@@ -1,0 +1,26 @@
+# Entornos virtuales de Python
+venv/
+.venv/
+env/
+
+# Caché y compilados de Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Archivos autogenerados por PLY (se regeneran solos al ejecutar)
+parsetab.py
+parser.out
+lextab.py
+
+# Configuraciones locales de editores (VS Code / PyCharm)
+.vscode/
+.idea/
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+
+# Asegurar que la carpeta de logs y los .txt NUNCA sean ignorados
+!logs/
+!logs/*.txt

@@ -1,8 +1,8 @@
-# Analizador Léxico para Subconjunto de Go (ESPOL)
+# Compilador para Subconjunto de Go (ESPOL)
 
-Analizador Léxico para un subconjunto del lenguaje de programación **Go**, desarrollado en **Python 3** utilizando la biblioteca de análisis léxico **PLY (`ply.lex`)**.
+Analizador Léxico, Sintáctico y Semántico para un subconjunto del lenguaje de programación **Go**, desarrollado en **Python 3** mediante la herramienta de análisis léxico y sintáctico **PLY (`ply.lex` y `ply.yacc`)**, complementado con una interfaz gráfica moderna e interactiva implementada en **CustomTkinter**.
 
-Este repositorio corresponde a la entrega del **Avance 1** de la materia **Lenguajes de Programación** de la Escuela Superior Politécnica del Litoral (**ESPOL**), bajo la dirección del profesor Ing. Rodrigo Saraguro.
+Este proyecto corresponde al desarrollo práctico de la materia **Lenguajes de Programación** de la Escuela Superior Politécnica del Litoral (**ESPOL**), bajo la dirección del profesor Ing. Rodrigo Saraguro.
 
 ---
 
@@ -43,22 +43,25 @@ La estructura del proyecto organiza la separación de responsabilidades para fac
 ```text
 LP-Proyecto_Parcial/
 │
-├── algoritmos/             # Algoritmos de prueba en Go (.go)
+├── algoritmos/             # Casos de prueba escritos en el subconjunto de Go (.go)
 │   ├── algoritmo1.go       # Algoritmo de validación - Pablo Naranjo
 │   ├── algoritmo2.go       # Algoritmo de validación - Hivor Araujo
 │   └── algoritmo3.go       # Algoritmo de validación - Josué Pacheco
 │
-├── logs/                   # Carpeta única para registros de ejecución (.txt)
+├── logs/                   # Registros de ejecución generados por el analizador léxico
 │   └── lexico-NombreApellido-DD-MM-YYYY-HHhMM.txt
 │
-├── src/                    # Código fuente del analizador léxico en Python
-│   ├── __init__.py         # Inicializador del paquete
-│   └── lexer.py            # Analizador léxico modular implementado con PLY
+├── src/                    # Código fuente del compilador en Python
+│   ├── __init__.py
+│   ├── lexer.py            # Analizador léxico implementado con PLY
+│   ├── parser.py           # Analizador sintáctico con PLY 
+│   ├── semantic.py         # Analizador semántico y tabla de símbolos 
+│   └── gui.py              # Interfaz gráfica de usuario en CustomTkinter 
 │
 ├── CONTRIBUTING.md         # Normas de Git, contrato de tokens y formato de commits
 ├── README.md               # Portada técnica y visión general del proyecto
-├── main.py                 # Punto de entrada principal para ejecución CLI y logs
-└── requirements.txt        # Dependencias externas del proyecto (PLY)
+├── main.py                 # Punto de entrada principal para CLI y ejecución
+└── requirements.txt        # Dependencias externas del proyecto
 ```
 
 ---
@@ -107,5 +110,5 @@ pip install -r requirements.txt
 > En dicho documento encontrará:
 > - Configuración obligatoria de identidad en Git (`user.name` y `user.email`).
 > - Política estricta de **Merge commit (`--no-ff`)** y prohibición de *Squash*.
-> - **Tabla Contrato de Tokens**: Estandarización de identificadores y nombres de tokens en mayúsculas.
+> - **Tabla Contrato de Tokens**: Estandarización de identificadores en mayúsculas para encajar directamente con `ply.yacc`.
 > - Estándar de nomenclatura para archivos de log (`lexico-NombreApellido-DD-MM-YYYY-HHhMM.txt`).

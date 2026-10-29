@@ -21,6 +21,10 @@ lextab.py
 .DS_Store
 Thumbs.db
 
-# Asegurar que la carpeta de logs y los .txt NUNCA sean ignorados
+# Asegurar que la carpeta de logs nunca sea ignorada
 !logs/
+!logs/.gitkeep
 !logs/*.txt
+
+# Documentación local
+/docs

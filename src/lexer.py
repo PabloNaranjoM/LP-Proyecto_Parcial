@@ -160,6 +160,21 @@ tokens: tuple[str, ...] = tuple(tokens_hivor + tokens_pablo + tokens_josue + lis
 #         t_AMPERSAND = r'&'
 #       (Nota de diseño: operadores multicarácter como :=, +=, ++ deben definirse
 #        con prioridad frente a caracteres individuales cuando se usen strings).
+
+# Reglas para operadores
+t_ASIGNACION_CORTA = r':='
+t_MAS_IGUAL = r'\+='
+t_MENOS_IGUAL = r'-='
+t_MULT_IGUAL = r'\*='
+t_DIV_IGUAL = r'/='
+t_MOD_IGUAL = r'%='
+t_INCREMENTO = r'\+\+'
+t_DECREMENTO = r'--'
+
+# Reglas para delimintadores
+t_DOS_PUNTOS = r':'
+t_PUNTO_COMA = r';'
+t_AMPERSAND = r'&'
 # =====================================================================
 # FIN APORTE: Pablo Naranjo (@PabloNaranjoM)
 # =====================================================================

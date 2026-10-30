@@ -82,8 +82,27 @@ tokens_hivor: list[str] = []
 #         'DIV_IGUAL', 'MOD_IGUAL'
 #       - Incremento y decremento: 'INCREMENTO', 'DECREMENTO'
 #       - Delimitadores y operadores: 'DOS_PUNTOS' (:), 'PUNTO_COMA' (;), 'AMPERSAND' (&)
-keywords_pablo: dict[str, str] = {}
-tokens_pablo: list[str] = []
+keywords_pablo: dict[str, str] = {
+    # Palabras reservadas oficiales de Go
+    'map' : 'MAP',
+    'struct' : 'STRUCT',
+
+    # Identificadores predefinidos
+    'int' : 'TIPO_INT',
+    'float64' : 'TIPO_FLOAT64'
+}
+
+tokens_pablo: list[str] = [
+    # Literales
+    'LITERAL_FLOAT', 'LITERAL_STRING',
+    
+    # Operadores
+    'ASIGNACION_CORTA', 'MAS_IGUAL', 'MENOS_IGUAL', 'MULT_IGUAL', 'DIV_IGUAL', 'MOD_IGUAL', 
+    'INCREMENTO', 'DECREMENTO',
+
+    # Delimitadores
+    'DOS_PUNTOS', 'PUNTO_COMA', 'AMPERSAND'
+    ]
 # =====================================================================
 # FIN APORTE: Pablo Naranjo (@PabloNaranjoM)
 # =====================================================================

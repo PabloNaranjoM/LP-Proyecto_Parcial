@@ -240,6 +240,49 @@ t_AMPERSAND = r'&'
 #       Debe ubicarse ANTES de t_LITERAL_INT para evitar consumo parcial del prefijo.
 # TODO: def t_LITERAL_STRING(t): Regla para literales de cadena ("...") soportando
 #       caracteres escapados (\", \\, \n, \t) y control de líneas internas.
+
+# -----------------------------------------------------------------------------
+# FUNCIÓN AUXILIAR PARA ERRORES LÉXICOS
+# -----------------------------------------------------------------------------
+def registrar_error_lexico(lexer, linea, caracter, mensaje):
+    """Encapsula el reporte y almacenamiento de errores para main.py."""
+    print(mensaje)
+    if not hasattr(lexer, 'errores_lexicos'):
+        lexer.errores_lexicos = []
+    lexer.errores_lexicos.append({
+        'linea': linea,
+        'caracter': caracter,
+        'mensaje': mensaje
+    })
+
+# Comentarios
+def t_COMENTARIO_SIMPLE(t):
+    r'//[^\n]*'
+    pass
+
+def t_COMENTARIO_MULTI(t):
+    r'/\*([\s\S]*?\*/|[\s\S]*)'
+
+    # Valida si el comentario no se cerró antes del EOF
+    if not t.value[2:].endswith('*/'):
+        mensaje = f"Error léxico en la línea {t.lineno}: comentario multilínea no cerrado al fin de archivo"
+        registrar_error_lexico(t.lexer, t.lineno, '/*', mensaje)
+        return None
+
+    t.lexer.lineno += t.value.count('\n')
+    pass
+
+# Literales
+def t_LITERAL_FLOAT(t):
+    r'\d+\.\d+'
+    t.value = float(t.value)
+    return t
+
+def t_LITERAL_STRING(t):
+    #Soporta los escapes: \n, \t, \", \\, \r, \'
+    r'"([^"\n\\]|\\[nrt\\\'"])*"'
+    t.lexer.lineno += t.value.count('\n')
+    return t
 # =====================================================================
 # FIN APORTE: Pablo Naranjo (@PabloNaranjoM)
 # =====================================================================
@@ -276,6 +319,15 @@ t_AMPERSAND = r'&'
 #       ilegal, su número de línea y posición, e invoque t.lexer.skip(1).
 # TODO: def build_lexer(**kwargs): Función fábrica que invoque y retorne
 #       lex.lex(**kwargs) para instanciar el analizador léxico.
+def t_error(t):
+    mensaje = f"Error léxico en la línea {t.lineno}: carácter no reconocido '{t.value[0]}'"
+    registrar_error_lexico(t.lexer, t.lineno, t.value[0], mensaje)
+    t.lexer.skip(1)
+
+
+def build_lexer(**kwargs):
+    """Construye e inicializa una nueva instancia del analizador léxico PLY."""
+    return lex.lex(**kwargs)
 # =====================================================================
 # FIN APORTE: Pablo Naranjo (@PabloNaranjoM)
 # =====================================================================

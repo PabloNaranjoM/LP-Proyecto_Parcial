@@ -253,6 +253,11 @@ t_PUNTO = r'\.'
 # TODO: t_ignore = ' \t' para descartar espacios en blanco y tabulaciones.
 # TODO: def t_newline(t): Regla para saltos de línea (\n+) que incremente
 #       el contador t.lexer.lineno += len(t.value).
+t_ignore = ' \t'
+
+def t_newline(t):
+    r'\n+'
+    t.lexer.lineno += len(t.value)
 # =====================================================================
 # FIN APORTE: Josué Pacheco (@JosuePach3co)
 # =====================================================================

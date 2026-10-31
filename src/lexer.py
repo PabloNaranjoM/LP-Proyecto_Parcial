@@ -6,7 +6,7 @@ del lenguaje de programación Go, utilizando la biblioteca PLY (Python Lex-Yacc)
 
 El analizador está estructurado de forma modular y colaborativa entre los
 tres integrantes del equipo, siguiendo el contrato de nombres establecido
-en CONTRIBUTING.md y en el documento de propuesta técnica:
+en el documento de propuesta técnica:
 - Hivor Araujo (@AraujoHivor): 23 palabras reservadas base de Go (excluyendo map y struct),
   tipo predefinido 'string' ('TIPO_STRING'), identificadores ('ID'), literales enteros
   ('LITERAL_INT'), operadores aritméticos ('SUMA', 'RESTA', 'MULT', 'DIV', 'MOD'),

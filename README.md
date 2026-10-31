@@ -58,7 +58,6 @@ LP-Proyecto_Parcial/
 │   ├── semantic.py         # Analizador semántico y tabla de símbolos 
 │   └── gui.py              # Interfaz gráfica de usuario en CustomTkinter 
 │
-├── CONTRIBUTING.md         # Normas de Git, contrato de tokens y formato de commits
 ├── README.md               # Portada técnica y visión general del proyecto
 ├── main.py                 # Punto de entrada principal para CLI y ejecución
 └── requirements.txt        # Dependencias externas del proyecto
@@ -97,18 +96,3 @@ Con el entorno virtual activo, instale las librerías requeridas:
 ```bash
 pip install -r requirements.txt
 ```
-
----
-
-## 📖 Normas de Contribución y Contrato de Tokens
-
-> [!IMPORTANT]
-> **Lectura obligatoria para los desarrolladores:**
-> Antes de realizar cualquier aporte o commit, consulte la guía técnica detallada en:
-> 👉 **[CONTRIBUTING.md](./CONTRIBUTING.md)**
-> 
-> En dicho documento encontrará:
-> - Configuración obligatoria de identidad en Git (`user.name` y `user.email`).
-> - Política estricta de **Merge commit (`--no-ff`)** y prohibición de *Squash*.
-> - **Tabla Contrato de Tokens**: Estandarización de identificadores en mayúsculas para encajar directamente con `ply.yacc`.
-> - Estándar de nomenclatura para archivos de log (`lexico-NombreApellido-DD-MM-YYYY-HHhMM.txt`).

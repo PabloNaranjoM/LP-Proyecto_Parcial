@@ -163,6 +163,19 @@ tokens: tuple[str, ...] = tuple(tokens_hivor + tokens_pablo + tokens_josue + lis
 #         t_MENOR_IGUAL = r'<=', t_MAYOR_IGUAL = r'>=', t_MENOR = r'<', t_MAYOR = r'>'
 #       - Operadores lógicos: t_AND = r'&&', t_OR = r'\|\|', t_NOT = r'!'
 #       - Delimitadores: t_COMA = r',', t_PUNTO = r'\.'
+t_IGUAL_IGUAL = r'=='
+t_DIFERENTE = r'!='
+t_MENOR_IGUAL = r'<='
+t_MAYOR_IGUAL = r'>='
+t_MENOR = r'<'
+t_MAYOR = r'>'
+
+t_AND = r'&&'
+t_OR = r'\|\|'
+t_NOT = r'!'
+
+t_COMA = r','
+t_PUNTO = r'\.'
 # =====================================================================
 # FIN APORTE: Josué Pacheco (@JosuePach3co)
 # =====================================================================

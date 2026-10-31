@@ -100,8 +100,18 @@ tokens_pablo: list[str] = []
 #         'MAYOR', 'MENOR_IGUAL', 'MAYOR_IGUAL'
 #       - Operadores lógicos: 'AND', 'OR', 'NOT'
 #       - Delimitadores: 'COMA' (,), 'PUNTO' (.)
-keywords_josue: dict[str, str] = {}
-tokens_josue: list[str] = []
+keywords_josue: dict[str, str] = {
+    'bool': 'TIPO_BOOL',
+    'true': 'TRUE',
+    'false': 'FALSE'
+}
+
+tokens_josue: list[str] = [
+    'IGUAL_IGUAL', 'DIFERENTE', 'MENOR', 'MAYOR', 'MENOR_IGUAL', 'MAYOR_IGUAL',
+    'AND', 'OR', 'NOT',
+    'COMA', 'PUNTO'
+]
+# ==
 # =====================================================================
 # FIN APORTE: Josué Pacheco (@JosuePach3co)
 # =====================================================================

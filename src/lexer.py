@@ -314,7 +314,7 @@ def t_COMENTARIO_MULTI(t):
 
     # Valida si el comentario no se cerró antes del EOF
     if not t.value[2:].endswith('*/'):
-        mensaje = f"Error léxico en la línea {t.lineno}: comentario multilínea no cerrado al fin de archivo"
+        mensaje = f"Error lexico en la linea {t.lineno}: comentario multilinea no cerrado al fin de archivo"
         registrar_error_lexico(t.lexer, t.lineno, '/*', mensaje)
         return None
 
@@ -382,13 +382,13 @@ def t_newline(t):
 # TODO: def build_lexer(**kwargs): Función fábrica que invoque y retorne
 #       lex.lex(**kwargs) para instanciar el analizador léxico.
 def t_error(t):
-    mensaje = f"Error léxico en la línea {t.lineno}: carácter no reconocido '{t.value[0]}'"
+    mensaje = f"Error lexico en la linea {t.lineno}: caracter no reconocido '{t.value[0]}'"
     registrar_error_lexico(t.lexer, t.lineno, t.value[0], mensaje)
     t.lexer.skip(1)
 
 
 def build_lexer(**kwargs):
-    """Construye e inicializa una nueva instancia del analizador léxico PLY."""
+    """Construye e inicializa una nueva instancia del analizador lexico PLY."""
     return lex.lex(**kwargs)
 # =====================================================================
 # FIN APORTE: Pablo Naranjo (@PabloNaranjoM)

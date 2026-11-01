@@ -136,8 +136,18 @@ tokens_pablo: list[str] = [
 #         'MAYOR', 'MENOR_IGUAL', 'MAYOR_IGUAL'
 #       - Operadores lógicos: 'AND', 'OR', 'NOT'
 #       - Delimitadores: 'COMA' (,), 'PUNTO' (.)
-keywords_josue: dict[str, str] = {}
-tokens_josue: list[str] = []
+keywords_josue: dict[str, str] = {
+    'bool': 'TIPO_BOOL',
+    'true': 'TRUE',
+    'false': 'FALSE'
+}
+
+tokens_josue: list[str] = [
+    'IGUAL_IGUAL', 'DIFERENTE', 'MENOR', 'MAYOR', 'MENOR_IGUAL', 'MAYOR_IGUAL',
+    'AND', 'OR', 'NOT',
+    'COMA', 'PUNTO'
+]
+# ==
 # =====================================================================
 # FIN APORTE: Josué Pacheco (@JosuePach3co)
 # =====================================================================
@@ -213,6 +223,19 @@ t_AMPERSAND = r'&'
 #         t_MENOR_IGUAL = r'<=', t_MAYOR_IGUAL = r'>=', t_MENOR = r'<', t_MAYOR = r'>'
 #       - Operadores lógicos: t_AND = r'&&', t_OR = r'\|\|', t_NOT = r'!'
 #       - Delimitadores: t_COMA = r',', t_PUNTO = r'\.'
+t_IGUAL_IGUAL = r'=='
+t_DIFERENTE = r'!='
+t_MENOR_IGUAL = r'<='
+t_MAYOR_IGUAL = r'>='
+t_MENOR = r'<'
+t_MAYOR = r'>'
+
+t_AND = r'&&'
+t_OR = r'\|\|'
+t_NOT = r'!'
+
+t_COMA = r','
+t_PUNTO = r'\.'
 # =====================================================================
 # FIN APORTE: Josué Pacheco (@JosuePach3co)
 # =====================================================================
@@ -341,6 +364,11 @@ def t_ID(t):
 # TODO: t_ignore = ' \t' para descartar espacios en blanco y tabulaciones.
 # TODO: def t_newline(t): Regla para saltos de línea (\n+) que incremente
 #       el contador t.lexer.lineno += len(t.value).
+t_ignore = ' \t'
+
+def t_newline(t):
+    r'\n+'
+    t.lexer.lineno += len(t.value)
 # =====================================================================
 # FIN APORTE: Josué Pacheco (@JosuePach3co)
 # =====================================================================

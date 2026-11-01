@@ -87,18 +87,6 @@ tokens_hivor: list[str] = [
 # =====================================================================
 # INICIO APORTE: Pablo Naranjo (@PabloNaranjoM)
 # =====================================================================
-# TODO: Definir diccionario keywords_pablo con las palabras reservadas asignadas:
-#       'map': 'MAP', 'struct': 'STRUCT'.
-# TODO: Mapear los tipos de datos predefinidos en keywords_pablo:
-#       'int': 'TIPO_INT', 'float64': 'TIPO_FLOAT64'.
-# TODO: Definir lista tokens_pablo con los nombres oficiales del contrato:
-#       - Literales numéricos de punto flotante: 'LITERAL_FLOAT'
-#       - Literales de cadena con secuencias de escape: 'LITERAL_STRING'
-#       - Declaración y asignación corta: 'ASIGNACION_CORTA' (:=)
-#       - Asignaciones compuestas: 'MAS_IGUAL', 'MENOS_IGUAL', 'MULT_IGUAL',
-#         'DIV_IGUAL', 'MOD_IGUAL'
-#       - Incremento y decremento: 'INCREMENTO', 'DECREMENTO'
-#       - Delimitadores y operadores: 'DOS_PUNTOS' (:), 'PUNTO_COMA' (;), 'AMPERSAND' (&)
 keywords_pablo: dict[str, str] = {
     # Palabras reservadas oficiales de Go
     'map' : 'MAP',
@@ -177,15 +165,6 @@ t_CORCHETE_DER = r'\]'
 # =====================================================================
 # INICIO APORTE: Pablo Naranjo (@PabloNaranjoM)
 # =====================================================================
-# TODO: Definir reglas regex en string (t_...) para asignaciones, incremento y delimitadores:
-#       - Asignación corta: t_ASIGNACION_CORTA = r':='
-#       - Asignaciones compuestas: t_MAS_IGUAL = r'\+=', t_MENOS_IGUAL = r'-=',
-#         t_MULT_IGUAL = r'\*=', t_DIV_IGUAL = r'/=', t_MOD_IGUAL = r'%='
-#       - Incremento / Decremento: t_INCREMENTO = r'\+\+', t_DECREMENTO = r'--'
-#       - Delimitadores / operadores: t_DOS_PUNTOS = r':', t_PUNTO_COMA = r';',
-#         t_AMPERSAND = r'&'
-#       (Nota de diseño: operadores multicarácter como :=, +=, ++ deben definirse
-#        con prioridad frente a caracteres individuales cuando se usen strings).
 
 # Reglas para operadores
 t_ASIGNACION_CORTA = r':='
@@ -257,15 +236,6 @@ t_AMPERSAND = r'&'
 # =====================================================================
 # INICIO APORTE: Pablo Naranjo (@PabloNaranjoM)
 # =====================================================================
-# TODO: def t_COMMENT_SINGLE(t): Regla para comentarios de línea (//...) que
-#       descarte el token sin emitirlo.
-# TODO: def t_COMMENT_MULTI(t): Regla para comentarios de bloque (/* ... */) que
-#       incremente lineno según saltos de línea encontrados y detecte/reporte
-#       error léxico en caso de comentario multilínea no cerrado al fin de archivo.
-# TODO: def t_LITERAL_FLOAT(t): Regla para números en punto flotante (\d+\.\d+).
-#       Debe ubicarse ANTES de t_LITERAL_INT para evitar consumo parcial del prefijo.
-# TODO: def t_LITERAL_STRING(t): Regla para literales de cadena ("...") soportando
-#       caracteres escapados (\", \\, \n, \t) y control de líneas internas.
 
 # -----------------------------------------------------------------------------
 # FUNCIÓN AUXILIAR PARA ERRORES LÉXICOS
@@ -349,10 +319,7 @@ def t_ID(t):
 # =====================================================================
 # INICIO APORTE: Pablo Naranjo (@PabloNaranjoM)
 # =====================================================================
-# TODO: def t_error(t): Manejador de errores léxicos que registre el carácter
-#       ilegal, su número de línea y posición, e invoque t.lexer.skip(1).
-# TODO: def build_lexer(**kwargs): Función fábrica que invoque y retorne
-#       lex.lex(**kwargs) para instanciar el analizador léxico.
+
 def t_error(t):
     mensaje = f"Error léxico en la línea {t.lineno}: carácter no reconocido '{t.value[0]}'"
     registrar_error_lexico(t.lexer, t.lineno, t.value[0], mensaje)

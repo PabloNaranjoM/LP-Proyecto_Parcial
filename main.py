@@ -1,14 +1,5 @@
 """
-Punto de Entrada Principal - Compilador Subconjunto Go (Lenguajes de Programación)
-=================================================================================
-Este módulo constituye el punto de entrada principal para el proyecto:
-- Avance 1: Interfaz de línea de comandos (CLI) para ejecutar el análisis léxico
-  sobre algoritmos de prueba (.go) y generar automáticamente reportes de log
-  conforme a la especificación académica:
-  logs/lexico-<NombreApellido>-<DD>-<MM>-<YYYY>-<HH>h<MM>.txt.
-- Entregas posteriores: Lanzador para la interfaz gráfica de usuario (GUI)
-  desarrollada con CustomTkinter para análisis interactivo y visualización
-  de tokens y árboles de derivación sintáctica.
+Punto de entrada principal: lanza la GUI en CustomTkinter o el modo `--cli`.
 
 Autores:
     - Pablo Naranjo (@PabloNaranjoM)
@@ -16,144 +7,51 @@ Autores:
     - Josué Pacheco (@JosuePach3co)
 """
 
+import argparse
+from pathlib import Path
+import sys
+
+from src.gui import launch_gui
+from src.gui.log_exporter import ejecutar_analisis_lexico_codigo
+
 
 # =====================================================================
 # INICIO APORTE: Pablo Naranjo (@PabloNaranjoM)
 # =====================================================================
-# TODO: Implementar runner CLI que acepte la ruta de un archivo fuente Go (*.go)
-#       y el nombre del integrante evaluador.
-# TODO: Invocar la función constructora build_lexer() de src.lexer para inicializar
-#       el analizador léxico con PLY.
-# TODO: Procesar el código fuente, extrayendo secuencialmente los tokens reconocidos
-#       y recolectando los errores léxicos detectados.
-# TODO: Formatear y exportar automáticamente el reporte de log en la carpeta:
-#       logs/lexico-<NombreApellido>-<DD>-<MM>-<YYYY>-<HH>h<MM>.txt
-#       asegurando la creación de la carpeta 'logs/' en caso de no existir.
+def ejecutar_modo_cli(ruta_archivo: str, autor: str) -> None:
+    """Ejecuta el análisis léxico desde consola y genera el reporte en `logs/`."""
+    path = Path(ruta_archivo)
+    if not path.exists():
+        print(f"Error: No se encontró el archivo '{ruta_archivo}'.", file=sys.stderr)
+        sys.exit(1)
 
-import os
-import sys
-from datetime import datetime
-from src import lexer
-from src.lexer import build_lexer
-
-
-def obtener_desarrollador(ruta_archivo: str) -> tuple[str, str]:
-    """Mapea el archivo de prueba con su respectivo autor según CONTRIBUTING.md."""
-    archivo = os.path.basename(ruta_archivo).lower()
-    if "algoritmo1" in archivo:
-        return "Pablo Naranjo", "PabloNaranjo" 
-    elif "algoritmo2" in archivo:
-        return "Hivor Araujo", "HivorAraujo"
-    elif "algoritmo3" in archivo:
-        return "Josue Pacheco", "JosuePacheco"
+    resultado = ejecutar_analisis_lexico_codigo(
+        codigo_fuente=path.read_text(encoding="utf-8"),
+        desarrollador=autor,
+        nombre_archivo=path.as_posix(),
+    )
+    print(
+        f"Análisis finalizado | Tokens: {len(resultado['tokens'])} | "
+        f"Errores: {len(resultado['errores'])} | Log: {resultado['ruta_log'].as_posix()}"
+    )
 
 
 def main() -> None:
-    """Punto de entrada principal para la ejecución del analisis lexico por CLI."""
-    if len(sys.argv) < 2:
-        print("Uso: python main.py <ruta_archivo_go>")
-        print("Ejemplos:")
-        print("  python main.py algoritmos/algoritmo1.go")
-        print("  python main.py algoritmos/algoritmo2.go")
-        print("  python main.py algoritmos/algoritmo3.go")
-        sys.exit(1)
+    parser = argparse.ArgumentParser(
+        description="Analizador Léxico, Sintáctico y Semántico en Go — PLY & CustomTkinter"
+    )
+    parser.add_argument("archivo", nargs="?", default="algoritmos/algoritmo1.go")
+    parser.add_argument("autor", nargs="?", default="PabloNaranjoM")
+    parser.add_argument("--cli", action="store_true", help="Ejecutar en modo consola")
+    args = parser.parse_args()
 
-    archivo_fuente = sys.argv[1]
-
-    if not os.path.exists(archivo_fuente):
-        print(f"Error: El archivo fuente '{archivo_fuente}' no existe.")
-        sys.exit(1)
-
-    with open(archivo_fuente, "r", encoding="utf-8") as f:
-        codigo_fuente = f.read()
-
-    # Construir el lexer
-    lexer = build_lexer()
-    lexer.input(codigo_fuente)
-
-    tokens_encontrados = []
-
-    # Procesar tokens y capturar errores léxicos
-    while True:
-        try:
-            tok = lexer.token()
-            if not tok:
-                break
-            tokens_encontrados.append(tok)
-        except Exception as e:
-            break
-
-    # Asegurar la existencia de la carpeta 'logs/'
-    os.makedirs("logs", exist_ok=True)
-
-    # Identificar autor de forma dinámica
-    nombre_completo, apellido_slug = obtener_desarrollador(archivo_fuente)
-
-    # Generar marca de tiempo conforme a la regla: DD-MM-YYYY-HHhMM[cite: 1, 2]
-    ahora = datetime.now()
-    fecha_hora_str = ahora.strftime("%d-%m-%Y-%Hh%M")
-    nombre_log = f"lexico-{apellido_slug}-{fecha_hora_str}.txt"
-    ruta_log = os.path.join("logs", nombre_log)
-
-    # Formatear el contenido del reporte de log
-    lineas_reporte = [
-        "=" * 80,
-        "REPORTE DE ANALISIS LEXICO - COMPILADOR GO (ESPOL)",
-        f"Archivo analizado: {archivo_fuente}",
-        f"Fecha y hora     : {ahora.strftime('%d-%m-%Y %H:%M:%S')}",
-        f"Desarrollador    : {nombre_completo}",
-        "=" * 80,
-        "",
-        "--- TOKENS RECONOCIDOS ---"
-    ]
-
-    
-    # Agregar todos los tokens reconocidos al reporte
-    for tok in tokens_encontrados:
-        inicio_linea = codigo_fuente.rfind('\n', 0, tok.lexpos) + 1
-        columna = tok.lexpos - inicio_linea + 1
-
-        lineas_reporte.append(
-            f"[Linea {tok.lineno:3d}, Columna {columna:3d}] TOKEN: {tok.type:20} LEXEMA: '{tok.value}'"
-        )
-
-    # Obtener los errores registrados por el analizador
-    errores = getattr(lexer, 'errores_lexicos', [])
-
-    lineas_reporte.append("")
-    lineas_reporte.append("--- ERRORES LEXICOS DETECTADOS ---")
-
-    if errores:
-        for error in errores:
-            lineas_reporte.append(error['mensaje'])
+    if args.cli:
+        ejecutar_modo_cli(args.archivo, args.autor)
     else:
-        lineas_reporte.append("No se detectaron errores lexicos.")
-
-    # Resumen del analisis
-    lineas_reporte.extend([
-        "",
-        "=" * 80,
-        f"RESUMEN: Total Tokens Reconocidos: {len(tokens_encontrados)}",
-        f"Total Errores Lexicos: {len(errores)}",
-        "=" * 80
-    ])
-
-
-    # Guardar el archivo de log en la carpeta correspondiente
-    with open(ruta_log, "w", encoding="utf-8") as f_log:
-        f_log.write("\n".join(lineas_reporte))
-
-    print(f"[OK] Analisis lexico completado exitosamente.")
-    print(f"[OK] Reporte de log generado en: {ruta_log}")
+        launch_gui(archivo_inicial=args.archivo)
 # =====================================================================
 # FIN APORTE: Pablo Naranjo (@PabloNaranjoM)
 # =====================================================================
-
-
-
-#def main() -> None:
- #   """Punto de entrada principal para la ejecución de la aplicación."""
- #   pass
 
 
 if __name__ == "__main__":

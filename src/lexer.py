@@ -87,18 +87,6 @@ tokens_hivor: list[str] = [
 # =====================================================================
 # INICIO APORTE: Pablo Naranjo (@PabloNaranjoM)
 # =====================================================================
-# TODO: Definir diccionario keywords_pablo con las palabras reservadas asignadas:
-#       'map': 'MAP', 'struct': 'STRUCT'.
-# TODO: Mapear los tipos de datos predefinidos en keywords_pablo:
-#       'int': 'TIPO_INT', 'float64': 'TIPO_FLOAT64'.
-# TODO: Definir lista tokens_pablo con los nombres oficiales del contrato:
-#       - Literales numéricos de punto flotante: 'LITERAL_FLOAT'
-#       - Literales de cadena con secuencias de escape: 'LITERAL_STRING'
-#       - Declaración y asignación corta: 'ASIGNACION_CORTA' (:=)
-#       - Asignaciones compuestas: 'MAS_IGUAL', 'MENOS_IGUAL', 'MULT_IGUAL',
-#         'DIV_IGUAL', 'MOD_IGUAL'
-#       - Incremento y decremento: 'INCREMENTO', 'DECREMENTO'
-#       - Delimitadores y operadores: 'DOS_PUNTOS' (:), 'PUNTO_COMA' (;), 'AMPERSAND' (&)
 keywords_pablo: dict[str, str] = {
     # Palabras reservadas oficiales de Go
     'map' : 'MAP',
@@ -127,15 +115,6 @@ tokens_pablo: list[str] = [
 # =====================================================================
 # INICIO APORTE: Josué Pacheco (@JosuePach3co)
 # =====================================================================
-# TODO: Mapear el tipo de dato predefinido en keywords_josue:
-#       'bool': 'TIPO_BOOL'.
-# TODO: Mapear las constantes booleanas predefinidas en keywords_josue:
-#       'true': 'TRUE', 'false': 'FALSE'.
-# TODO: Definir lista tokens_josue con los nombres oficiales del contrato:
-#       - Operadores relacionales: 'IGUAL_IGUAL', 'DIFERENTE', 'MENOR',
-#         'MAYOR', 'MENOR_IGUAL', 'MAYOR_IGUAL'
-#       - Operadores lógicos: 'AND', 'OR', 'NOT'
-#       - Delimitadores: 'COMA' (,), 'PUNTO' (.)
 keywords_josue: dict[str, str] = {
     'bool': 'TIPO_BOOL',
     'true': 'TRUE',
@@ -147,7 +126,6 @@ tokens_josue: list[str] = [
     'AND', 'OR', 'NOT',
     'COMA', 'PUNTO'
 ]
-# ==
 # =====================================================================
 # FIN APORTE: Josué Pacheco (@JosuePach3co)
 # =====================================================================
@@ -187,15 +165,6 @@ t_CORCHETE_DER = r'\]'
 # =====================================================================
 # INICIO APORTE: Pablo Naranjo (@PabloNaranjoM)
 # =====================================================================
-# TODO: Definir reglas regex en string (t_...) para asignaciones, incremento y delimitadores:
-#       - Asignación corta: t_ASIGNACION_CORTA = r':='
-#       - Asignaciones compuestas: t_MAS_IGUAL = r'\+=', t_MENOS_IGUAL = r'-=',
-#         t_MULT_IGUAL = r'\*=', t_DIV_IGUAL = r'/=', t_MOD_IGUAL = r'%='
-#       - Incremento / Decremento: t_INCREMENTO = r'\+\+', t_DECREMENTO = r'--'
-#       - Delimitadores / operadores: t_DOS_PUNTOS = r':', t_PUNTO_COMA = r';',
-#         t_AMPERSAND = r'&'
-#       (Nota de diseño: operadores multicarácter como :=, +=, ++ deben definirse
-#        con prioridad frente a caracteres individuales cuando se usen strings).
 
 # Reglas para operadores
 t_ASIGNACION_CORTA = r':='
@@ -218,11 +187,6 @@ t_AMPERSAND = r'&'
 # =====================================================================
 # INICIO APORTE: Josué Pacheco (@JosuePach3co)
 # =====================================================================
-# TODO: Definir reglas regex en string (t_...) para relacionales, lógicos y delimitadores:
-#       - Operadores relacionales: t_IGUAL_IGUAL = r'==', t_DIFERENTE = r'!=',
-#         t_MENOR_IGUAL = r'<=', t_MAYOR_IGUAL = r'>=', t_MENOR = r'<', t_MAYOR = r'>'
-#       - Operadores lógicos: t_AND = r'&&', t_OR = r'\|\|', t_NOT = r'!'
-#       - Delimitadores: t_COMA = r',', t_PUNTO = r'\.'
 t_IGUAL_IGUAL = r'=='
 t_DIFERENTE = r'!='
 t_MENOR_IGUAL = r'<='
@@ -280,26 +244,23 @@ t_PUNTO = r'\.'
 # =====================================================================
 # INICIO APORTE: Pablo Naranjo (@PabloNaranjoM)
 # =====================================================================
-# TODO: def t_COMMENT_SINGLE(t): Regla para comentarios de línea (//...) que
-#       descarte el token sin emitirlo.
-# TODO: def t_COMMENT_MULTI(t): Regla para comentarios de bloque (/* ... */) que
-#       incremente lineno según saltos de línea encontrados y detecte/reporte
-#       error léxico en caso de comentario multilínea no cerrado al fin de archivo.
-# TODO: def t_LITERAL_FLOAT(t): Regla para números en punto flotante (\d+\.\d+).
-#       Debe ubicarse ANTES de t_LITERAL_INT para evitar consumo parcial del prefijo.
-# TODO: def t_LITERAL_STRING(t): Regla para literales de cadena ("...") soportando
-#       caracteres escapados (\", \\, \n, \t) y control de líneas internas.
 
 # -----------------------------------------------------------------------------
 # FUNCIÓN AUXILIAR PARA ERRORES LÉXICOS
 # -----------------------------------------------------------------------------
-def registrar_error_lexico(lexer, linea, caracter, mensaje):
-    """Encapsula el reporte y almacenamiento de errores para main.py."""
+def calcular_columna(data, lexpos):
+    """Columna (1-based) de la posición lexpos dentro del texto data."""
+    return lexpos - data.rfind('\n', 0, lexpos)
+
+
+def registrar_error_lexico(lexer, linea, caracter, mensaje, lexpos=0):
+    """Encapsula el reporte y almacenamiento de errores para main.py y la GUI."""
     print(mensaje)
     if not hasattr(lexer, 'errores_lexicos'):
         lexer.errores_lexicos = []
     lexer.errores_lexicos.append({
         'linea': linea,
+        'columna': calcular_columna(lexer.lexdata, lexpos),
         'caracter': caracter,
         'mensaje': mensaje
     })
@@ -314,8 +275,8 @@ def t_COMENTARIO_MULTI(t):
 
     # Valida si el comentario no se cerró antes del EOF
     if not t.value[2:].endswith('*/'):
-        mensaje = f"Error lexico en la linea {t.lineno}: comentario multilinea no cerrado al fin de archivo"
-        registrar_error_lexico(t.lexer, t.lineno, '/*', mensaje)
+        mensaje = f"Error léxico en la línea {t.lineno}: comentario multilínea no cerrado al fin de archivo"
+        registrar_error_lexico(t.lexer, t.lineno, '/*', mensaje, t.lexpos)
         return None
 
     t.lexer.lineno += t.value.count('\n')
@@ -361,10 +322,7 @@ def t_ID(t):
 # =====================================================================
 # INICIO APORTE: Josué Pacheco (@JosuePach3co)
 # =====================================================================
-# TODO: t_ignore = ' \t' para descartar espacios en blanco y tabulaciones.
-# TODO: def t_newline(t): Regla para saltos de línea (\n+) que incremente
-#       el contador t.lexer.lineno += len(t.value).
-t_ignore = ' \t'
+t_ignore = ' \t\r'
 
 def t_newline(t):
     r'\n+'
@@ -377,19 +335,48 @@ def t_newline(t):
 # =====================================================================
 # INICIO APORTE: Pablo Naranjo (@PabloNaranjoM)
 # =====================================================================
-# TODO: def t_error(t): Manejador de errores léxicos que registre el carácter
-#       ilegal, su número de línea y posición, e invoque t.lexer.skip(1).
-# TODO: def build_lexer(**kwargs): Función fábrica que invoque y retorne
-#       lex.lex(**kwargs) para instanciar el analizador léxico.
 def t_error(t):
-    mensaje = f"Error lexico en la linea {t.lineno}: caracter no reconocido '{t.value[0]}'"
-    registrar_error_lexico(t.lexer, t.lineno, t.value[0], mensaje)
+    mensaje = f"Error léxico en la línea {t.lineno}: carácter no reconocido '{t.value[0]}'"
+    registrar_error_lexico(t.lexer, t.lineno, t.value[0], mensaje, t.lexpos)
     t.lexer.skip(1)
+
+
+def formatear_categoria_token(tipo, lexema=''):
+    """Convierte el tipo de token de PLY a la categoría mostrada en la Tabla de Tokens."""
+    if tipo.startswith('TIPO_'):
+        return f"TIPO_DATO ({str(lexema).upper() or tipo[5:]})"
+    if tipo in ('TRUE', 'FALSE'):
+        return f"LITERAL_BOOL ({tipo})"
+    if tipo in KEYWORDS_MAP.values():
+        return f"RESERVADA ({tipo})"
+    return tipo
 
 
 def build_lexer(**kwargs):
     """Construye e inicializa una nueva instancia del analizador lexico PLY."""
     return lex.lex(**kwargs)
+
+
+def analizar(codigo):
+    """
+    Tokeniza `codigo` y retorna (tokens, errores). Cada token incluye
+    indice, linea, columna, tipo, categoria y valor.
+    """
+    lexer = build_lexer()
+    lexer.errores_lexicos = []
+    lexer.input(codigo)
+    tokens = [
+        {
+            'indice': i,
+            'linea': tok.lineno,
+            'columna': calcular_columna(codigo, tok.lexpos),
+            'tipo': tok.type,
+            'categoria': formatear_categoria_token(tok.type, tok.value),
+            'valor': tok.value,
+        }
+        for i, tok in enumerate(lexer, start=1)
+    ]
+    return tokens, lexer.errores_lexicos
 # =====================================================================
 # FIN APORTE: Pablo Naranjo (@PabloNaranjoM)
 # =====================================================================

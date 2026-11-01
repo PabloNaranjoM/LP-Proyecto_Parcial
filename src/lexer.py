@@ -44,25 +44,42 @@ except ImportError:
 # =====================================================================
 # INICIO APORTE: Hivor Araujo (@AraujoHivor)
 # =====================================================================
-# TODO: Definir diccionario keywords_hivor con las 23 palabras reservadas base de Go
-#       (excluyendo 'map' y 'struct') mapeadas a sus tokens en mayúsculas:
-#       'break': 'BREAK', 'case': 'CASE', 'chan': 'CHAN', 'const': 'CONST',
-#       'continue': 'CONTINUE', 'default': 'DEFAULT', 'defer': 'DEFER',
-#       'else': 'ELSE', 'fallthrough': 'FALLTHROUGH', 'for': 'FOR',
-#       'func': 'FUNC', 'go': 'GO', 'goto': 'GOTO', 'if': 'IF',
-#       'import': 'IMPORT', 'interface': 'INTERFACE', 'package': 'PACKAGE',
-#       'range': 'RANGE', 'return': 'RETURN', 'select': 'SELECT',
-#       'switch': 'SWITCH', 'type': 'TYPE', 'var': 'VAR'.
-# TODO: Mapear el tipo de dato predefinido 'string': 'TIPO_STRING' en keywords_hivor.
-# TODO: Definir lista tokens_hivor con los nombres oficiales del contrato:
-#       - Identificadores: 'ID'
-#       - Literales enteros: 'LITERAL_INT'
-#       - Operadores aritméticos: 'SUMA', 'RESTA', 'MULT', 'DIV', 'MOD'
-#       - Asignación simple: 'ASIGNACION'
-#       - Delimitadores: 'PAR_IZQ', 'PAR_DER', 'LLAVE_IZQ', 'LLAVE_DER',
-#         'CORCHETE_IZQ', 'CORCHETE_DER'
-keywords_hivor: dict[str, str] = {}
-tokens_hivor: list[str] = []
+# Las palabras reservadas se reconocen desde t_ID para no dividir nombres
+# como "variable" en "var" y "iable".
+keywords_hivor: dict[str, str] = {
+    'break': 'BREAK',
+    'case': 'CASE',
+    'chan': 'CHAN',
+    'const': 'CONST',
+    'continue': 'CONTINUE',
+    'default': 'DEFAULT',
+    'defer': 'DEFER',
+    'else': 'ELSE',
+    'fallthrough': 'FALLTHROUGH',
+    'for': 'FOR',
+    'func': 'FUNC',
+    'go': 'GO',
+    'goto': 'GOTO',
+    'if': 'IF',
+    'import': 'IMPORT',
+    'interface': 'INTERFACE',
+    'package': 'PACKAGE',
+    'range': 'RANGE',
+    'return': 'RETURN',
+    'select': 'SELECT',
+    'switch': 'SWITCH',
+    'type': 'TYPE',
+    'var': 'VAR',
+    'string': 'TIPO_STRING',  # En Go es un tipo predefinido, no palabra reservada.
+}
+
+tokens_hivor: list[str] = [
+    'ID', 'LITERAL_INT',
+    'SUMA', 'RESTA', 'MULT', 'DIV', 'MOD', 'ASIGNACION',
+    'PAR_IZQ', 'PAR_DER', 'LLAVE_IZQ', 'LLAVE_DER',
+    'CORCHETE_IZQ', 'CORCHETE_DER',
+]
+
 # =====================================================================
 # FIN APORTE: Hivor Araujo (@AraujoHivor)
 # =====================================================================
@@ -137,13 +154,22 @@ tokens: tuple[str, ...] = tuple(tokens_hivor + tokens_pablo + tokens_josue + lis
 # =====================================================================
 # INICIO APORTE: Hivor Araujo (@AraujoHivor)
 # =====================================================================
-# TODO: Definir reglas regex en string (t_...) para operadores y delimitadores:
-#       - Aritméticos: t_SUMA = r'\+', t_RESTA = r'-', t_MULT = r'\*',
-#         t_DIV = r'/', t_MOD = r'%'
-#       - Asignación simple: t_ASIGNACION = r'='
-#       - Delimitadores: t_PAR_IZQ = r'\(', t_PAR_DER = r'\)',
-#         t_LLAVE_IZQ = r'\{', t_LLAVE_DER = r'\}',
-#         t_CORCHETE_IZQ = r'\[', t_CORCHETE_DER = r'\]'
+# Operadores aritmeticos y asignacion simple.
+t_SUMA = r'\+'
+t_RESTA = r'-'
+t_MULT = r'\*'
+t_DIV = r'/'
+t_MOD = r'%'
+t_ASIGNACION = r'='
+
+# Delimitadores que se usan en expresiones, bloques y arreglos.
+t_PAR_IZQ = r'\('
+t_PAR_DER = r'\)'
+t_LLAVE_IZQ = r'\{'
+t_LLAVE_DER = r'\}'
+t_CORCHETE_IZQ = r'\['
+t_CORCHETE_DER = r'\]'
+
 # =====================================================================
 # FIN APORTE: Hivor Araujo (@AraujoHivor)
 # =====================================================================
@@ -291,11 +317,19 @@ def t_LITERAL_STRING(t):
 # =====================================================================
 # INICIO APORTE: Hivor Araujo (@AraujoHivor)
 # =====================================================================
-# TODO: def t_LITERAL_INT(t): Regla para números enteros decimales (\d+), convirtiendo
-#       el lexema a entero en t.value.
-# TODO: def t_ID(t): Regla para identificadores ([a-zA-Z_][a-zA-Z0-9_]*),
-#       consultando KEYWORDS_MAP.get(t.value, 'ID') para discriminar palabras
-#       reservadas y tipos predefinidos de nombres de variables/funciones.
+def t_LITERAL_INT(t):
+    r'[0-9]+'
+    # Esta primera version reconoce enteros basicos, sin prefijos ni guiones bajos.
+    t.value = int(t.value)
+    return t
+
+
+def t_ID(t):
+    r'[a-zA-Z_][a-zA-Z0-9_]*'
+    # Primero se busca el nombre completo en el diccionario de palabras clave.
+    t.type = KEYWORDS_MAP.get(t.value, 'ID')
+    return t
+
 # =====================================================================
 # FIN APORTE: Hivor Araujo (@AraujoHivor)
 # =====================================================================

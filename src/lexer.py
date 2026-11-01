@@ -124,8 +124,18 @@ tokens_pablo: list[str] = [
 #         'MAYOR', 'MENOR_IGUAL', 'MAYOR_IGUAL'
 #       - Operadores lógicos: 'AND', 'OR', 'NOT'
 #       - Delimitadores: 'COMA' (,), 'PUNTO' (.)
-keywords_josue: dict[str, str] = {}
-tokens_josue: list[str] = []
+keywords_josue: dict[str, str] = {
+    'bool': 'TIPO_BOOL',
+    'true': 'TRUE',
+    'false': 'FALSE'
+}
+
+tokens_josue: list[str] = [
+    'IGUAL_IGUAL', 'DIFERENTE', 'MENOR', 'MAYOR', 'MENOR_IGUAL', 'MAYOR_IGUAL',
+    'AND', 'OR', 'NOT',
+    'COMA', 'PUNTO'
+]
+# ==
 # =====================================================================
 # FIN APORTE: Josué Pacheco (@JosuePach3co)
 # =====================================================================
@@ -192,6 +202,19 @@ t_AMPERSAND = r'&'
 #         t_MENOR_IGUAL = r'<=', t_MAYOR_IGUAL = r'>=', t_MENOR = r'<', t_MAYOR = r'>'
 #       - Operadores lógicos: t_AND = r'&&', t_OR = r'\|\|', t_NOT = r'!'
 #       - Delimitadores: t_COMA = r',', t_PUNTO = r'\.'
+t_IGUAL_IGUAL = r'=='
+t_DIFERENTE = r'!='
+t_MENOR_IGUAL = r'<='
+t_MAYOR_IGUAL = r'>='
+t_MENOR = r'<'
+t_MAYOR = r'>'
+
+t_AND = r'&&'
+t_OR = r'\|\|'
+t_NOT = r'!'
+
+t_COMA = r','
+t_PUNTO = r'\.'
 # =====================================================================
 # FIN APORTE: Josué Pacheco (@JosuePach3co)
 # =====================================================================
@@ -261,7 +284,7 @@ def t_COMENTARIO_MULTI(t):
 
     # Valida si el comentario no se cerró antes del EOF
     if not t.value[2:].endswith('*/'):
-        mensaje = f"Error léxico en la línea {t.lineno}: comentario multilínea no cerrado al fin de archivo"
+        mensaje = f"Error lexico en la linea {t.lineno}: comentario multilinea no cerrado al fin de archivo"
         registrar_error_lexico(t.lexer, t.lineno, '/*', mensaje)
         return None
 
@@ -311,6 +334,11 @@ def t_ID(t):
 # TODO: t_ignore = ' \t' para descartar espacios en blanco y tabulaciones.
 # TODO: def t_newline(t): Regla para saltos de línea (\n+) que incremente
 #       el contador t.lexer.lineno += len(t.value).
+t_ignore = ' \t'
+
+def t_newline(t):
+    r'\n+'
+    t.lexer.lineno += len(t.value)
 # =====================================================================
 # FIN APORTE: Josué Pacheco (@JosuePach3co)
 # =====================================================================
@@ -321,13 +349,13 @@ def t_ID(t):
 # =====================================================================
 
 def t_error(t):
-    mensaje = f"Error léxico en la línea {t.lineno}: carácter no reconocido '{t.value[0]}'"
+    mensaje = f"Error lexico en la linea {t.lineno}: caracter no reconocido '{t.value[0]}'"
     registrar_error_lexico(t.lexer, t.lineno, t.value[0], mensaje)
     t.lexer.skip(1)
 
 
 def build_lexer(**kwargs):
-    """Construye e inicializa una nueva instancia del analizador léxico PLY."""
+    """Construye e inicializa una nueva instancia del analizador lexico PLY."""
     return lex.lex(**kwargs)
 # =====================================================================
 # FIN APORTE: Pablo Naranjo (@PabloNaranjoM)

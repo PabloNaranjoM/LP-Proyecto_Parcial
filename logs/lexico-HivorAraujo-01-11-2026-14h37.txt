@@ -1,0 +1,38 @@
+================================================================================
+REPORTE DE ANALISIS LEXICO - COMPILADOR GO (ESPOL)
+Archivo analizado: algoritmos/algoritmo2_error.go
+Fecha y hora     : 01-11-2026 14:37:21
+Desarrollador    : Hivor Araujo
+================================================================================
+
+--- TOKENS RECONOCIDOS ---
+[Linea   1, Columna   1] TOKEN: PACKAGE              LEXEMA: 'package'
+[Linea   1, Columna   9] TOKEN: ID                   LEXEMA: 'main'
+[Linea   4, Columna   1] TOKEN: FUNC                 LEXEMA: 'func'
+[Linea   4, Columna   6] TOKEN: ID                   LEXEMA: 'main'
+[Linea   4, Columna  10] TOKEN: PAR_IZQ              LEXEMA: '('
+[Linea   4, Columna  11] TOKEN: PAR_DER              LEXEMA: ')'
+[Linea   4, Columna  13] TOKEN: LLAVE_IZQ            LEXEMA: '{'
+[Linea   5, Columna   5] TOKEN: VAR                  LEXEMA: 'var'
+[Linea   5, Columna   9] TOKEN: ID                   LEXEMA: 'edad'
+[Linea   5, Columna  14] TOKEN: TIPO_INT             LEXEMA: 'int'
+[Linea   5, Columna  18] TOKEN: ASIGNACION           LEXEMA: '='
+[Linea   5, Columna  20] TOKEN: LITERAL_INT          LEXEMA: '20'
+[Linea   6, Columna   5] TOKEN: VAR                  LEXEMA: 'var'
+[Linea   6, Columna   9] TOKEN: ID                   LEXEMA: 'resultado'
+[Linea   6, Columna  19] TOKEN: TIPO_INT             LEXEMA: 'int'
+[Linea   6, Columna  23] TOKEN: ASIGNACION           LEXEMA: '='
+[Linea   6, Columna  25] TOKEN: ID                   LEXEMA: 'edad'
+[Linea   6, Columna  32] TOKEN: LITERAL_INT          LEXEMA: '3'
+[Linea   7, Columna   5] TOKEN: ID                   LEXEMA: '_'
+[Linea   7, Columna   7] TOKEN: ASIGNACION           LEXEMA: '='
+[Linea   7, Columna   9] TOKEN: ID                   LEXEMA: 'resultado'
+[Linea   8, Columna   1] TOKEN: LLAVE_DER            LEXEMA: '}'
+
+--- ERRORES LEXICOS DETECTADOS ---
+Error lexico en la linea 6: caracter no reconocido '@'
+
+================================================================================
+RESUMEN: Total Tokens Reconocidos: 22
+Total Errores Lexicos: 1
+================================================================================

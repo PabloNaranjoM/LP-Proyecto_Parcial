@@ -33,6 +33,7 @@ Autores:
 import os
 import sys
 from datetime import datetime
+from src import lexer
 from src.lexer import build_lexer
 
 
@@ -106,17 +107,37 @@ def main() -> None:
         "--- TOKENS RECONOCIDOS ---"
     ]
 
+    
+    # Agregar todos los tokens reconocidos al reporte
     for tok in tokens_encontrados:
+        inicio_linea = codigo_fuente.rfind('\n', 0, tok.lexpos) + 1
+        columna = tok.lexpos - inicio_linea + 1
+
         lineas_reporte.append(
-            f"[Linea {tok.lineno:3d}, Columna {tok.lexpos:3d}] TOKEN: {tok.type:20} LEXEMA: '{tok.value}'"
+            f"[Linea {tok.lineno:3d}, Columna {columna:3d}] TOKEN: {tok.type:20} LEXEMA: '{tok.value}'"
         )
 
+    # Obtener los errores registrados por el analizador
+    errores = getattr(lexer, 'errores_lexicos', [])
+
+    lineas_reporte.append("")
+    lineas_reporte.append("--- ERRORES LEXICOS DETECTADOS ---")
+
+    if errores:
+        for error in errores:
+            lineas_reporte.append(error['mensaje'])
+    else:
+        lineas_reporte.append("No se detectaron errores lexicos.")
+
+    # Resumen del analisis
     lineas_reporte.extend([
         "",
         "=" * 80,
         f"RESUMEN: Total Tokens Reconocidos: {len(tokens_encontrados)}",
+        f"Total Errores Lexicos: {len(errores)}",
         "=" * 80
     ])
+
 
     # Guardar el archivo de log en la carpeta correspondiente
     with open(ruta_log, "w", encoding="utf-8") as f_log:

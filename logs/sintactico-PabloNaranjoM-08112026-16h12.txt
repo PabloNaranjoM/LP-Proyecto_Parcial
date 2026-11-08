@@ -1,0 +1,53 @@
+================================================================================
+REPORTE DE ANÁLISIS SINTÁCTICO - COMPILADOR GO (ESPOL)
+Archivo analizado: algoritmo1_sintactico.go
+Fecha y hora     : 08-11-2026 16:12:52
+Desarrollador    : PabloNaranjoM
+================================================================================
+
+--- REGLAS GRAMATICALES VALIDADAS ---
+[Línea   1] REGLA VALIDADA: programa
+[Línea  11] REGLA VALIDADA: declaracion_import
+[Línea  13] REGLA VALIDADA: definicion_struct
+[Línea  19] REGLA VALIDADA: declaracion_funcion_variadica
+[Línea  20] REGLA VALIDADA: declaracion_corta
+[Línea  21] REGLA VALIDADA: sentencia_for
+[Línea  22] REGLA VALIDADA: expresion_aritmetica
+[Línea  22] REGLA VALIDADA: asignacion
+[Línea  24] REGLA VALIDADA: sentencia_retorno
+[Línea  27] REGLA VALIDADA: declaracion_funcion
+[Línea  28] REGLA VALIDADA: declaracion_corta
+[Línea  29] REGLA VALIDADA: declaracion_corta
+[Línea  30] REGLA VALIDADA: declaracion_corta
+[Línea  32] REGLA VALIDADA: sentencia_lectura
+[Línea  34] REGLA VALIDADA: declaracion_mapa
+[Línea  39] REGLA VALIDADA: instanciacion_struct
+[Línea  39] REGLA VALIDADA: declaracion_corta
+[Línea  45] REGLA VALIDADA: expresion_aritmetica
+[Línea  45] REGLA VALIDADA: termino
+[Línea  45] REGLA VALIDADA: termino
+[Línea  45] REGLA VALIDADA: declaracion_corta
+[Línea  46] REGLA VALIDADA: comparacion
+[Línea  46] REGLA VALIDADA: comparacion
+[Línea  46] REGLA VALIDADA: conjuncion
+[Línea  46] REGLA VALIDADA: declaracion_corta
+[Línea  48] REGLA VALIDADA: declaracion_corta
+[Línea  49] REGLA VALIDADA: comparacion
+[Línea  49] REGLA VALIDADA: sentencia_for
+[Línea  50] REGLA VALIDADA: expresion_aritmetica
+[Línea  50] REGLA VALIDADA: asignacion
+[Línea  53] REGLA VALIDADA: declaracion_corta
+[Línea  54] REGLA VALIDADA: declaracion_corta
+[Línea  54] REGLA VALIDADA: comparacion
+[Línea  54] REGLA VALIDADA: incremento
+[Línea  54] REGLA VALIDADA: sentencia_for
+[Línea  55] REGLA VALIDADA: asignacion_compuesta
+[Línea  58] REGLA VALIDADA: llamada_funcion
+[Línea  58] REGLA VALIDADA: declaracion_corta
+[Línea  59] REGLA VALIDADA: sentencia_impresion
+
+--- ERRORES SINTÁCTICOS DETECTADOS ---
+No se detectaron errores sintácticos.
+================================================================================
+RESUMEN: Reglas Validadas: 39 | Errores Sintácticos: 0 | Estado: VÁLIDO
+================================================================================

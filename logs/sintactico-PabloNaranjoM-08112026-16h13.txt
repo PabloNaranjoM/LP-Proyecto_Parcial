@@ -1,0 +1,25 @@
+================================================================================
+REPORTE DE ANÁLISIS SINTÁCTICO - COMPILADOR GO (ESPOL)
+Archivo analizado: algoritmo1_error_sintactico.go
+Fecha y hora     : 08-11-2026 16:13:32
+Desarrollador    : PabloNaranjoM
+================================================================================
+
+--- REGLAS GRAMATICALES VALIDADAS ---
+[Línea   1] REGLA VALIDADA: programa
+[Línea  11] REGLA VALIDADA: declaracion_import
+[Línea  13] REGLA VALIDADA: definicion_struct
+[Línea  18] REGLA VALIDADA: declaracion_funcion
+[Línea  19] REGLA VALIDADA: declaracion_corta
+[Línea  20] REGLA VALIDADA: sentencia_lectura
+[Línea  26] REGLA VALIDADA: termino
+[Línea  26] REGLA VALIDADA: termino
+[Línea  29] REGLA VALIDADA: declaracion_corta
+
+--- ERRORES SINTÁCTICOS DETECTADOS ---
+[Línea  23, Columna  10] Error sintáctico en la línea 23, columna 10: Token inesperado ';', se esperaba una expresión, delimitador o sentencia válida según la gramática de Go.
+[Línea  26, Columna  26] Error sintáctico en la línea 26, columna 26: Token inesperado ';', se esperaba una expresión, delimitador o sentencia válida según la gramática de Go.
+[Línea  29, Columna  21] Error sintáctico en la línea 29, columna 21: Token inesperado ';', se esperaba una expresión, delimitador o sentencia válida según la gramática de Go.
+================================================================================
+RESUMEN: Reglas Validadas: 9 | Errores Sintácticos: 3 | Estado: INVÁLIDO
+================================================================================

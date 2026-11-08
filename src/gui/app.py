@@ -19,7 +19,11 @@ import customtkinter as ctk
 
 from .diagnostics_panel import DiagnosticsPanel
 from .editor_panel import CodeEditorPanel
-from .log_exporter import ejecutar_analisis_lexico_codigo
+from .log_exporter import (
+    ejecutar_analisis_completo_codigo,
+    ejecutar_analisis_lexico_codigo,
+    ejecutar_analisis_sintactico_codigo,
+)
 from .theme import (
     ACCENT,
     APP_TITLE,
@@ -157,9 +161,9 @@ class GoAnalyzerApp(ctk.CTk):
 
         botones = [
             ("Léxico", lambda: self._ejecutar_lexico(False), BTN_PRIMARY, 90, 6),
-            ("Sintáctico", None, BTN_PRIMARY, 95, 6),
+            ("Sintáctico", self._ejecutar_sintactico, BTN_PRIMARY, 95, 6),
             ("Semántico", None, BTN_PRIMARY, 95, 8),
-            ("▶ Ejecutar Todo", lambda: self._ejecutar_lexico(True), BTN_SUCCESS, 130, 0),
+            ("▶ Ejecutar Todo", self._ejecutar_todo, BTN_SUCCESS, 130, 0),
         ]
         for col, (texto, cmd, colores, ancho, pad_der) in enumerate(botones):
             ctk.CTkButton(
@@ -261,6 +265,56 @@ class GoAnalyzerApp(ctk.CTk):
             resultado, modo_ejecucion_todo=modo_todo
         )
         self.lbl_log_badge.configure(text=resultado["nombre_log"], text_color=ACCENT)
+
+    def _ejecutar_sintactico(self) -> None:
+        resultado = ejecutar_analisis_sintactico_codigo(
+            codigo_fuente=self.editor_panel.obtener_codigo(),
+            desarrollador=self.desarrollador_var.get(),
+            nombre_archivo=self.editor_panel.obtener_nombre_archivo(),
+        )
+
+        lineas_err = [e["linea"] for e in resultado["errores"]] + [
+            e["linea"] for e in resultado.get("errores_lexicos", [])
+        ]
+        if lineas_err:
+            self.editor_panel.resaltar_lineas_error(lineas_err)
+            self.editor_panel.ir_a_linea(lineas_err[0])
+        else:
+            self.editor_panel.limpiar_resaltado_errores()
+
+        self.diagnostics_panel.mostrar_resultados_sintacticos(
+            resultado, modo_ejecucion_todo=False
+        )
+        self.lbl_log_badge.configure(text=resultado["nombre_log"], text_color=ACCENT)
+
+    def _ejecutar_todo(self) -> None:
+        completo = ejecutar_analisis_completo_codigo(
+            codigo_fuente=self.editor_panel.obtener_codigo(),
+            desarrollador=self.desarrollador_var.get(),
+            nombre_archivo=self.editor_panel.obtener_nombre_archivo(),
+        )
+        res_lex = completo["lexico"]
+        res_sin = completo["sintactico"]
+
+        lineas_err = [e["linea"] for e in res_lex["errores"]] + [
+            e["linea"] for e in res_sin["errores"]
+        ]
+        if lineas_err:
+            self.editor_panel.resaltar_lineas_error(lineas_err)
+            self.editor_panel.ir_a_linea(lineas_err[0])
+        else:
+            self.editor_panel.limpiar_resaltado_errores()
+
+        self.diagnostics_panel.mostrar_resultados_lexicos(
+            res_lex, modo_ejecucion_todo=True
+        )
+        self.diagnostics_panel.mostrar_resultados_sintacticos(
+            res_sin, modo_ejecucion_todo=True
+        )
+        self.lbl_log_badge.configure(
+            text=f"{res_lex['nombre_log']} • {res_sin['nombre_log']}",
+            text_color=ACCENT,
+        )
 
 
 def launch_gui(archivo_inicial: str | None = "algoritmos/algoritmo1.go") -> None:

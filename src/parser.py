@@ -153,7 +153,8 @@ def p_lista_sentencias(p):
 
 
 def p_sentencia_bloque(p):
-    """sentencia_bloque : sentencia fin_opc"""
+    """sentencia_bloque : sentencia fin_opc
+                        | error fin_opc"""
     p[0] = p[1]
 
 
@@ -767,46 +768,20 @@ def p_lista_referencias(p):
 # =====================================================================
 # INICIO APORTE: Hivor Araujo (@AraujoHivor)
 # =====================================================================
-_SUGERENCIAS_IHC: dict[str, str] = {
-    "SINO": "Cláusula 'else' desvinculada de un bloque 'if' válido o falta cerrar '}' antes de 'else'.",
-    "CASO": "La cláusula 'case' debe ubicarse dentro de un bloque 'switch' y terminar con ':'.",
-    "DEFECTO": "La cláusula 'default' debe ubicarse dentro de un bloque 'switch' y terminar con ':'.",
-    "LLAVE_DER": "Verifique si falta un operando, expresión o cierre de paréntesis/corchete antes de '}'.",
-    "PAR_DER": "Expresión o lista de argumentos/parámetros incompleta antes de ')'.",
-    "ASIGNACION": "Verifique el nombre del identificador o tipo antes del operador '='.",
-    "ASIGNACION_CORTA": "El operador ':=' requiere un identificador válido a la izquierda y una expresión a la derecha.",
-}
-
-
-def _esperado_para_token(tipo_tok: str) -> tuple[str, str]:
+def _esperado_para_token(tipo_tok: str) -> str:
     if tipo_tok == "SINO":
-        return (
-            "una sentencia válida o el cierre de bloque '}'",
-            _SUGERENCIAS_IHC["SINO"],
-        )
+        return "una sentencia válida o el cierre de bloque '}'"
     if tipo_tok in ("LLAVE_DER", "PAR_DER", "CORCHETE_DER"):
-        return (
-            "completar la expresión o instrucción previa antes del delimitador de cierre",
-            _SUGERENCIAS_IHC.get(tipo_tok, "Revise los delimitadores de agrupación abiertos en la línea."),
-        )
+        return "completar la expresión o instrucción previa antes del delimitador de cierre"
     if tipo_tok in ("ASIGNACION", "ASIGNACION_CORTA"):
-        return (
-            "un identificador o especificación de tipo antes del operador de asignación",
-            _SUGERENCIAS_IHC[tipo_tok],
-        )
-    return (
-        "una expresión, delimitador o sentencia válida según la gramática de Go",
-        _SUGERENCIAS_IHC.get(
-            tipo_tok,
-            "Revise la sintaxis de la instrucción en la línea señalada (delimitadores, operadores o tipos).",
-        ),
-    )
+        return "un identificador o especificación de tipo antes del operador de asignación"
+    return "una expresión, delimitador o sentencia válida según la gramática de Go"
 
 
 def p_error(p):
     if p is not None:
         col = calcular_columna(_codigo_actual, p.lexpos) if _codigo_actual else 1
-        esperado, sugerencia = _esperado_para_token(p.type)
+        esperado = _esperado_para_token(p.type)
         mensaje = (
             f"Error sintáctico en la línea {p.lineno}, columna {col}: "
             f"Token inesperado '{p.value}', se esperaba {esperado}."
@@ -817,7 +792,6 @@ def p_error(p):
             "token": str(p.value),
             "tipo": p.type,
             "mensaje": mensaje,
-            "sugerencia": sugerencia,
         })
     else:
         lineas = _codigo_actual.splitlines() if _codigo_actual else [""]
@@ -833,7 +807,6 @@ def p_error(p):
             "token": "EOF",
             "tipo": "EOF",
             "mensaje": mensaje,
-            "sugerencia": "Verifique que todas las llaves '{', paréntesis '(' y corchetes '[' estén cerrados y las asignaciones completas.",
         })
 # =====================================================================
 # FIN APORTE: Hivor Araujo (@AraujoHivor)
@@ -870,7 +843,7 @@ def analizar_sintaxis(codigo: str) -> dict[str, Any]:
     lexer_parser = build_lexer()
     lexer_parser.errores_lexicos = []
     parser = build_parser()
-    arbol = parser.parse(codigo, lexer=lexer_parser) if codigo.strip() else None
+    arbol = parser.parse(codigo, lexer=lexer_parser, tracking=True) if codigo.strip() else None
 
     valido = not errores_lexicos and not errores_sintacticos and (arbol is not None or not codigo.strip())
     return {

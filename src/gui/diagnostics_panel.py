@@ -42,7 +42,7 @@ class DiagnosticsPanel(ctk.CTkFrame):
     """Panel derecho de diagnóstico y resultados (55 % del ancho de trabajo)."""
 
     TAB_TOKENS = "Tabla de Tokens"
-    TAB_SINTACTICO = "Reglas Sintáticas"
+    TAB_SINTACTICO = "Reglas Sintácticas"
     TAB_SIMBOLOS = "Tabla de Símbolos"
 
     def __init__(
@@ -150,6 +150,8 @@ class DiagnosticsPanel(ctk.CTkFrame):
         self.tabview._segmented_button.configure(font=fuente_ui(12))
 
         self._construir_tab_tokens()
+        self._construir_tab_sintactico()
+        self._construir_tab_simbolos()
 
     def _construir_tab_tokens(self) -> None:
         self.tab_tokens.grid_columnconfigure(0, weight=1)
@@ -271,6 +273,98 @@ class DiagnosticsPanel(ctk.CTkFrame):
             if len(valores) >= 4:
                 self._on_line_select(int(valores[3]))
 
+    def _construir_tab_sintactico(self) -> None:
+        self.tab_sintactico.grid_columnconfigure(0, weight=1)
+        self.tab_sintactico.grid_rowconfigure(1, weight=1)
+
+        header = ctk.CTkFrame(
+            self.tab_sintactico, fg_color=BG_MAIN, corner_radius=6, height=28
+        )
+        header.grid(row=0, column=0, sticky="ew", padx=2, pady=(0, 6))
+        header.grid_columnconfigure(0, weight=1)
+
+        self.lbl_contador_sintactico = ctk.CTkLabel(
+            header,
+            text="Reglas Sintácticas (0)",
+            font=fuente_ui(11),
+            text_color=TEXT_SECONDARY,
+        )
+        self.lbl_contador_sintactico.grid(row=0, column=0, padx=10, pady=3, sticky="w")
+
+        self.lbl_resumen_sintactico = ctk.CTkLabel(
+            header,
+            text="0 reglas validadas • 0 errores sintácticos",
+            font=fuente_mono(11),
+            text_color=TEXT_SECONDARY,
+        )
+        self.lbl_resumen_sintactico.grid(row=0, column=1, padx=10, pady=3, sticky="e")
+
+        tree_frame = ctk.CTkFrame(
+            self.tab_sintactico,
+            fg_color=BG_EDITOR,
+            border_color=BORDER_PANEL,
+            border_width=1,
+            corner_radius=6,
+        )
+        tree_frame.grid(row=1, column=0, sticky="nsew", padx=2)
+        tree_frame.grid_columnconfigure(0, weight=1)
+        tree_frame.grid_rowconfigure(0, weight=1)
+
+        columnas_sin = [
+            ("estado", "Estado", 85, 70, False, "center"),
+            ("linea", "Línea", 70, 55, False, "center"),
+            ("regla", "Regla Gramatical", 185, 140, False, "w"),
+            ("detalle", "Detalle de Validación LALR(1)", 360, 220, True, "w"),
+        ]
+        self.tree_sintactico = ttk.Treeview(
+            tree_frame,
+            columns=[c[0] for c in columnas_sin],
+            show="headings",
+            style="Tokens.Treeview",
+            selectmode="browse",
+        )
+        for col, titulo, width, minw, stretch, anchor in columnas_sin:
+            self.tree_sintactico.heading(col, text=titulo, anchor=anchor)
+            self.tree_sintactico.column(
+                col, width=width, minwidth=minw, stretch=stretch, anchor=anchor
+            )
+
+        self.tree_sintactico.tag_configure("even", background=BG_EDITOR, foreground=OK_FG)
+        self.tree_sintactico.tag_configure("odd", background=BG_ROW_ALT, foreground=OK_FG)
+        self.tree_sintactico.tag_configure("error", background=ERROR_ROW_BG, foreground=ERROR_FG)
+        self.tree_sintactico.grid(row=0, column=0, sticky="nsew", padx=(2, 0), pady=2)
+
+        scrollbar = ctk.CTkScrollbar(
+            tree_frame,
+            orientation="vertical",
+            command=self.tree_sintactico.yview,
+            fg_color=BG_EDITOR,
+            button_color=BORDER_PANEL,
+            button_hover_color="#3B4252",
+        )
+        scrollbar.grid(row=0, column=1, sticky="ns", padx=(0, 2), pady=2)
+        self.tree_sintactico.configure(yscrollcommand=scrollbar.set)
+        self.tree_sintactico.bind("<<TreeviewSelect>>", self._al_seleccionar_fila_sintactico)
+
+    def _al_seleccionar_fila_sintactico(self, _event: Any = None) -> None:
+        if not self._on_line_select:
+            return
+        sel = self.tree_sintactico.selection()
+        if sel:
+            valores = self.tree_sintactico.item(sel[0], "values")
+            if len(valores) >= 2:
+                self._on_line_select(int(valores[1]))
+
+    def _construir_tab_simbolos(self) -> None:
+        self.tab_simbolos.grid_columnconfigure(0, weight=1)
+        self.tab_simbolos.grid_rowconfigure(0, weight=1)
+        ctk.CTkLabel(
+            self.tab_simbolos,
+            text="Tabla de Símbolos y Análisis Semántico — Pendiente para el Avance 3",
+            font=fuente_ui(12, negrita=False),
+            text_color=TEXT_SECONDARY,
+        ).grid(row=0, column=0, padx=20, pady=20)
+
     def _construir_consola_inferior(self) -> None:
         frame = ctk.CTkFrame(
             self,
@@ -326,6 +420,13 @@ class DiagnosticsPanel(ctk.CTkFrame):
         botones = self.tabview._segmented_button._buttons_dict
         if self.TAB_TOKENS in botones:
             botones[self.TAB_TOKENS].configure(text=txt_tokens)
+
+    def _actualizar_contador_sintactico(self, total_filas: int) -> None:
+        txt_sin = f"Reglas Sintácticas ({total_filas})"
+        self.lbl_contador_sintactico.configure(text=txt_sin)
+        botones = self.tabview._segmented_button._buttons_dict
+        if self.TAB_SINTACTICO in botones:
+            botones[self.TAB_SINTACTICO].configure(text=txt_sin)
 
     def _escribir_consola(self, segmentos: list[tuple[str, str]]) -> None:
         self.consola_textbox.configure(state="normal")
@@ -383,22 +484,112 @@ class DiagnosticsPanel(ctk.CTkFrame):
             ]
             if modo_ejecucion_todo:
                 segmentos.append((
-                    "[INFO] Análisis Sintáctico y Semántico: Pendientes de integración (Avances 2 y 3).\n",
+                    "[INFO] Ejecutando fase de Análisis Sintáctico LALR(1)...\n",
                     "info",
                 ))
         else:
             segmentos = [(f"{e['mensaje'].rstrip('.')}.\n", "error") for e in errores]
         self._escribir_consola(segmentos)
 
+    def mostrar_resultados_sintacticos(
+        self, resultado: dict[str, Any], modo_ejecucion_todo: bool = False
+    ) -> None:
+        reglas: list[dict[str, Any]] = resultado["reglas"]
+        errores_sin: list[dict[str, Any]] = resultado["errores"]
+        errores_lex: list[dict[str, Any]] = resultado.get("errores_lexicos", [])
+        tokens: list[dict[str, Any]] = resultado.get("tokens", [])
+
+        if errores_lex:
+            self.actualizar_estado_banner("ERROR_LEXICO")
+        elif errores_sin:
+            self.actualizar_estado_banner("ERROR_SINTACTICO")
+        else:
+            msg = (
+                "ESTADO DEL SISTEMA: Análisis léxico y sintáctico completado sin errores."
+                if modo_ejecucion_todo
+                else "ESTADO DEL SISTEMA: Análisis sintáctico LALR(1) completado sin errores."
+            )
+            self.actualizar_estado_banner("VALIDO", mensaje_custom=msg)
+
+        self.tree_sintactico.delete(*self.tree_sintactico.get_children())
+        filas = [
+            (
+                r["linea"],
+                0,
+                False,
+                "✓ VÁLIDA",
+                r["regla"],
+                f"✓ [Línea {r['linea']}] Regla '{r['regla']}' validada.",
+            )
+            for r in reglas
+        ] + [
+            (
+                e["linea"],
+                1,
+                True,
+                "✕ ERROR",
+                "p_error (LALR)",
+                f"✕ [Línea {e['linea']}, Col {e['columna']}] Token inesperado '{e['token']}'",
+            )
+            for e in errores_sin
+        ]
+        filas.sort(key=lambda r: (r[0], r[1]))
+
+        for pos, (linea, _prio, es_err, estado_txt, regla_txt, detalle_txt) in enumerate(filas):
+            tag = "error" if es_err else ("even" if pos % 2 == 0 else "odd")
+            self.tree_sintactico.insert(
+                "", "end", values=(estado_txt, linea, regla_txt, detalle_txt), tags=(tag,)
+            )
+
+        tiene_err_sin = bool(errores_sin)
+        self.lbl_resumen_sintactico.configure(
+            text=f"{len(reglas)} reglas validadas • {len(errores_sin)} errores sintácticos",
+            text_color=ERROR_FG if tiene_err_sin else OK_FG,
+        )
+        self._actualizar_contador_sintactico(len(filas))
+
+        segmentos: list[tuple[str, str]] = []
+        if modo_ejecucion_todo:
+            if not errores_lex:
+                segmentos.append(
+                    (f"[OK] Análisis Léxico: {len(tokens)} tokens reconocidos correctamente.\n", "ok")
+                )
+            else:
+                for el in errores_lex:
+                    segmentos.append((f"{el['mensaje'].rstrip('.')}.\n", "error"))
+
+        if not errores_sin and not errores_lex:
+            segmentos.append((
+                f"[OK] Análisis Sintáctico: Estructura gramatical LALR(1) válida ({len(reglas)} reglas verificadas).\n",
+                "ok",
+            ))
+            if modo_ejecucion_todo:
+                segmentos.append((
+                    "[INFO] Análisis Semántico: Pendiente de integración (Avance 3).\n",
+                    "info",
+                ))
+        else:
+            for es in errores_sin:
+                segmentos.append((f"{es['mensaje']}\n", "error"))
+
+        self._escribir_consola(segmentos)
+        if not modo_ejecucion_todo or tiene_err_sin:
+            self.tabview.set(self.TAB_SINTACTICO)
+
     def limpiar_panel(self) -> None:
         self.actualizar_estado_banner("IDLE")
         self.tree_tokens.delete(*self.tree_tokens.get_children())
+        self.tree_sintactico.delete(*self.tree_sintactico.get_children())
         self.lbl_resumen_tokens.configure(
             text="0 válidos • 0 errores léxicos", text_color=TEXT_SECONDARY
         )
+        self.lbl_resumen_sintactico.configure(
+            text="0 reglas validadas • 0 errores sintácticos", text_color=TEXT_SECONDARY
+        )
         self._actualizar_contador_tokens(0)
+        self._actualizar_contador_sintactico(0)
         self._escribir_consola([(
-            "Consola lista. Cargue un archivo .go o escriba código en el editor y presione 'Léxico' o '▶ Ejecutar Todo'.\n",
+            "Consola lista. Cargue un archivo .go o escriba código en el editor y presione 'Léxico', 'Sintáctico' o '▶ Ejecutar Todo'.\n",
             "info",
         )])
         self.tabview.set(self.TAB_TOKENS)

@@ -9,7 +9,7 @@ from src.lexer import tokens, build_lexer
 
 # 1. Declaración explicita con inferencia de tipo
 def p_declaracion_var_inferencia(p):
-    'declaracion_var : VAR ID ASIGNACION expresion'
+    'declaracion_var : VARIABLE ID ASIGNACION expresion'
     p[0] = ("var_inferencia", p[2], p[4])
 
 # 2. Expresiones aritmeticas: Regla aditiva de resta
@@ -19,7 +19,7 @@ def p_expresion_resta(p):
 
 # 3. Expresiones booleanas: Regla de disyuncion logica (OR)
 def p_expresion_booleana_or(p):
-    'expresion_booleana : expresion_booleana OR conjuncion'
+    'expresion_booleana : expresion_booleana O_LOGICO conjuncion'
     p[0] = ("or", p[1], p[3])
 
 def p_expresion_booleana_base(p):
@@ -28,7 +28,7 @@ def p_expresion_booleana_base(p):
 
 # 4. Estructura de selección múltiple switch
 def p_sentencia_switch(p):
-    'sentencia_switch : SWITCH expresion LLAVE_IZQ lista_casos LLAVE_DER'
+    'sentencia_switch : SEGUN expresion LLAVE_IZQ lista_casos LLAVE_DER'
     p[0] = ("switch", p[2], p[4])
 
 def p_lista_casos(p):
@@ -40,8 +40,8 @@ def p_lista_casos(p):
         p[0] = p[1] + [p[2]]
 
 def p_caso(p):
-    '''caso : CASE expresion DOS_PUNTOS lista_sentencias_opc
-            | DEFAULT DOS_PUNTOS lista_sentencias_opc'''
+    '''caso : CASO expresion DOS_PUNTOS lista_sentencias_opc
+            | DEFECTO DOS_PUNTOS lista_sentencias_opc'''
     if p[1] == 'case':
         p[0] = ("case", p[2], p[4])
     else:
@@ -72,18 +72,13 @@ def p_lista_expresiones(p):
 
 # 6. Funciones anonimas o expresiones lambda
 def p_literal_funcion(p):
-    'literal_funcion : FUNC PAR_IZQ parametros_opc PAR_DER tipo bloque'
+    'literal_funcion : FUNCION PAR_IZQ parametros_opc PAR_DER tipo bloque'
     p[0] = ("func_anonima", p[3], p[5], p[6])
 
 # 7. Impresion simple en consola con fmt.Print
 def p_sentencia_impresion_simple(p):
-    'sentencia_impresion : ID PUNTO ID PAR_IZQ argumentos_opc PAR_DER'
-    if p[1] == "fmt" and p[3] == "Print":
-        p[0] = ("print", p[5])
-    else:
-        mensaje = f"Llamada no soportada: {p[1]}.{p[3]}"
-        errores_sintacticos.append(mensaje)
-        p[0] = None
+    'sentencia_impresion : PAQUETE_FMT PUNTO IMPRIMIR PAR_IZQ argumentos_opc PAR_DER'
+    p[0] = ("print", p[5])
 
 # =====================================================================
 # REGLAS DE INTEGRACION BASE
@@ -110,25 +105,25 @@ def p_termino_factor_base(p):
     p[0] = p[1]
 
 def p_factor_base(p):
-    '''factor : LITERAL_INT
-              | LITERAL_FLOAT
-              | LITERAL_STRING
+    '''factor : LITERAL_ENTERO
+              | LITERAL_FLOTANTE
+              | LITERAL_CADENA
               | ID
-              | TRUE
-              | FALSE'''
+              | VERDADERO
+              | FALSO'''
     p[0] = p[1]
 
 def p_tipo_base(p):
-    '''tipo : TIPO_INT
-            | TIPO_FLOAT64
-            | TIPO_STRING
-            | TIPO_BOOL'''
+    '''tipo : TIPO_ENTERO
+            | TIPO_FLOTANTE
+            | TIPO_CADENA
+            | TIPO_BOOLEANO'''
     p[0] = p[1]
 
 def p_conjuncion_base(p):
     '''conjuncion : ID
-                  | TRUE
-                  | FALSE'''
+                  | VERDADERO
+                  | FALSO'''
     p[0] = p[1]
 
 def p_bloque_base(p):

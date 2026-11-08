@@ -36,7 +36,7 @@ from .theme import (
 )
 
 # Expresiones regulares derivadas del propio lexer para evitar duplicar listas de palabras
-_TIPOS_Y_BOOLS = {k for k, v in KEYWORDS_MAP.items() if v.startswith("TIPO_") or v in ("TRUE", "FALSE")}
+_TIPOS_Y_BOOLS = {k for k, v in KEYWORDS_MAP.items() if v.startswith("TIPO_") or v in ("VERDADERO", "FALSO")}
 _RESERVADAS = set(KEYWORDS_MAP) - _TIPOS_Y_BOOLS
 
 _PATRONES_SINTAXIS: list[tuple[str, re.Pattern[str]]] = [

@@ -8,22 +8,24 @@ El analizador está estructurado de forma modular y colaborativa entre los
 tres integrantes del equipo, siguiendo el contrato de nombres establecido
 en el documento de propuesta técnica:
 - Hivor Araujo (@AraujoHivor): 23 palabras reservadas base de Go (excluyendo map y struct),
-  tipo predefinido 'string' ('TIPO_STRING'), identificadores ('ID'), literales enteros
-  ('LITERAL_INT'), operadores aritméticos ('SUMA', 'RESTA', 'MULT', 'DIV', 'MOD'),
-  asignación simple ('ASIGNACION') y delimitadores básicos ('PAR_IZQ', 'PAR_DER',
-  'LLAVE_IZQ', 'LLAVE_DER', 'CORCHETE_IZQ', 'CORCHETE_DER').
-- Pablo Naranjo (@PabloNaranjoM): Palabras reservadas 'map' ('MAP') y 'struct' ('STRUCT'),
-  tipos numéricos 'int' ('TIPO_INT') y 'float64' ('TIPO_FLOAT64'), literales flotantes
-  ('LITERAL_FLOAT'), literales de cadena ('LITERAL_STRING'), asignación corta
-  ('ASIGNACION_CORTA'), asignaciones compuestas ('MAS_IGUAL', 'MENOS_IGUAL', 'MULT_IGUAL',
-  'DIV_IGUAL', 'MOD_IGUAL'), incremento/decremento ('INCREMENTO', 'DECREMENTO'),
-  comentarios (// y /* */), delimitadores/operadores ('DOS_PUNTOS', 'PUNTO_COMA',
-  'AMPERSAND'), manejador de errores y constructor del lexer.
-- Josué Pacheco (@JosuePach3co): Tipo predefinido 'bool' ('TIPO_BOOL'), constantes
-  booleanas 'true' ('TRUE') y 'false' ('FALSE'), operadores relacionales ('IGUAL_IGUAL',
-  'DIFERENTE', 'MENOR', 'MAYOR', 'MENOR_IGUAL', 'MAYOR_IGUAL'), operadores lógicos
-  ('AND', 'OR', 'NOT'), delimitadores ('COMA', 'PUNTO'), espacios ignorados y
-  seguimiento de saltos de línea.
+  tipo predefinido 'string' ('TIPO_CADENA'), función 'Println' ('IMPRIMIR_LN'),
+  identificadores ('ID'), literales enteros ('LITERAL_ENTERO'), operadores aritméticos
+  ('SUMA', 'RESTA', 'MULTIPLICACION', 'DIVISION', 'MODULO'), asignación simple ('ASIGNACION')
+  y delimitadores básicos ('PAR_IZQ', 'PAR_DER', 'LLAVE_IZQ', 'LLAVE_DER', 'CORCHETE_IZQ',
+  'CORCHETE_DER').
+- Pablo Naranjo (@PabloNaranjoM): Palabras reservadas 'map' ('MAPA') y 'struct' ('ESTRUCTURA'),
+  tipos numéricos 'int' ('TIPO_ENTERO') y 'float64' ('TIPO_FLOTANTE'), paquete y lectura
+  estándar ('PAQUETE_FMT', 'LEER_LN', 'LEER'), literales flotantes ('LITERAL_FLOTANTE'),
+  literales de cadena ('LITERAL_CADENA'), asignación corta ('ASIGNACION_CORTA'),
+  asignaciones compuestas ('MAS_IGUAL', 'MENOS_IGUAL', 'MULT_IGUAL', 'DIV_IGUAL', 'MOD_IGUAL'),
+  incremento/decremento ('INCREMENTO', 'DECREMENTO'), comentarios (// y /* */),
+  delimitadores/operadores ('DOS_PUNTOS', 'PUNTO_COMA', 'AMPERSAND', 'ELIPSIS'),
+  manejador de errores y constructor del lexer.
+- Josué Pacheco (@JosuePach3co): Tipo predefinido 'bool' ('TIPO_BOOLEANO'), constantes
+  booleanas 'true' ('VERDADERO') y 'false' ('FALSO'), función 'Print' ('IMPRIMIR'),
+  operadores relacionales ('IGUAL_IGUAL', 'DIFERENTE', 'MENOR', 'MAYOR', 'MENOR_IGUAL',
+  'MAYOR_IGUAL'), operadores lógicos ('Y_LOGICO', 'O_LOGICO', 'NEGACION'), delimitadores
+  ('COMA', 'PUNTO'), espacios ignorados y seguimiento de saltos de línea.
 
 Autores:
     - Pablo Naranjo (@PabloNaranjoM)
@@ -47,35 +49,36 @@ except ImportError:
 # Las palabras reservadas se reconocen desde t_ID para no dividir nombres
 # como "variable" en "var" y "iable".
 keywords_hivor: dict[str, str] = {
-    'break': 'BREAK',
-    'case': 'CASE',
-    'chan': 'CHAN',
-    'const': 'CONST',
-    'continue': 'CONTINUE',
-    'default': 'DEFAULT',
-    'defer': 'DEFER',
-    'else': 'ELSE',
-    'fallthrough': 'FALLTHROUGH',
-    'for': 'FOR',
-    'func': 'FUNC',
-    'go': 'GO',
-    'goto': 'GOTO',
-    'if': 'IF',
-    'import': 'IMPORT',
-    'interface': 'INTERFACE',
-    'package': 'PACKAGE',
-    'range': 'RANGE',
-    'return': 'RETURN',
-    'select': 'SELECT',
-    'switch': 'SWITCH',
-    'type': 'TYPE',
-    'var': 'VAR',
-    'string': 'TIPO_STRING',  # En Go es un tipo predefinido, no palabra reservada.
+    'break': 'ROMPER',
+    'case': 'CASO',
+    'chan': 'CANAL',
+    'const': 'CONSTANTE',
+    'continue': 'CONTINUAR',
+    'default': 'DEFECTO',
+    'defer': 'DIFERIR',
+    'else': 'SINO',
+    'fallthrough': 'CAIDA',
+    'for': 'PARA',
+    'func': 'FUNCION',
+    'go': 'CORRUTINA',
+    'goto': 'IR_A',
+    'if': 'SI',
+    'import': 'IMPORTAR',
+    'interface': 'INTERFAZ',
+    'package': 'PAQUETE',
+    'range': 'RANGO',
+    'return': 'RETORNAR',
+    'select': 'SELECCIONAR',
+    'switch': 'SEGUN',
+    'type': 'TIPO',
+    'var': 'VARIABLE',
+    'string': 'TIPO_CADENA',  # En Go es un tipo predefinido, no palabra reservada.
+    'Println': 'IMPRIMIR_LN',
 }
 
 tokens_hivor: list[str] = [
-    'ID', 'LITERAL_INT',
-    'SUMA', 'RESTA', 'MULT', 'DIV', 'MOD', 'ASIGNACION',
+    'ID', 'LITERAL_ENTERO',
+    'SUMA', 'RESTA', 'MULTIPLICACION', 'DIVISION', 'MODULO', 'ASIGNACION',
     'PAR_IZQ', 'PAR_DER', 'LLAVE_IZQ', 'LLAVE_DER',
     'CORCHETE_IZQ', 'CORCHETE_DER',
 ]
@@ -89,24 +92,27 @@ tokens_hivor: list[str] = [
 # =====================================================================
 keywords_pablo: dict[str, str] = {
     # Palabras reservadas oficiales de Go
-    'map' : 'MAP',
-    'struct' : 'STRUCT',
+    'map': 'MAPA',
+    'struct': 'ESTRUCTURA',
 
-    # Identificadores predefinidos
-    'int' : 'TIPO_INT',
-    'float64' : 'TIPO_FLOAT64'
+    # Identificadores predefinidos y paquete estándar fmt
+    'int': 'TIPO_ENTERO',
+    'float64': 'TIPO_FLOTANTE',
+    'fmt': 'PAQUETE_FMT',
+    'Scanln': 'LEER_LN',
+    'Scan': 'LEER',
 }
 
 tokens_pablo: list[str] = [
     # Literales
-    'LITERAL_FLOAT', 'LITERAL_STRING',
+    'LITERAL_FLOTANTE', 'LITERAL_CADENA',
     
     # Operadores
     'ASIGNACION_CORTA', 'MAS_IGUAL', 'MENOS_IGUAL', 'MULT_IGUAL', 'DIV_IGUAL', 'MOD_IGUAL', 
     'INCREMENTO', 'DECREMENTO',
 
     # Delimitadores
-    'DOS_PUNTOS', 'PUNTO_COMA', 'AMPERSAND'
+    'DOS_PUNTOS', 'PUNTO_COMA', 'AMPERSAND', 'ELIPSIS'
     ]
 # =====================================================================
 # FIN APORTE: Pablo Naranjo (@PabloNaranjoM)
@@ -116,14 +122,15 @@ tokens_pablo: list[str] = [
 # INICIO APORTE: Josué Pacheco (@JosuePach3co)
 # =====================================================================
 keywords_josue: dict[str, str] = {
-    'bool': 'TIPO_BOOL',
-    'true': 'TRUE',
-    'false': 'FALSE'
+    'bool': 'TIPO_BOOLEANO',
+    'true': 'VERDADERO',
+    'false': 'FALSO',
+    'Print': 'IMPRIMIR',
 }
 
 tokens_josue: list[str] = [
     'IGUAL_IGUAL', 'DIFERENTE', 'MENOR', 'MAYOR', 'MENOR_IGUAL', 'MAYOR_IGUAL',
-    'AND', 'OR', 'NOT',
+    'Y_LOGICO', 'O_LOGICO', 'NEGACION',
     'COMA', 'PUNTO'
 ]
 # =====================================================================
@@ -145,9 +152,9 @@ tokens: tuple[str, ...] = tuple(tokens_hivor + tokens_pablo + tokens_josue + lis
 # Operadores aritmeticos y asignacion simple.
 t_SUMA = r'\+'
 t_RESTA = r'-'
-t_MULT = r'\*'
-t_DIV = r'/'
-t_MOD = r'%'
+t_MULTIPLICACION = r'\*'
+t_DIVISION = r'/'
+t_MODULO = r'%'
 t_ASIGNACION = r'='
 
 # Delimitadores que se usan en expresiones, bloques y arreglos.
@@ -180,6 +187,7 @@ t_DECREMENTO = r'--'
 t_DOS_PUNTOS = r':'
 t_PUNTO_COMA = r';'
 t_AMPERSAND = r'&'
+t_ELIPSIS = r'\.\.\.'
 # =====================================================================
 # FIN APORTE: Pablo Naranjo (@PabloNaranjoM)
 # =====================================================================
@@ -194,9 +202,9 @@ t_MAYOR_IGUAL = r'>='
 t_MENOR = r'<'
 t_MAYOR = r'>'
 
-t_AND = r'&&'
-t_OR = r'\|\|'
-t_NOT = r'!'
+t_Y_LOGICO = r'&&'
+t_O_LOGICO = r'\|\|'
+t_NEGACION = r'!'
 
 t_COMA = r','
 t_PUNTO = r'\.'
@@ -283,12 +291,12 @@ def t_COMENTARIO_MULTI(t):
     pass
 
 # Literales
-def t_LITERAL_FLOAT(t):
+def t_LITERAL_FLOTANTE(t):
     r'\d+\.\d+'
     t.value = float(t.value)
     return t
 
-def t_LITERAL_STRING(t):
+def t_LITERAL_CADENA(t):
     #Soporta los escapes: \n, \t, \", \\, \r, \'
     r'"([^"\n\\]|\\[nrt\\\'"])*"'
     t.lexer.lineno += t.value.count('\n')
@@ -301,7 +309,7 @@ def t_LITERAL_STRING(t):
 # =====================================================================
 # INICIO APORTE: Hivor Araujo (@AraujoHivor)
 # =====================================================================
-def t_LITERAL_INT(t):
+def t_LITERAL_ENTERO(t):
     r'[0-9]+'
     # Esta primera version reconoce enteros basicos, sin prefijos ni guiones bajos.
     t.value = int(t.value)
@@ -344,9 +352,11 @@ def t_error(t):
 def formatear_categoria_token(tipo, lexema=''):
     """Convierte el tipo de token de PLY a la categoría mostrada en la Tabla de Tokens."""
     if tipo.startswith('TIPO_'):
-        return f"TIPO_DATO ({str(lexema).upper() or tipo[5:]})"
-    if tipo in ('TRUE', 'FALSE'):
-        return f"LITERAL_BOOL ({tipo})"
+        return f"TIPO_DATO ({tipo[5:]})"
+    if tipo in ('VERDADERO', 'FALSO'):
+        return f"LITERAL_BOOLEANO ({tipo})"
+    if tipo in ('PAQUETE_FMT', 'IMPRIMIR_LN', 'IMPRIMIR', 'LEER_LN', 'LEER'):
+        return f"ESTANDAR_FMT ({tipo})"
     if tipo in KEYWORDS_MAP.values():
         return f"RESERVADA ({tipo})"
     return tipo

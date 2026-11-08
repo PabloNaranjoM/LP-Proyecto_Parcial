@@ -7,15 +7,15 @@ from src.lexer import tokens, build_lexer
 # Por ahora, la regla inicial solo reconoce una declaracion.
 
 def p_declaracion_var(p):
-    'declaracion_var : VAR ID tipo ASIGNACION expresion'
+    'declaracion_var : VARIABLE ID tipo ASIGNACION expresion'
     p[0] = ("variable", p[2], p[3], p[5])
 
 
 def p_tipo(p):
-    '''tipo : TIPO_INT
-            | TIPO_FLOAT64
-            | TIPO_STRING
-            | TIPO_BOOL'''
+    '''tipo : TIPO_ENTERO
+            | TIPO_FLOTANTE
+            | TIPO_CADENA
+            | TIPO_BOOLEANO'''
     p[0] = p[1]
 
 
@@ -32,7 +32,7 @@ def p_expresion_termino(p):
 
 # Multiplicacion: tiene mayor prioridad que la suma.
 def p_termino_mult(p):
-    'termino : termino MULT factor'
+    'termino : termino MULTIPLICACION factor'
     p[0] = ("multiplicacion", p[1], p[3])
 
 
@@ -42,12 +42,12 @@ def p_termino_factor(p):
 
 
 def p_factor(p):
-    '''factor : LITERAL_INT
-              | LITERAL_FLOAT
-              | LITERAL_STRING
+    '''factor : LITERAL_ENTERO
+              | LITERAL_FLOTANTE
+              | LITERAL_CADENA
               | ID
-              | TRUE
-              | FALSE'''
+              | VERDADERO
+              | FALSO'''
     p[0] = p[1]
 
 
@@ -64,7 +64,7 @@ def p_comparacion(p):
 # Conjuncion logica: permite unir varias condiciones con &&.
 def p_conjuncion(p):
     '''conjuncion : comparacion
-                 | conjuncion AND comparacion'''
+                 | conjuncion Y_LOGICO comparacion'''
     if len(p) == 2:
         p[0] = p[1]
     else:
@@ -74,9 +74,9 @@ def p_conjuncion(p):
 
 # Condicional if, if-else y else if.
 def p_sentencia_if(p):
-    '''sentencia_if : IF conjuncion bloque
-                    | IF conjuncion bloque ELSE bloque
-                    | IF conjuncion bloque ELSE sentencia_if'''
+    '''sentencia_if : SI conjuncion bloque
+                    | SI conjuncion bloque SINO bloque
+                    | SI conjuncion bloque SINO sentencia_if'''
 
     if len(p) == 4:
         # Solo if
@@ -128,7 +128,7 @@ def p_programa(p):
 # Ejemplo: var numeros [3]int
 
 def p_declaracion_arreglo(p):
-    'declaracion_arreglo : VAR ID CORCHETE_IZQ expresion CORCHETE_DER tipo'
+    'declaracion_arreglo : VARIABLE ID CORCHETE_IZQ expresion CORCHETE_DER tipo'
 
     p[0] = ("arreglo", p[2], p[4], p[6])
 
@@ -138,7 +138,7 @@ def p_declaracion_arreglo(p):
 # Ejemplo: func sumar(a int, b int) int { return a + b }
 
 def p_declaracion_funcion(p):
-    '''declaracion_funcion : FUNC ID PAR_IZQ parametros_opc PAR_DER tipo bloque'''
+    '''declaracion_funcion : FUNCION ID PAR_IZQ parametros_opc PAR_DER tipo bloque'''
     p[0] = ("funcion", p[2], p[4], p[6], p[7])
 
 
@@ -167,7 +167,7 @@ def p_parametro(p):
 
 # Instruccion return.
 def p_sentencia_retorno(p):
-    'sentencia_retorno : RETURN expresion'
+    'sentencia_retorno : RETORNAR expresion'
     p[0] = ("return", p[2])
 
 
@@ -181,16 +181,8 @@ def p_vacio(p):
 # Ejemplo: fmt.Println("Hola", edad)
 
 def p_sentencia_impresion(p):
-    'sentencia_impresion : ID PUNTO ID PAR_IZQ argumentos_opc PAR_DER'
-
-    # Comprobamos que sea la llamada de impresion.
-    if p[1] == "fmt" and p[3] == "Println":
-        p[0] = ("imprimir", p[5])
-    else:
-        mensaje = f"Llamada no soportada: {p[1]}.{p[3]}"
-        errores_sintacticos.append(mensaje)
-        print(mensaje)
-        p[0] = None
+    'sentencia_impresion : PAQUETE_FMT PUNTO IMPRIMIR_LN PAR_IZQ argumentos_opc PAR_DER'
+    p[0] = ("imprimir", p[5])
 
 
 # Permite imprimir con argumentos o sin ellos.

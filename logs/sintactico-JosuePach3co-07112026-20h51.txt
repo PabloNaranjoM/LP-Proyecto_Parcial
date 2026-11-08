@@ -1,0 +1,55 @@
+================================================================================
+REPORTE DE ANÁLISIS SINTÁCTICO - COMPILADOR GO (ESPOL)
+Desarrollador    : Josue Pacheco (@JosuePach3co)
+================================================================================
+
+PRUEBA 1: 
+var promedio = 9.45
+>>> Estado: VALIDO
+    - Arbol Yacc: ('var_inferencia', 'promedio', 9.45)
+--------------------------------------------------------------------------------
+PRUEBA 2: 
+var total = 10 - 5
+>>> Estado: VALIDO
+    - Arbol Yacc: ('var_inferencia', 'total', ('resta', 10, 5))
+--------------------------------------------------------------------------------
+PRUEBA 3: 
+switch opcion {
+            case 1:
+                fmt.Print("Uno")
+            default:
+                fmt.Print("Otro")
+        }
+>>> Estado: VALIDO
+    - Arbol Yacc: ('switch', 'opcion', [('case', 1, [('print', ['"Uno"'])]), ('default', [('print', ['"Otro"'])])])
+--------------------------------------------------------------------------------
+PRUEBA 4: 
+notas := []float64{8.5, 9.0, 10.0}
+>>> Estado: VALIDO
+    - Arbol Yacc: ('slice', 'notas', 'float64', [8.5, 9.0, 10.0])
+--------------------------------------------------------------------------------
+PRUEBA 5: 
+duplicar := func(n int) int { var x = n }
+>>> Estado: VALIDO
+    - Arbol Yacc: duplicar
+--------------------------------------------------------------------------------
+PRUEBA 6: 
+fmt.Print("Resultado: ", 10)
+>>> Estado: VALIDO
+    - Arbol Yacc: ('print', ['"Resultado: "', 10])
+--------------------------------------------------------------------------------
+PRUEBA 7: 
+var = 10
+>>> Estado: INVALIDO
+    - Error sintactico en linea 1: token inesperado '='
+--------------------------------------------------------------------------------
+PRUEBA 8: 
+switch opcion { case 1 fmt.Print(1) }
+>>> Estado: INVALIDO
+    - Error sintactico en linea 1: token inesperado 'fmt'
+--------------------------------------------------------------------------------
+PRUEBA 9: 
+fmt.Print("Hola", )
+>>> Estado: INVALIDO
+    - Error sintactico en linea 1: token inesperado ')'
+--------------------------------------------------------------------------------

@@ -1,0 +1,143 @@
+======================================================================
+REPORTE DE ANALISIS SINTACTICO - GO
+Desarrollador: Hivor Araujo (@AraujoHivor)
+======================================================================
+
+PRUEBA 1
+Codigo:
+var edad int = 20
+Estado: VALIDO
+Resultado: ('variable', 'edad', 'int', 20)
+----------------------------------------------------------------------
+PRUEBA 2
+Codigo:
+var total int = 2 + 3 * 4
+Estado: VALIDO
+Resultado: ('variable', 'total', 'int', ('suma', 2, ('multiplicacion', 3, 4)))
+----------------------------------------------------------------------
+PRUEBA 3
+Codigo:
+if edad >= 18 && edad <= 60 {
+            var estado string = "Permitido"
+        }
+Estado: VALIDO
+Resultado: ('if', ('and', ('comparacion', '>=', 'edad', 18), ('comparacion', '<=', 'edad', 60)), [('variable', 'estado', 'string', '"Permitido"')])
+----------------------------------------------------------------------
+PRUEBA 4
+Codigo:
+var edad int =
+Estado: INVALIDO
+Error: Error sintactico: final inesperado del codigo
+----------------------------------------------------------------------
+PRUEBA 5
+Codigo:
+if edad >= 18 && {
+            var estado string = "Permitido"
+        }
+Estado: INVALIDO
+Error: Error sintactico en linea 1: {
+Error: Error sintactico en linea 3: }
+----------------------------------------------------------------------
+PRUEBA 6
+Codigo:
+if edad >= 18 {
+            var mensaje string = "Mayor de edad"
+        } else {
+            var mensaje string = "Menor de edad"
+        }
+Estado: VALIDO
+Resultado: ('if', ('comparacion', '>=', 'edad', 18), [('variable', 'mensaje', 'string', '"Mayor de edad"')], [('variable', 'mensaje', 'string', '"Menor de edad"')])
+----------------------------------------------------------------------
+PRUEBA 7
+Codigo:
+if edad >= 18 && edad <= 60 {
+            var estado string = "Adulto"
+        } else if edad >= 13 && edad <= 17 {
+            var estado string = "Adolescente"
+        } else {
+            var estado string = "Otro"
+        }
+Estado: VALIDO
+Resultado: ('if', ('and', ('comparacion', '>=', 'edad', 18), ('comparacion', '<=', 'edad', 60)), [('variable', 'estado', 'string', '"Adulto"')], ('if', ('and', ('comparacion', '>=', 'edad', 13), ('comparacion', '<=', 'edad', 17)), [('variable', 'estado', 'string', '"Adolescente"')], [('variable', 'estado', 'string', '"Otro"')]))
+----------------------------------------------------------------------
+PRUEBA 8
+Codigo:
+var numeros [3]int
+Estado: VALIDO
+Resultado: ('arreglo', 'numeros', 3, 'int')
+----------------------------------------------------------------------
+PRUEBA 9
+Codigo:
+var notas [2 + 1]float64
+Estado: VALIDO
+Resultado: ('arreglo', 'notas', ('suma', 2, 1), 'float64')
+----------------------------------------------------------------------
+PRUEBA 10
+Codigo:
+var edades [3 int
+Estado: INVALIDO
+Error: Error sintactico en linea 1: int
+----------------------------------------------------------------------
+PRUEBA 11
+Codigo:
+func sumar(a int, b int) int {
+            return a + b
+        }
+Estado: VALIDO
+Resultado: ('funcion', 'sumar', [('a', 'int'), ('b', 'int')], 'int', [('return', ('suma', 'a', 'b'))])
+----------------------------------------------------------------------
+PRUEBA 12
+Codigo:
+func obtenerNumero() int {
+            return 10
+        }
+Estado: VALIDO
+Resultado: ('funcion', 'obtenerNumero', [], 'int', [('return', 10)])
+----------------------------------------------------------------------
+PRUEBA 13
+Codigo:
+func sumar(a int, b int {
+            return a + b
+        }
+Estado: INVALIDO
+Error: Error sintactico en linea 1: {
+Error: Error sintactico en linea 3: }
+----------------------------------------------------------------------
+PRUEBA 14
+Codigo:
+func fallida(a int) int {
+            return
+        }
+Estado: INVALIDO
+Error: Error sintactico en linea 3: }
+----------------------------------------------------------------------
+PRUEBA 15
+Codigo:
+fmt.Println("Hola mundo")
+Estado: VALIDO
+Resultado: ('imprimir', ['"Hola mundo"'])
+----------------------------------------------------------------------
+PRUEBA 16
+Codigo:
+fmt.Println("Total:", 2 + 3 * 4)
+Estado: VALIDO
+Resultado: ('imprimir', ['"Total:"', ('suma', 2, ('multiplicacion', 3, 4))])
+----------------------------------------------------------------------
+PRUEBA 17
+Codigo:
+func mostrarNumero(numero int) int {
+            fmt.Println("Numero:", numero)
+            return numero
+        }
+Estado: VALIDO
+Resultado: ('funcion', 'mostrarNumero', [('numero', 'int')], 'int', [('imprimir', ['"Numero:"', 'numero']), ('return', 'numero')])
+----------------------------------------------------------------------
+PRUEBA 18
+Codigo:
+fmt.Println("Hola",)
+Estado: INVALIDO
+Error: Error sintactico en linea 1: )
+----------------------------------------------------------------------
+Pruebas validas: 12
+Pruebas invalidas: 6
+Total de pruebas: 18

@@ -1,4 +1,5 @@
-
+from datetime import datetime
+from pathlib import Path
 import ply.yacc as yacc
 from src.lexer import tokens, build_lexer
 
@@ -316,15 +317,66 @@ if __name__ == "__main__":
     ]
 
 
-    for codigo in pruebas:
+    
+    # Guardar los resultados de las pruebas de Hivor.
+    log = [
+        "=" * 70,
+        "REPORTE DE ANALISIS SINTACTICO - GO",
+        "Desarrollador: Hivor Araujo (@AraujoHivor)",
+        "=" * 70,
+        ""
+    ]
+
+    validas = 0
+    invalidas = 0
+
+    for numero, codigo in enumerate(pruebas, start=1):
         errores_sintacticos.clear()
 
         print("\nProbando:", codigo)
         resultado = parser.parse(codigo, lexer=build_lexer())
 
-        if errores_sintacticos or resultado is None:
-            print("Estado: Invalido")
-        else:
-            print("Estado: Valido")
+        valido = not errores_sintacticos and resultado is not None
+        estado = "VALIDO" if valido else "INVALIDO"
+
+        print("Estado:", estado)
+
+        log.append(f"PRUEBA {numero}")
+        log.append("Codigo:")
+        log.append(codigo.strip())
+        log.append(f"Estado: {estado}")
+
+        if valido:
+            validas += 1
             print("Resultado:", resultado)
+            log.append(f"Resultado: {resultado}")
+        else:
+            invalidas += 1
+            for error in errores_sintacticos:
+                log.append(f"Error: {error}")
+
+            if not errores_sintacticos:
+                log.append("Error: no se obtuvo un resultado valido")
+
+        log.append("-" * 70)
+
+    log.append(f"Pruebas validas: {validas}")
+    log.append(f"Pruebas invalidas: {invalidas}")
+    log.append(f"Total de pruebas: {len(pruebas)}")
+
+    # Crear el archivo en la carpeta logs.
+    carpeta = Path("logs")
+    carpeta.mkdir(exist_ok=True)
+
+    fecha = datetime.now().strftime("%d%m%Y-%Hh%M")
+    nombre = f"sintactico-AraujoHivor-{fecha}.txt"
+    ruta = carpeta / nombre
+
+    ruta.write_text("\n".join(log) + "\n", encoding="utf-8")
+
+    print("\nResumen de pruebas:")
+    print(f"Validas: {validas}")
+    print(f"Invalidas: {invalidas}")
+    print(f"Log generado: {ruta}")
+
 

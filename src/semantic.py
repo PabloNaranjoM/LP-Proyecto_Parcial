@@ -318,6 +318,635 @@ def registrar_validacion_semantica(
 #       - `visitar_interrupcion_control(nodo, tabla_simbolos, contexto)`: validar
 #         `break` (`profundidad_for > 0` o `profundidad_switch > 0`), `continue`
 #         (`profundidad_for > 0`) y `fallthrough` (`profundidad_switch > 0`).
+
+def _extraer_linea(nodo: Any, por_defecto: int = 1) -> int:
+    """Obtiene de forma segura la línea adjunta al final de una tupla AST."""
+    if isinstance(nodo, tuple) and nodo and isinstance(nodo[-1], int):
+        return nodo[-1]
+    return por_defecto
+
+
+def evaluar_expresion(
+    nodo: Any,
+    tabla_simbolos: TablaSimbolos,
+    contexto: dict[str, Any],
+) -> str:
+    """Deduce recursivamente el tipo de dato de cualquier expresión del AST."""
+    if nodo is None:
+        return "void"
+
+    if not isinstance(nodo, tuple):
+        if isinstance(nodo, bool):
+            return "bool"
+        if isinstance(nodo, int):
+            return "int"
+        if isinstance(nodo, float):
+            return "float64"
+        if isinstance(nodo, str):
+            return "string"
+        return "error_tipo"
+
+    etiqueta = nodo[0]
+    linea = _extraer_linea(nodo)
+
+    # 1. Literales etiquetados: ("literal", tipo_go, valor, linea)
+    if etiqueta == "literal":
+        return str(nodo[1])
+
+    # 2. Referencias: ("id", ...), ("campo", ...), ("indice", ...)
+    if etiqueta in ("id", "campo", "indice"):
+        return resolver_tipo_referencia(nodo, tabla_simbolos, contexto)
+
+    # 3. Llamadas a funciones
+    if etiqueta == "llamada_funcion":
+        return validar_llamada_funcion(nodo, tabla_simbolos, contexto)
+
+    # 4. Funciones anónimas / literales de función
+    if etiqueta == "literal_funcion":
+        return visitar_literal_funcion(nodo, tabla_simbolos, contexto)
+
+    # 5. Instanciación de struct: ("struct_init", ref_tipo, campos, linea)
+    if etiqueta == "struct_init":
+        return visitar_declaraciones_compuestas(nodo, tabla_simbolos, contexto)
+
+    # 6. Operaciones binarias aritméticas, relacionales y lógicas
+    mapa_binarios = {
+        "suma": "+",
+        "resta": "-",
+        "multiplicacion": "*",
+        "division": "/",
+        "modulo": "%",
+        "and": "&&",
+        "or": "||",
+    }
+    if etiqueta in mapa_binarios:
+        tipo_izq = evaluar_expresion(nodo[1], tabla_simbolos, contexto)
+        tipo_der = evaluar_expresion(nodo[2], tabla_simbolos, contexto)
+        return validar_operacion_binaria(
+            mapa_binarios[etiqueta], tipo_izq, tipo_der, linea, contexto
+        )
+
+    if etiqueta == "comparacion":
+        operador = str(nodo[1])
+        tipo_izq = evaluar_expresion(nodo[2], tabla_simbolos, contexto)
+        tipo_der = evaluar_expresion(nodo[3], tabla_simbolos, contexto)
+        return validar_operacion_binaria(
+            operador, tipo_izq, tipo_der, linea, contexto
+        )
+
+    # 7. Operaciones unarias: ("not", expr, linea) o ("unario", op, expr, linea)
+    if etiqueta == "not":
+        return validar_operacion_unaria("!", nodo[1], linea, tabla_simbolos, contexto)
+
+    if etiqueta == "unario":
+        operador = str(nodo[1])
+        return validar_operacion_unaria(
+            operador, nodo[2], linea, tabla_simbolos, contexto
+        )
+
+    return "error_tipo"
+
+
+def validar_operacion_binaria(
+    operador: str,
+    tipo_izq: str,
+    tipo_der: str,
+    linea: int,
+    contexto: dict[str, Any],
+) -> str:
+    """Valida RS-4 (operaciones permitidas) para operadores binarios."""
+    if tipo_izq == "error_tipo" or tipo_der == "error_tipo":
+        return "error_tipo"
+
+    if tipo_izq == "void" or tipo_der == "void":
+        registrar_error_semantico(
+            "operaciones permitidas",
+            linea,
+            f"No se puede aplicar el operador '{operador}' sobre una expresión sin valor ('void').",
+            contexto,
+        )
+        return "error_tipo"
+
+    # Suma (+) / Concatenación
+    if operador == "+":
+        if tipo_izq == tipo_der and tipo_izq in ("int", "float64", "string"):
+            registrar_validacion_semantica(
+                linea,
+                "RS-4 (Operaciones permitidas)",
+                f"Operación '{operador}' válida entre operandos '{tipo_izq}'.",
+                contexto,
+            )
+            return tipo_izq
+        registrar_error_semantico(
+            "operaciones permitidas",
+            linea,
+            f"Operación '+' no válida entre tipos incompatibles '{tipo_izq}' y '{tipo_der}'.",
+            contexto,
+        )
+        return "error_tipo"
+
+    # Resta, multiplicación y división (-, *, /)
+    if operador in ("-", "*", "/"):
+        if tipo_izq == tipo_der and tipo_izq in TIPOS_NUMERICOS:
+            registrar_validacion_semantica(
+                linea,
+                "RS-4 (Operaciones permitidas)",
+                f"Operación '{operador}' válida entre operandos '{tipo_izq}'.",
+                contexto,
+            )
+            return tipo_izq
+        registrar_error_semantico(
+            "operaciones permitidas",
+            linea,
+            f"Operación '{operador}' requiere operandos numéricos del mismo tipo, se recibió '{tipo_izq}' y '{tipo_der}'.",
+            contexto,
+        )
+        return "error_tipo"
+
+    # Módulo (%) exclusivo de int
+    if operador == "%":
+        if tipo_izq == "int" and tipo_der == "int":
+            registrar_validacion_semantica(
+                linea,
+                "RS-4 (Operaciones permitidas)",
+                "Operación '%' válida entre operandos 'int'.",
+                contexto,
+            )
+            return "int"
+        registrar_error_semantico(
+            "operaciones permitidas",
+            linea,
+            f"El operador '%' solo admite operandos de tipo 'int', se recibió '{tipo_izq}' y '{tipo_der}'.",
+            contexto,
+        )
+        return "error_tipo"
+
+    # Relacionales (<, >, <=, >=)
+    if operador in ("<", ">", "<=", ">="):
+        if tipo_izq == tipo_der and tipo_izq in ("int", "float64", "string"):
+            registrar_validacion_semantica(
+                linea,
+                "RS-4 (Operaciones permitidas)",
+                f"Comparación '{operador}' válida entre '{tipo_izq}'.",
+                contexto,
+            )
+            return "bool"
+        registrar_error_semantico(
+            "operaciones permitidas",
+            linea,
+            f"No se pueden comparar los tipos '{tipo_izq}' y '{tipo_der}' con '{operador}'.",
+            contexto,
+        )
+        return "error_tipo"
+
+    # Igualdad (==, !=)
+    if operador in ("==", "!="):
+        if tipo_izq == tipo_der:
+            registrar_validacion_semantica(
+                linea,
+                "RS-4 (Operaciones permitidas)",
+                f"Comparación de igualdad '{operador}' válida para tipo '{tipo_izq}'.",
+                contexto,
+            )
+            return "bool"
+        registrar_error_semantico(
+            "operaciones permitidas",
+            linea,
+            f"No se puede comparar igualdad '{operador}' entre tipos distintos '{tipo_izq}' y '{tipo_der}'.",
+            contexto,
+        )
+        return "error_tipo"
+
+    # Lógicos (&&, ||)
+    if operador in ("&&", "||"):
+        if tipo_izq == "bool" and tipo_der == "bool":
+            registrar_validacion_semantica(
+                linea,
+                "RS-4 (Operaciones permitidas)",
+                f"Operador lógico '{operador}' válido entre booleanos.",
+                contexto,
+            )
+            return "bool"
+        registrar_error_semantico(
+            "operaciones permitidas",
+            linea,
+            f"El operador lógico '{operador}' requiere operandos 'bool', se recibió '{tipo_izq}' y '{tipo_der}'.",
+            contexto,
+        )
+        return "error_tipo"
+
+    registrar_error_semantico(
+        "operaciones permitidas",
+        linea,
+        f"Operador binario no soportado '{operador}'.",
+        contexto,
+    )
+    return "error_tipo"
+
+
+def validar_operacion_unaria(
+    operador: str,
+    operando: Any,
+    linea: int,
+    tabla_simbolos: TablaSimbolos,
+    contexto: dict[str, Any],
+) -> str:
+    """Valida RS-4 para operadores unarios (!, -, &) e incremento/decremento (++, --)."""
+    if operador == "&":
+        tipo_ref = resolver_tipo_referencia(operando, tabla_simbolos, contexto)
+        return tipo_ref
+
+    if operador in ("++", "--"):
+        tipo_ref = resolver_tipo_referencia(operando, tabla_simbolos, contexto)
+        if tipo_ref == "error_tipo":
+            return "error_tipo"
+
+        if isinstance(operando, tuple) and operando[0] == "id":
+            simbolo = tabla_simbolos.buscar_visible(operando[1])
+            if simbolo is not None and not simbolo.mutable:
+                registrar_error_semantico(
+                    "asignación de tipo",
+                    linea,
+                    f"No se puede aplicar '{operador}' sobre la constante '{simbolo.nombre}'.",
+                    contexto,
+                )
+                return "error_tipo"
+
+        if tipo_ref not in TIPOS_NUMERICOS:
+            registrar_error_semantico(
+                "operaciones permitidas",
+                linea,
+                f"El operador '{operador}' requiere un operando numérico ('int' o 'float64'), se recibió '{tipo_ref}'.",
+                contexto,
+            )
+            return "error_tipo"
+
+        registrar_validacion_semantica(
+            linea,
+            "RS-4 (Operaciones permitidas)",
+            f"Operador '{operador}' válido sobre tipo '{tipo_ref}'.",
+            contexto,
+        )
+        return tipo_ref
+
+    tipo_op = evaluar_expresion(operando, tabla_simbolos, contexto)
+    if tipo_op == "error_tipo":
+        return "error_tipo"
+
+    if operador == "!":
+        if tipo_op == "bool":
+            registrar_validacion_semantica(
+                linea,
+                "RS-4 (Operaciones permitidas)",
+                "Negación lógica '!' válida sobre 'bool'.",
+                contexto,
+            )
+            return "bool"
+        registrar_error_semantico(
+            "operaciones permitidas",
+            linea,
+            f"El operador '!' requiere un operando de tipo 'bool', se recibió '{tipo_op}'.",
+            contexto,
+        )
+        return "error_tipo"
+
+    if operador == "-":
+        if tipo_op in TIPOS_NUMERICOS:
+            registrar_validacion_semantica(
+                linea,
+                "RS-4 (Operaciones permitidas)",
+                f"Negación aritmética '-' válida sobre '{tipo_op}'.",
+                contexto,
+            )
+            return tipo_op
+        registrar_error_semantico(
+            "operaciones permitidas",
+            linea,
+            f"El operador unario '-' requiere un tipo numérico, se recibió '{tipo_op}'.",
+            contexto,
+        )
+        return "error_tipo"
+
+    return "error_tipo"
+
+
+def obtener_tipos_iteracion_range(tipo_coleccion: str) -> tuple[str, str] | None:
+    """Retorna (tipo_clave_o_indice, tipo_valor) para colecciones soportadas en for range."""
+    if tipo_coleccion.startswith("[]"):
+        return ("int", tipo_coleccion[2:])
+
+    if tipo_coleccion.startswith("[") and "]" in tipo_coleccion:
+        idx_cierre = tipo_coleccion.index("]")
+        return ("int", tipo_coleccion[idx_cierre + 1 :])
+
+    if tipo_coleccion.startswith("map["):
+        profundidad = 0
+        for i in range(3, len(tipo_coleccion)):
+            if tipo_coleccion[i] == "[":
+                profundidad += 1
+            elif tipo_coleccion[i] == "]":
+                profundidad -= 1
+                if profundidad == 0:
+                    tipo_clave = tipo_coleccion[4:i]
+                    tipo_valor = tipo_coleccion[i + 1 :]
+                    return (tipo_clave, tipo_valor)
+
+    return None
+
+
+def visitar_bloque(
+    lista_sentencias: list[Any] | None,
+    tabla_simbolos: TablaSimbolos,
+    contexto: dict[str, Any],
+    nombre_ambito: str = "bloque",
+) -> None:
+    """Abre un ámbito léxico hijo, recorre las sentencias del bloque y lo cierra."""
+    tabla_simbolos.entrar_ambito(nombre_ambito)
+    try:
+        if lista_sentencias:
+            for sentencia in lista_sentencias:
+                if sentencia is not None:
+                    visitar_nodo(sentencia, tabla_simbolos, contexto)
+    finally:
+        tabla_simbolos.salir_ambito()
+
+
+def visitar_sentencia_if(
+    nodo: tuple[Any, ...],
+    tabla_simbolos: TablaSimbolos,
+    contexto: dict[str, Any],
+) -> None:
+    """Valida RS-6 en estructuras condicionales if / else if / else."""
+    linea = _extraer_linea(nodo)
+    condicion = nodo[1]
+    bloque_then = nodo[2]
+    rama_else = nodo[3] if len(nodo) == 5 else None
+
+    tipo_cond = evaluar_expresion(condicion, tabla_simbolos, contexto)
+    if tipo_cond != "error_tipo" and tipo_cond != "bool":
+        registrar_error_semantico(
+            "estructuras de control",
+            linea,
+            f"La condición de la sentencia 'if' debe ser de tipo 'bool', se recibió '{tipo_cond}'.",
+            contexto,
+        )
+    elif tipo_cond == "bool":
+        registrar_validacion_semantica(
+            linea,
+            "RS-6 (Estructuras de control)",
+            "Condición booleana válida en sentencia 'if'.",
+            contexto,
+        )
+
+    visitar_bloque(bloque_then, tabla_simbolos, contexto, f"if_{linea}")
+
+    if rama_else is not None:
+        if isinstance(rama_else, tuple) and rama_else[0] == "if":
+            visitar_sentencia_if(rama_else, tabla_simbolos, contexto)
+        elif isinstance(rama_else, list):
+            visitar_bloque(rama_else, tabla_simbolos, contexto, f"else_{linea}")
+
+
+def visitar_sentencia_for(
+    nodo: tuple[Any, ...],
+    tabla_simbolos: TablaSimbolos,
+    contexto: dict[str, Any],
+) -> None:
+    """Valida RS-6 en ciclos for (infinito, condicional, clásico y range)."""
+    etiqueta = nodo[0]
+    linea = _extraer_linea(nodo)
+
+    tabla_simbolos.entrar_ambito(f"for_{linea}")
+    contexto["profundidad_for"] += 1
+    try:
+        if etiqueta == "for_infinito":
+            cuerpo = nodo[1]
+            registrar_validacion_semantica(
+                linea,
+                "RS-6 (Estructuras de control)",
+                "Bucle 'for' infinito validado.",
+                contexto,
+            )
+            if cuerpo:
+                for sent in cuerpo:
+                    visitar_nodo(sent, tabla_simbolos, contexto)
+
+        elif etiqueta == "for_cond":
+            condicion, cuerpo = nodo[1], nodo[2]
+            tipo_cond = evaluar_expresion(condicion, tabla_simbolos, contexto)
+            if tipo_cond != "error_tipo" and tipo_cond != "bool":
+                registrar_error_semantico(
+                    "estructuras de control",
+                    linea,
+                    f"La condición del ciclo 'for' debe ser de tipo 'bool', se recibió '{tipo_cond}'.",
+                    contexto,
+                )
+            elif tipo_cond == "bool":
+                registrar_validacion_semantica(
+                    linea,
+                    "RS-6 (Estructuras de control)",
+                    "Condición booleana válida en ciclo 'for'.",
+                    contexto,
+                )
+            if cuerpo:
+                for sent in cuerpo:
+                    visitar_nodo(sent, tabla_simbolos, contexto)
+
+        elif etiqueta == "for_clasico":
+            init_nodo, condicion, post_nodo, cuerpo = nodo[1], nodo[2], nodo[3], nodo[4]
+            if init_nodo is not None:
+                visitar_nodo(init_nodo, tabla_simbolos, contexto)
+
+            tipo_cond = evaluar_expresion(condicion, tabla_simbolos, contexto)
+            if tipo_cond != "error_tipo" and tipo_cond != "bool":
+                registrar_error_semantico(
+                    "estructuras de control",
+                    linea,
+                    f"La condición del ciclo 'for' clásico debe ser 'bool', se recibió '{tipo_cond}'.",
+                    contexto,
+                )
+            elif tipo_cond == "bool":
+                registrar_validacion_semantica(
+                    linea,
+                    "RS-6 (Estructuras de control)",
+                    "Ciclo 'for' clásico con condición 'bool' validado.",
+                    contexto,
+                )
+
+            if post_nodo is not None:
+                visitar_nodo(post_nodo, tabla_simbolos, contexto)
+
+            if cuerpo:
+                for sent in cuerpo:
+                    visitar_nodo(sent, tabla_simbolos, contexto)
+
+        elif etiqueta == "for_range":
+            var_clave, var_valor, expr_coleccion, cuerpo = nodo[1], nodo[2], nodo[3], nodo[4]
+            tipo_coleccion = evaluar_expresion(expr_coleccion, tabla_simbolos, contexto)
+
+            if tipo_coleccion != "error_tipo":
+                tipos_iter = obtener_tipos_iteracion_range(tipo_coleccion)
+                if tipos_iter is None:
+                    registrar_error_semantico(
+                        "estructuras de control",
+                        linea,
+                        f"No se puede iterar con 'range' sobre el tipo '{tipo_coleccion}'; se esperaba arreglo, slice o mapa.",
+                        contexto,
+                    )
+                else:
+                    tipo_k, tipo_v = tipos_iter
+                    if var_clave == var_valor:
+                        registrar_error_semantico(
+                            "identificadores",
+                            linea,
+                            f"El identificador '{var_valor}' ya fue declarado previamente en este bloque.",
+                            contexto,
+                        )
+                    tabla_simbolos.declarar(
+                        Simbolo(
+                            nombre=var_clave,
+                            categoria="variable",
+                            tipo_dato=tipo_k,
+                            ambito=tabla_simbolos.ambito_actual(),
+                            linea=linea,
+                        )
+                    )
+                    tabla_simbolos.declarar(
+                        Simbolo(
+                            nombre=var_valor,
+                            categoria="variable",
+                            tipo_dato=tipo_v,
+                            ambito=tabla_simbolos.ambito_actual(),
+                            linea=linea,
+                        )
+                    )
+                    registrar_validacion_semantica(
+                        linea,
+                        "RS-6 (Estructuras de control)",
+                        f"Iteración 'for range' válida sobre '{tipo_coleccion}'.",
+                        contexto,
+                    )
+
+            if cuerpo:
+                for sent in cuerpo:
+                    visitar_nodo(sent, tabla_simbolos, contexto)
+    finally:
+        contexto["profundidad_for"] -= 1
+        tabla_simbolos.salir_ambito()
+
+
+def visitar_sentencia_switch(
+    nodo: tuple[Any, ...],
+    tabla_simbolos: TablaSimbolos,
+    contexto: dict[str, Any],
+) -> None:
+    """Valida RS-6 en sentencias switch (con y sin selector) y sus cláusulas case/default."""
+    linea = _extraer_linea(nodo)
+    expr_selector = nodo[1]
+    lista_casos = nodo[2]
+
+    if expr_selector is not None:
+        tipo_selector = evaluar_expresion(expr_selector, tabla_simbolos, contexto)
+    else:
+        tipo_selector = "bool"
+
+    contexto["profundidad_switch"] += 1
+    try:
+        for caso in lista_casos:
+            tipo_nodo_caso = caso[0]
+            linea_caso = _extraer_linea(caso, linea)
+
+            if tipo_nodo_caso == "case":
+                expr_caso = caso[1]
+                sents_caso = caso[2]
+                tipo_caso = evaluar_expresion(expr_caso, tabla_simbolos, contexto)
+
+                if (
+                    tipo_selector != "error_tipo"
+                    and tipo_caso != "error_tipo"
+                    and tipo_caso != tipo_selector
+                ):
+                    registrar_error_semantico(
+                        "estructuras de control",
+                        linea_caso,
+                        f"La expresión del 'case' es de tipo '{tipo_caso}' y no coincide con el tipo '{tipo_selector}' del 'switch'.",
+                        contexto,
+                    )
+                elif tipo_caso == tipo_selector and tipo_selector != "error_tipo":
+                    registrar_validacion_semantica(
+                        linea_caso,
+                        "RS-6 (Estructuras de control)",
+                        f"Cláusula 'case' compatible con tipo '{tipo_selector}'.",
+                        contexto,
+                    )
+
+                visitar_bloque(sents_caso, tabla_simbolos, contexto, f"case_{linea_caso}")
+
+            elif tipo_nodo_caso == "default":
+                sents_default = caso[1]
+                visitar_bloque(
+                    sents_default, tabla_simbolos, contexto, f"default_{linea_caso}"
+                )
+    finally:
+        contexto["profundidad_switch"] -= 1
+
+
+def visitar_interrupcion_control(
+    nodo: tuple[Any, ...],
+    _tabla_simbolos: TablaSimbolos,
+    contexto: dict[str, Any],
+) -> None:
+    """Valida RS-6 para el uso contextual de break, continue y fallthrough."""
+    palabra = str(nodo[1])
+    linea = _extraer_linea(nodo)
+
+    if palabra == "break":
+        if contexto["profundidad_for"] <= 0 and contexto["profundidad_switch"] <= 0:
+            registrar_error_semantico(
+                "estructuras de control",
+                linea,
+                "La instrucción 'break' solo puede usarse dentro de un bucle 'for' o un 'switch'.",
+                contexto,
+            )
+        else:
+            registrar_validacion_semantica(
+                linea,
+                "RS-6 (Estructuras de control)",
+                "Instrucción 'break' utilizada en un contexto válido.",
+                contexto,
+            )
+
+    elif palabra == "continue":
+        if contexto["profundidad_for"] <= 0:
+            registrar_error_semantico(
+                "estructuras de control",
+                linea,
+                "La instrucción 'continue' solo puede usarse dentro de un bucle 'for'.",
+                contexto,
+            )
+        else:
+            registrar_validacion_semantica(
+                linea,
+                "RS-6 (Estructuras de control)",
+                "Instrucción 'continue' utilizada dentro de un bucle 'for'.",
+                contexto,
+            )
+
+    elif palabra == "fallthrough":
+        if contexto["profundidad_switch"] <= 0:
+            registrar_error_semantico(
+                "estructuras de control",
+                linea,
+                "La instrucción 'fallthrough' solo puede usarse dentro de un bloque 'switch'.",
+                contexto,
+            )
+        else:
+            registrar_validacion_semantica(
+                linea,
+                "RS-6 (Estructuras de control)",
+                "Instrucción 'fallthrough' utilizada dentro de un bloque 'switch'.",
+                contexto,
+            )
 # =====================================================================
 # FIN APORTE: Josué Pacheco (@JosuePach3co)
 # =====================================================================

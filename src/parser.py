@@ -236,7 +236,7 @@ def p_declaracion_var_sin_valor(p):
 def p_declaracion_var_inferencia(p):
     """declaracion_var : VARIABLE ID ASIGNACION expresion"""
     registrar_regla(p, "declaracion_var")
-    p[0] = ("declaracion_var_inferencia", p[2], p[4])
+    p[0] = ("declaracion_var_inferencia", p[2], p[4], _linea_de_produccion(p))
 # =====================================================================
 # FIN APORTE: Josué Pacheco (@JosuePach3co)
 # =====================================================================
@@ -338,7 +338,7 @@ def p_referencia(p):
 def p_expresion_aritmetica_resta(p):
     """expresion_aritmetica : expresion_aritmetica RESTA termino"""
     registrar_regla(p, "expresion_aritmetica")
-    p[0] = ("resta", p[1], p[3])
+    p[0] = ("resta", p[1], p[3], _linea_de_produccion(p))
 
 
 def p_expresion_aritmetica_termino(p):
@@ -392,7 +392,7 @@ def p_factor_unario(p):
 def p_expresion_booleana_or(p):
     """expresion_booleana : expresion_booleana O_LOGICO conjuncion"""
     registrar_regla(p, "expresion_booleana")
-    p[0] = ("or", p[1], p[3])
+    p[0] = ("or", p[1], p[3], _linea_de_produccion(p))
 
 
 def p_expresion_booleana_base(p):
@@ -543,9 +543,14 @@ def p_post_sentencia(p):
 #         `resta`, `or`, `and`, `not`, `switch`, `case`, `default`, `interrupcion`,
 #         `asignacion`, `asignacion_compuesta`, `incremento`, `slice` y `literal_funcion`).
 def p_sentencia_switch(p):
-    """sentencia_switch : SEGUN expresion_booleana LLAVE_IZQ lista_casos LLAVE_DER"""
+    """sentencia_switch : SEGUN expresion_booleana LLAVE_IZQ lista_casos LLAVE_DER
+                        | SEGUN LLAVE_IZQ lista_casos LLAVE_DER"""
     registrar_regla(p, "sentencia_switch")
-    p[0] = ("switch", p[2], p[4])
+    linea = _linea_de_produccion(p)
+    if len(p) == 6:
+        p[0] = ("switch", p[2], p[4], linea)
+    else:
+        p[0] = ("switch", None, p[3], linea)
 
 
 def p_lista_casos(p):
@@ -557,10 +562,11 @@ def p_lista_casos(p):
 def p_caso(p):
     """caso : CASO expresion DOS_PUNTOS lista_sentencias_opc
             | DEFECTO DOS_PUNTOS lista_sentencias_opc"""
+    linea = _linea_de_produccion(p)
     if len(p) == 5:
-        p[0] = ("case", p[2], p[4])
+        p[0] = ("case", p[2], p[4], linea)
     else:
-        p[0] = ("default", p[3])
+        p[0] = ("default", p[3], linea)
 
 
 def p_sentencia_interrupcion(p):
@@ -568,19 +574,19 @@ def p_sentencia_interrupcion(p):
                               | CONTINUAR
                               | CAIDA"""
     registrar_regla(p, "sentencia_interrupcion")
-    p[0] = ("interrupcion", p[1])
+    p[0] = ("interrupcion", p[1], _linea_de_produccion(p))
 
 
 def p_asignacion_simple(p):
     """asignacion : referencia ASIGNACION expresion"""
     registrar_regla(p, "asignacion")
-    p[0] = ("asignacion", p[1], p[3])
+    p[0] = ("asignacion", p[1], p[3], _linea_de_produccion(p))
 
 
 def p_asignacion_compuesta(p):
     """asignacion : referencia op_asignacion_compuesta expresion"""
     registrar_regla(p, "asignacion_compuesta")
-    p[0] = ("asignacion_compuesta", p[2], p[1], p[3])
+    p[0] = ("asignacion_compuesta", p[2], p[1], p[3], _linea_de_produccion(p))
 
 
 def p_op_asignacion_compuesta(p):
@@ -596,7 +602,7 @@ def p_incremento(p):
     """incremento : referencia INCREMENTO
                   | referencia DECREMENTO"""
     registrar_regla(p, "incremento")
-    p[0] = ("incremento", p[2], p[1])
+    p[0] = ("incremento", p[2], p[1], _linea_de_produccion(p))
 # =====================================================================
 # FIN APORTE: Josué Pacheco (@JosuePach3co)
 # =====================================================================
@@ -640,7 +646,7 @@ def p_tipo(p):
 def p_declaracion_slice(p):
     """declaracion_slice : ID ASIGNACION_CORTA CORCHETE_IZQ CORCHETE_DER tipo LLAVE_IZQ lista_expresiones_opc LLAVE_DER"""
     registrar_regla(p, "declaracion_slice")
-    p[0] = ("slice", p[1], p[5], p[7])
+    p[0] = ("slice", p[1], p[5], p[7], _linea_de_produccion(p))
 
 
 def p_lista_expresiones_opc(p):
@@ -795,7 +801,7 @@ def p_vacio(p):
 def p_literal_funcion(p):
     """literal_funcion : FUNCION PAR_IZQ parametros_opc PAR_DER tipo bloque"""
     registrar_regla(p, "literal_funcion")
-    p[0] = ("literal_funcion", p[3], p[5], p[6])
+    p[0] = ("literal_funcion", p[3], p[5], p[6], _linea_de_produccion(p))
 # =====================================================================
 # FIN APORTE: Josué Pacheco (@JosuePach3co)
 # =====================================================================
@@ -848,7 +854,7 @@ def p_sentencia_impresion_ln(p):
 def p_sentencia_impresion_simple(p):
     """sentencia_impresion : PAQUETE_FMT PUNTO IMPRIMIR PAR_IZQ argumentos_opc PAR_DER"""
     registrar_regla(p, "sentencia_impresion")
-    p[0] = ("print", p[5])
+    p[0] = ("print", p[5], _linea_de_produccion(p))
 # =====================================================================
 # FIN APORTE: Josué Pacheco (@JosuePach3co)
 # =====================================================================

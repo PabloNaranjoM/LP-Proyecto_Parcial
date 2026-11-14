@@ -36,6 +36,7 @@ _codigo_actual: str = ""
 
 
 def _linea_de_produccion(p: Any) -> int:
+    """Retorna la línea inicial de la producción; contrato base al final de cada tupla AST."""
     for idx in range(1, len(p)):
         linea = p.lineno(idx)
         if linea:
@@ -51,11 +52,6 @@ def registrar_regla(p: Any, nombre_regla: str, descripcion: str = "") -> None:
         "descripcion": descripcion or f"Regla '{nombre_regla}' validada.",
         "mensaje": f"[Línea {linea}] Regla '{nombre_regla}' validada.",
     })
-
-
-# TODO (Avance 3 - Paso 1.1 | Pablo Naranjo @PabloNaranjoM):
-#       Definir contrato estándar de tuplas AST con número de línea (`linea = _linea_de_produccion(p)`)
-#       en todas las producciones del parser para habilitar reportes semánticos exactos.
 # =====================================================================
 # FIN APORTE: Pablo Naranjo (@PabloNaranjoM)
 # =====================================================================

@@ -52,41 +52,157 @@ from typing import Any
 TIPOS_NUMERICOS: tuple[str, ...] = ("int", "float64")
 TIPOS_PRIMITIVOS: tuple[str, ...] = ("int", "float64", "string", "bool")
 
-# TODO (Paso 1.1 - Estructura Base): Definir la clase/dataclass `Simbolo` para
-#       representar cada entrada de la Tabla de Símbolos con los atributos:
-#       - nombre: str
-#       - categoria: str ("variable", "constante", "funcion", "parametro", "tipo_struct")
-#       - tipo_dato: str ("int", "float64", "string", "bool", "void", "[N]T", "[]T", "map[K]V", "<Struct>")
-#       - ambito: str (ej. "global", "func:main", "bloque_if_14", "bloque_for_22")
-#       - linea: int
-#       - mutable: bool = True (False para constantes `const`)
-#       - parametros: list[tuple[str, str]] = field(default_factory=list)
-#       - tipo_retorno: str = "void"
-#       - campos_struct: dict[str, str] = field(default_factory=dict)
-#       - valor_inicial: Any = None
-#       - Método `to_dict() -> dict[str, Any]` para serialización hacia GUI y logs.
+errores_semanticos: list[dict[str, Any]] = []
+reglas_semanticas_validadas: list[dict[str, Any]] = []
 
-# TODO (Paso 1.1 - Estructura Base): Definir la clase `TablaSimbolos` con soporte
-#       de pila de ámbitos (`pila_ambitos`, `nombres_ambitos`, `historial_simbolos`)
-#       y los métodos:
-#       - entrar_ambito(nombre_ambito: str) -> None
-#       - salir_ambito() -> str | None
-#       - ambito_actual() -> str
-#       - declarar(simbolo: Simbolo) -> tuple[bool, Simbolo | None]
-#       - buscar_en_ambito_actual(nombre: str) -> Simbolo | None
-#       - buscar_visible(nombre: str) -> Simbolo | None
-#       - exportar_lista_diccionarios() -> list[dict[str, Any]]
 
-# TODO (Paso 1.1 - Reporte Oficial de Diagnósticos): Definir la función
-#       `registrar_error_semantico(categoria, linea, descripcion)`
-#       respetando el formato estandarizado de la instrucción:
-#       "Error Semántico <Categoría> en la línea <N>: <Mensaje descriptivo>."
-#       y conservando metadatos (`categoria`, `linea`, `descripcion`, `mensaje`)
-#       para la consola de diagnóstico de la GUI y el exportador de logs.
+@dataclass
+class Simbolo:
+    """Representa una entrada declarada en la Tabla de Símbolos."""
 
-# TODO (Paso 1.1 - Auditoría Semántica): Definir la función
-#       `registrar_validacion_semantica(linea, regla, detalle)` para registrar
-#       en el contexto del análisis cada comprobación semántica exitosa.
+    nombre: str
+    categoria: str
+    tipo_dato: str
+    ambito: str
+    linea: int
+    mutable: bool = True
+    inicializado: bool = True
+    parametros: list[tuple[str, str]] = field(default_factory=list)
+    tipo_retorno: str = "void"
+    campos_struct: dict[str, str] = field(default_factory=dict)
+    valor_inicial: Any = None
+
+    def to_dict(self) -> dict[str, Any]:
+        """Serializa el símbolo a diccionario para GUI y exportador de logs."""
+        return {
+            "nombre": self.nombre,
+            "categoria": self.categoria,
+            "tipo_dato": self.tipo_dato,
+            "ambito": self.ambito,
+            "linea": self.linea,
+            "mutable": self.mutable,
+            "inicializado": self.inicializado,
+            "parametros": list(self.parametros),
+            "tipo_retorno": self.tipo_retorno,
+            "campos_struct": dict(self.campos_struct),
+            "valor_inicial": self.valor_inicial,
+        }
+
+
+class TablaSimbolos:
+    """Tabla de Símbolos jerárquica con pila de ámbitos y registro histórico."""
+
+    def __init__(self) -> None:
+        self.pila_ambitos: list[dict[str, Simbolo]] = [{}]
+        self.nombres_ambitos: list[str] = ["global"]
+        self.historial_simbolos: list[Simbolo] = []
+
+    def entrar_ambito(self, nombre_ambito: str) -> None:
+        """Abre un nuevo ámbito léxico hijo en el tope de la pila."""
+        self.pila_ambitos.append({})
+        self.nombres_ambitos.append(nombre_ambito)
+
+    def salir_ambito(self) -> str | None:
+        """Cierra el ámbito actual sin eliminar el ámbito global."""
+        if len(self.pila_ambitos) <= 1:
+            return None
+        self.pila_ambitos.pop()
+        return self.nombres_ambitos.pop()
+
+    def ambito_actual(self) -> str:
+        """Retorna el nombre del ámbito activo en el tope de la pila."""
+        return self.nombres_ambitos[-1]
+
+    def declarar(self, simbolo: Simbolo) -> tuple[bool, Simbolo | None]:
+        """Registra un símbolo en el ámbito actual si no existe duplicado previo."""
+        existente = self.buscar_en_ambito_actual(simbolo.nombre)
+        if existente is not None:
+            return False, existente
+        if not simbolo.ambito:
+            simbolo.ambito = self.ambito_actual()
+        self.pila_ambitos[-1][simbolo.nombre] = simbolo
+        self.historial_simbolos.append(simbolo)
+        return True, None
+
+    def buscar_en_ambito_actual(self, nombre: str) -> Simbolo | None:
+        """Busca un identificador únicamente en el ámbito activo."""
+        return self.pila_ambitos[-1].get(nombre)
+
+    def buscar_visible(self, nombre: str) -> Simbolo | None:
+        """Busca un identificador desde el ámbito más interno hacia el global."""
+        for ambito in reversed(self.pila_ambitos):
+            if nombre in ambito:
+                return ambito[nombre]
+        return None
+
+    def exportar_lista_diccionarios(self) -> list[dict[str, Any]]:
+        """Retorna el historial completo de símbolos en formato diccionario."""
+        return [simbolo.to_dict() for simbolo in self.historial_simbolos]
+
+
+def crear_contexto_semantico(*, usar_globales: bool = False) -> dict[str, Any]:
+    """Inicializa el estado compartido de recorrido para el analizador semántico."""
+    if usar_globales:
+        errores_semanticos.clear()
+        reglas_semanticas_validadas.clear()
+        errores = errores_semanticos
+        reglas = reglas_semanticas_validadas
+    else:
+        errores = []
+        reglas = []
+
+    return {
+        "errores": errores,
+        "reglas_semanticas": reglas,
+        "funcion_actual": None,
+        "tiene_retorno": False,
+        "profundidad_for": 0,
+        "profundidad_switch": 0,
+    }
+
+
+def registrar_error_semantico(
+    categoria: str,
+    linea: int,
+    descripcion: str,
+    contexto: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Registra un error semántico siguiendo el formato estándar del proyecto."""
+    desc = descripcion.strip()
+    if desc and not desc.endswith("."):
+        desc = f"{desc}."
+    entrada = {
+        "linea": linea,
+        "categoria": categoria,
+        "descripcion": desc,
+        "mensaje": f"Error Semántico {categoria} en la línea {linea}: {desc}",
+    }
+    destino = contexto["errores"] if contexto is not None else errores_semanticos
+    destino.append(entrada)
+    return entrada
+
+
+def registrar_validacion_semantica(
+    linea: int,
+    regla: str,
+    detalle: str,
+    contexto: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Registra una comprobación semántica válida para la GUI y los logs."""
+    descripcion = detalle.strip() if detalle else f"Regla '{regla}' validada."
+    entrada = {
+        "linea": linea,
+        "regla": regla,
+        "descripcion": descripcion,
+        "mensaje": f"[Semántico - Línea {linea}] {regla}: {descripcion}",
+    }
+    destino = (
+        contexto["reglas_semanticas"]
+        if contexto is not None
+        else reglas_semanticas_validadas
+    )
+    destino.append(entrada)
+    return entrada
 # =====================================================================
 # FIN APORTE: Pablo Naranjo (@PabloNaranjoM)
 # =====================================================================

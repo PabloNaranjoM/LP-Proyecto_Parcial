@@ -166,6 +166,7 @@ def p_sentencia_bloque(p):
 
 def p_sentencia(p):
     """sentencia : declaracion_var
+                 | declaracion_const
                  | declaracion_corta
                  | declaracion_arreglo
                  | declaracion_slice
@@ -197,16 +198,34 @@ def p_sentencia(p):
 #       - Agregar regla `p_declaracion_const` para soportar declaraciones `const`
 #         (con y sin tipo explícito) adjuntando `linea`.
 #       - Adjuntar `linea` en `declaracion_var`.
+
+def p_declaracion_const(p):
+    """declaracion_const : CONSTANTE ID tipo ASIGNACION expresion
+                         | CONSTANTE ID ASIGNACION expresion"""
+
+    registrar_regla(p, "declaracion_const")
+    linea = _linea_de_produccion(p)
+
+    if len(p) == 6:
+        # Constante con tipo explicito
+        p[0] = ("declaracion_const", p[2], p[3], p[5], linea)
+    else:
+        # Constante con tipo inferido
+        p[0] = ("declaracion_const", p[2], None, p[4], linea)
+
 def p_declaracion_var_tipada(p):
     """declaracion_var : VARIABLE ID tipo ASIGNACION expresion"""
     registrar_regla(p, "declaracion_var")
-    p[0] = ("declaracion_var", p[2], p[3], p[5])
+    linea = _linea_de_produccion(p)
+    p[0] = ("declaracion_var", p[2], p[3], p[5], linea)
 
 
 def p_declaracion_var_sin_valor(p):
     """declaracion_var : VARIABLE ID tipo"""
     registrar_regla(p, "declaracion_var")
-    p[0] = ("declaracion_var", p[2], p[3], None)
+    linea = _linea_de_produccion(p)
+    p[0] = ("declaracion_var", p[2], p[3], None, linea)
+
 # =====================================================================
 # FIN APORTE: Hivor Araujo (@AraujoHivor)
 # =====================================================================
@@ -249,13 +268,19 @@ def p_declaracion_corta(p):
 def p_expresion_aritmetica_suma(p):
     """expresion_aritmetica : expresion_aritmetica SUMA termino"""
     registrar_regla(p, "expresion_aritmetica")
-    p[0] = ("suma", p[1], p[3])
+
+    linea = _linea_de_produccion(p)
+    p[0] = ("suma", p[1], p[3], linea)
+
+
 
 
 def p_termino_multiplicacion(p):
     """termino : termino MULTIPLICACION factor"""
     registrar_regla(p, "termino")
-    p[0] = ("multiplicacion", p[1], p[3])
+
+    linea = _linea_de_produccion(p)
+    p[0] = ("multiplicacion", p[1], p[3], linea)
 
 
 def p_factor_literales(p):
@@ -266,7 +291,25 @@ def p_factor_literales(p):
               | FALSO
               | referencia
               | llamada_funcion"""
-    p[0] = p[1]
+
+    tipos = {
+        "LITERAL_ENTERO": "int",
+        "LITERAL_FLOTANTE": "float64",
+        "LITERAL_CADENA": "string",
+        "VERDADERO": "bool",
+        "FALSO": "bool",
+    }
+
+    tipo_token = p.slice[1].type
+
+    if tipo_token in tipos:
+        linea = p.lineno(1)
+        p[0] = ("literal", tipos[tipo_token], p[1], linea)
+    else:
+        # Las referencias y llamadas ya tienen su propia estructura.
+        p[0] = p[1]
+
+
 
 
 def p_referencia(p):
@@ -274,11 +317,17 @@ def p_referencia(p):
                   | referencia PUNTO ID
                   | referencia CORCHETE_IZQ expresion CORCHETE_DER"""
     if len(p) == 2:
-        p[0] = p[1]
+        # Referencia sencilla: edad
+        p[0] = ("id", p[1], p.lineno(1))
+
     elif len(p) == 4:
-        p[0] = ("campo", p[1], p[3])
+        # Acceso a un campo: persona.nombre
+        p[0] = ("campo", p[1], p[3], p.lineno(2))
+
     else:
-        p[0] = ("indice", p[1], p[3])
+        # Acceso por indice: numeros[0]
+        p[0] = ("indice", p[1], p[3], p.lineno(2))
+
 # =====================================================================
 # FIN APORTE: Hivor Araujo (@AraujoHivor)
 # =====================================================================
@@ -365,7 +414,10 @@ def p_expresion(p):
 def p_conjuncion_and(p):
     """conjuncion : conjuncion Y_LOGICO comparacion"""
     registrar_regla(p, "conjuncion")
-    p[0] = ("and", p[1], p[3])
+
+    linea = _linea_de_produccion(p)
+    p[0] = ("and", p[1], p[3], linea)
+
 
 
 def p_conjuncion_base(p):
@@ -419,11 +471,16 @@ def p_sentencia_if(p):
     """sentencia_if : SI expresion_booleana bloque
                     | SI expresion_booleana bloque SINO bloque
                     | SI expresion_booleana bloque SINO sentencia_if"""
+
     registrar_regla(p, "sentencia_if")
+    linea = _linea_de_produccion(p)
+
     if len(p) == 4:
-        p[0] = ("if", p[2], p[3])
+        # if sencillo
+        p[0] = ("if", p[2], p[3], linea)
     else:
-        p[0] = ("if", p[2], p[3], p[5])
+        # if-else o else if
+        p[0] = ("if", p[2], p[3], p[5], linea)
 # =====================================================================
 # FIN APORTE: Hivor Araujo (@AraujoHivor)
 # =====================================================================
@@ -555,11 +612,16 @@ def p_incremento(p):
 def p_declaracion_arreglo(p):
     """declaracion_arreglo : VARIABLE ID CORCHETE_IZQ expresion CORCHETE_DER tipo
                            | ID ASIGNACION_CORTA CORCHETE_IZQ expresion CORCHETE_DER tipo LLAVE_IZQ lista_expresiones_opc LLAVE_DER"""
+
     registrar_regla(p, "declaracion_arreglo")
+    linea = _linea_de_produccion(p)
+
     if len(p) == 7:
-        p[0] = ("arreglo", p[2], p[4], p[6], None)
+        # Declaracion de arreglo sin valores iniciales
+        p[0] = ("arreglo", p[2], p[4], p[6], None, linea)
     else:
-        p[0] = ("arreglo", p[1], p[4], p[6], p[8])
+        # Declaracion de arreglo con valores iniciales
+        p[0] = ("arreglo", p[1], p[4], p[6], p[8], linea)
 
 
 def p_tipo(p):
@@ -663,11 +725,16 @@ def p_instanciacion_struct(p):
 def p_declaracion_funcion(p):
     """declaracion_funcion : FUNCION ID PAR_IZQ parametros_opc PAR_DER tipo bloque
                            | FUNCION ID PAR_IZQ parametros_opc PAR_DER bloque"""
+
     registrar_regla(p, "declaracion_funcion")
+    linea = _linea_de_produccion(p)
+
     if len(p) == 8:
-        p[0] = ("declaracion_funcion", p[2], p[4], p[6], p[7])
+        # Funcion que declara un tipo de retorno
+        p[0] = ("declaracion_funcion", p[2], p[4], p[6], p[7], linea)
     else:
-        p[0] = ("declaracion_funcion", p[2], p[4], None, p[6])
+        # Funcion sin tipo de retorno
+        p[0] = ("declaracion_funcion", p[2], p[4], None, p[6], linea)
 
 
 def p_parametros_opc(p):
@@ -687,13 +754,20 @@ def p_parametro(p):
     p[0] = (p[1], p[2])
 
 
+
 def p_sentencia_retorno(p):
-    """sentencia_retorno : RETORNAR expresion"""
-    # TODO (Avance 3 - Paso 2.1 | Hivor Araujo @AraujoHivor):
-    #       Permitir `return` vacío (`sentencia_retorno : RETORNAR` -> ("return", None, linea))
-    #       y adjuntar `linea` en `declaracion_funcion` e `if`.
+    """sentencia_retorno : RETORNAR expresion
+                         | RETORNAR"""
+
     registrar_regla(p, "sentencia_retorno")
-    p[0] = ("return", p[2])
+    linea = _linea_de_produccion(p)
+
+    if len(p) == 3:
+        # return con un valor
+        p[0] = ("return", p[2], linea)
+    else:
+        # return sin valor
+        p[0] = ("return", None, linea)
 
 
 def p_argumentos_opc(p):

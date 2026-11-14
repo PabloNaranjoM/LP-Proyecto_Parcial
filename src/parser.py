@@ -26,7 +26,12 @@ try:
 except ImportError:
     yacc = None
 
-from src.lexer import analizar, build_lexer, calcular_columna, tokens
+from src.lexer import (
+    build_lexer,
+    calcular_columna,
+    formatear_categoria_token,
+    tokens,
+)
 
 start = "programa"
 
@@ -67,13 +72,13 @@ def registrar_regla(p: Any, nombre_regla: str, descripcion: str = "") -> None:
 def p_programa_completo(p):
     """programa : PAQUETE ID fin_opc lista_imports_opc lista_elementos_top_opc"""
     registrar_regla(p, "programa")
-    p[0] = ("programa", p[2], p[4], p[5])
+    p[0] = ("programa", p[2], p[4], p[5], _linea_de_produccion(p))
 
 
 def p_programa_fragmento(p):
     """programa : lista_elementos_top"""
     registrar_regla(p, "programa")
-    p[0] = ("fragmento", p[1])
+    p[0] = ("fragmento", p[1], _linea_de_produccion(p))
 
 
 def p_fin_opc(p):
@@ -223,7 +228,7 @@ def p_declaracion_var_inferencia(p):
 def p_declaracion_corta(p):
     """declaracion_corta : ID ASIGNACION_CORTA expresion"""
     registrar_regla(p, "declaracion_corta")
-    p[0] = ("declaracion_corta", p[1], p[3])
+    p[0] = ("declaracion_corta", p[1], p[3], _linea_de_produccion(p))
 # =====================================================================
 # FIN APORTE: Pablo Naranjo (@PabloNaranjoM)
 # =====================================================================
@@ -300,13 +305,13 @@ def p_expresion_aritmetica_termino(p):
 def p_termino_division(p):
     """termino : termino DIVISION factor"""
     registrar_regla(p, "termino")
-    p[0] = ("division", p[1], p[3])
+    p[0] = ("division", p[1], p[3], _linea_de_produccion(p))
 
 
 def p_termino_modulo(p):
     """termino : termino MODULO factor"""
     registrar_regla(p, "termino")
-    p[0] = ("modulo", p[1], p[3])
+    p[0] = ("modulo", p[1], p[3], _linea_de_produccion(p))
 
 
 def p_termino_factor(p):
@@ -322,7 +327,7 @@ def p_factor_agrupacion(p):
 def p_factor_unario(p):
     """factor : AMPERSAND referencia
               | RESTA factor"""
-    p[0] = ("unario", p[1], p[2])
+    p[0] = ("unario", p[1], p[2], _linea_de_produccion(p))
 # =====================================================================
 # FIN APORTE: Pablo Naranjo (@PabloNaranjoM)
 # =====================================================================
@@ -376,7 +381,7 @@ def p_conjuncion_base(p):
 def p_comparacion_relacional(p):
     """comparacion : expresion_aritmetica op_relacional expresion_aritmetica"""
     registrar_regla(p, "comparacion")
-    p[0] = ("comparacion", p[2], p[1], p[3])
+    p[0] = ("comparacion", p[2], p[1], p[3], _linea_de_produccion(p))
 
 
 def p_op_relacional(p):
@@ -392,7 +397,7 @@ def p_op_relacional(p):
 def p_comparacion_negacion(p):
     """comparacion : NEGACION comparacion"""
     registrar_regla(p, "comparacion")
-    p[0] = ("not", p[2])
+    p[0] = ("not", p[2], _linea_de_produccion(p))
 
 
 def p_comparacion_base(p):
@@ -426,26 +431,28 @@ def p_sentencia_if(p):
 # =====================================================================
 # INICIO APORTE: Pablo Naranjo (@PabloNaranjoM)
 # =====================================================================
-# TODO (Avance 3 - Paso 2.3 | Pablo Naranjo @PabloNaranjoM):
-#       - Añadir variante de bucle infinito `PARA bloque` (`for_infinito`).
-#       - Ajustar `p_post_sentencia` (integrando `asignacion` sin conflicto Shift/Reduce
-#         en el estado 87) y adjuntar `linea` en las tuplas AST de bucles `for`.
+def p_sentencia_for_infinito(p):
+    """sentencia_for : PARA bloque"""
+    registrar_regla(p, "sentencia_for")
+    p[0] = ("for_infinito", p[2], _linea_de_produccion(p))
+
+
 def p_sentencia_for_condicional(p):
     """sentencia_for : PARA expresion_booleana bloque"""
     registrar_regla(p, "sentencia_for")
-    p[0] = ("for_cond", p[2], p[3])
+    p[0] = ("for_cond", p[2], p[3], _linea_de_produccion(p))
 
 
 def p_sentencia_for_clasico(p):
     """sentencia_for : PARA inicializacion_for PUNTO_COMA expresion_booleana PUNTO_COMA post_sentencia bloque"""
     registrar_regla(p, "sentencia_for")
-    p[0] = ("for_clasico", p[2], p[4], p[6], p[7])
+    p[0] = ("for_clasico", p[2], p[4], p[6], p[7], _linea_de_produccion(p))
 
 
 def p_sentencia_for_range(p):
     """sentencia_for : PARA ID COMA ID ASIGNACION_CORTA RANGO expresion_booleana bloque"""
     registrar_regla(p, "sentencia_for")
-    p[0] = ("for_range", p[2], p[4], p[7], p[8])
+    p[0] = ("for_range", p[2], p[4], p[7], p[8], _linea_de_produccion(p))
 
 
 def p_inicializacion_for(p):
@@ -456,8 +463,16 @@ def p_inicializacion_for(p):
 
 def p_post_sentencia(p):
     """post_sentencia : incremento
-                      | asignacion"""
-    p[0] = p[1]
+                      | referencia ASIGNACION expresion_booleana
+                      | referencia op_asignacion_compuesta expresion_booleana"""
+    if len(p) == 2:
+        p[0] = p[1]
+    elif p[2] == "=":
+        registrar_regla(p, "asignacion")
+        p[0] = ("asignacion", p[1], p[3], _linea_de_produccion(p))
+    else:
+        registrar_regla(p, "asignacion_compuesta")
+        p[0] = ("asignacion_compuesta", p[2], p[1], p[3], _linea_de_produccion(p))
 # =====================================================================
 # FIN APORTE: Pablo Naranjo (@PabloNaranjoM)
 # =====================================================================
@@ -586,7 +601,7 @@ def p_lista_expresiones(p):
 def p_declaracion_mapa(p):
     """declaracion_mapa : ID ASIGNACION_CORTA MAPA CORCHETE_IZQ tipo CORCHETE_DER tipo LLAVE_IZQ lista_elementos_mapa_opc LLAVE_DER"""
     registrar_regla(p, "declaracion_mapa")
-    p[0] = ("mapa", p[1], p[5], p[7], p[9])
+    p[0] = ("mapa", p[1], p[5], p[7], p[9], _linea_de_produccion(p))
 
 
 def p_lista_elementos_mapa_opc(p):
@@ -615,7 +630,7 @@ def p_elemento_mapa(p):
 def p_definicion_struct(p):
     """definicion_struct : TIPO ID ESTRUCTURA LLAVE_IZQ lista_campos LLAVE_DER"""
     registrar_regla(p, "definicion_struct")
-    p[0] = ("struct", p[2], p[5])
+    p[0] = ("struct", p[2], p[5], _linea_de_produccion(p))
 
 
 def p_lista_campos(p):
@@ -632,7 +647,7 @@ def p_campo(p):
 def p_instanciacion_struct(p):
     """expresion : referencia LLAVE_IZQ lista_elementos_mapa_opc LLAVE_DER"""
     registrar_regla(p, "instanciacion_struct")
-    p[0] = ("struct_init", p[1], p[3])
+    p[0] = ("struct_init", p[1], p[3], _linea_de_produccion(p))
 # =====================================================================
 # FIN APORTE: Pablo Naranjo (@PabloNaranjoM)
 # =====================================================================
@@ -717,7 +732,7 @@ def p_literal_funcion(p):
 def p_declaracion_funcion_variadica(p):
     """declaracion_funcion : FUNCION ID PAR_IZQ parametros_variadicos PAR_DER tipo bloque"""
     registrar_regla(p, "declaracion_funcion_variadica")
-    p[0] = ("declaracion_funcion_variadica", p[2], p[4], p[6], p[7])
+    p[0] = ("declaracion_funcion_variadica", p[2], p[4], p[6], p[7], _linea_de_produccion(p))
 
 
 def p_parametros_variadicos(p):
@@ -732,7 +747,7 @@ def p_parametros_variadicos(p):
 def p_llamada_funcion(p):
     """llamada_funcion : ID PAR_IZQ argumentos_opc PAR_DER"""
     registrar_regla(p, "llamada_funcion")
-    p[0] = ("llamada_funcion", p[1], p[3])
+    p[0] = ("llamada_funcion", p[1], p[3], _linea_de_produccion(p))
 # =====================================================================
 # FIN APORTE: Pablo Naranjo (@PabloNaranjoM)
 # =====================================================================
@@ -771,7 +786,7 @@ def p_sentencia_lectura(p):
     """sentencia_lectura : PAQUETE_FMT PUNTO LEER_LN PAR_IZQ lista_referencias PAR_DER
                          | PAQUETE_FMT PUNTO LEER PAR_IZQ lista_referencias PAR_DER"""
     registrar_regla(p, "sentencia_lectura")
-    p[0] = ("scanln", p[5])
+    p[0] = ("scanln", p[5], _linea_de_produccion(p))
 
 
 def p_lista_referencias(p):
@@ -837,14 +852,33 @@ def p_error(p):
 # =====================================================================
 # INICIO APORTE: Pablo Naranjo (@PabloNaranjoM)
 # =====================================================================
-# TODO (Avance 3 - Paso 2.3 | Pablo Naranjo @PabloNaranjoM):
-#       - Cachear la instancia de `build_parser()` (cuando `kwargs` esté vacío)
-#         y evitar el doble escaneo léxico en `analizar_sintaxis()`.
-#       - Adjuntar `linea` en sus demás bloques AST (`declaracion_corta`, `division`,
-#         `modulo`, `unario`, `comparacion`, `mapa`, `struct`, `struct_init`,
-#         `declaracion_funcion_variadica`, `llamada_funcion`, `println`, `print`, `scanln`).
+_PARSER_CACHE: Any = None
+
+
+class _TokenStreamLexer:
+    """Reproduce un flujo pre-escaneado de tokens PLY sin re-tokenizar el código fuente."""
+
+    def __init__(self, lista_tokens: list[Any]) -> None:
+        self._iter = iter(lista_tokens)
+        self.lineno = 1
+        self.lexpos = 0
+
+    def input(self, _codigo: str) -> None:
+        return None
+
+    def token(self):
+        tok = next(self._iter, None)
+        if tok is not None:
+            self.lineno = tok.lineno
+            self.lexpos = tok.lexpos
+        return tok
+
+
 def build_parser(**kwargs):
     """Construye y retorna una instancia del analizador sintáctico LALR(1)."""
+    global _PARSER_CACHE
+    if not kwargs and _PARSER_CACHE is not None:
+        return _PARSER_CACHE
     opciones = {
         "start": start,
         "debug": False,
@@ -852,26 +886,46 @@ def build_parser(**kwargs):
         "errorlog": yacc.NullLogger(),
     }
     opciones.update(kwargs)
-    return yacc.yacc(**opciones)
+    instancia = yacc.yacc(**opciones)
+    if not kwargs:
+        _PARSER_CACHE = instancia
+    return instancia
 
 
 def analizar_sintaxis(codigo: str) -> dict[str, Any]:
     """
-    Ejecuta el análisis léxico y sintáctico sobre `codigo` y retorna un
-    diccionario con tokens, errores_lexicos, arbol, reglas_validadas,
-    errores_sintacticos y valido.
+    Ejecuta el análisis léxico y sintáctico en una sola pasada léxica sobre
+    `codigo` y retorna tokens, errores_lexicos, arbol, reglas, errores y valido.
     """
     global _codigo_actual
     _codigo_actual = codigo
     errores_sintacticos.clear()
     reglas_validadas.clear()
 
-    tokens_reconocidos, errores_lexicos = analizar(codigo)
-
     lexer_parser = build_lexer()
     lexer_parser.errores_lexicos = []
+    lexer_parser.input(codigo)
+    tokens_raw = list(lexer_parser)
+    errores_lexicos = list(lexer_parser.errores_lexicos)
+
+    tokens_reconocidos = [
+        {
+            "indice": i,
+            "linea": tok.lineno,
+            "columna": calcular_columna(codigo, tok.lexpos),
+            "tipo": tok.type,
+            "categoria": formatear_categoria_token(tok.type, tok.value),
+            "valor": tok.value,
+        }
+        for i, tok in enumerate(tokens_raw, start=1)
+    ]
+
     parser = build_parser()
-    arbol = parser.parse(codigo, lexer=lexer_parser, tracking=True) if codigo.strip() else None
+    arbol = (
+        parser.parse(codigo, lexer=_TokenStreamLexer(tokens_raw), tracking=True)
+        if codigo.strip()
+        else None
+    )
 
     valido = not errores_lexicos and not errores_sintacticos and (arbol is not None or not codigo.strip())
     return {

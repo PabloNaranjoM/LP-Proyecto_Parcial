@@ -184,6 +184,9 @@ def ejecutar_analisis_completo_codigo(
         desarrollador=desarrollador,
         nombre_archivo=nombre_archivo,
     )
+    # TODO (Avance 3 - Paso 4.1 | Hivor Araujo @AraujoHivor):
+    #       Invocar `ejecutar_analisis_semantico_codigo(..., res_sintactico=res_sintactico)`
+    #       e incluir `"semantico"` dentro del diccionario retornado y en `valido`.
     return {
         "lexico": res_lexico,
         "sintactico": res_sintactico,
@@ -191,4 +194,23 @@ def ejecutar_analisis_completo_codigo(
     }
 # =====================================================================
 # FIN APORTE: Pablo Naranjo (@PabloNaranjoM)
+# =====================================================================
+
+
+# =====================================================================
+# INICIO APORTE: Hivor Araujo (@AraujoHivor)
+# =====================================================================
+# TODO (Avance 3 - Paso 4.1): Implementar la exportación de logs del Analizador Semántico:
+#       - Importar `analizar_semantica` desde `src.semantic`.
+#       - `def ejecutar_analisis_semantico_codigo(codigo_fuente: str, desarrollador: str, nombre_archivo: str = "editor_interactivo.go", res_sintactico: dict[str, Any] | None = None) -> dict[str, Any]`:
+#         * Ejecutar `analizar_semantica(codigo_fuente, res_sintactico=res_sintactico)`.
+#         * Generar archivo con patrón exacto: `logs/semantico-<usuarioGit>-<DDMMYYYY>-<HHhMM>.txt`
+#           (usando el usuario de Git sin espacios ni `@`, conforme a la Instrucción del Avance 3).
+#         * Volcar en el log: encabezado institucional, sección de Tabla de Símbolos
+#           (`#`, `Identificador`, `Categoría`, `Tipo de Dato`, `Ámbito`, `Línea`),
+#           sección de Reglas Semánticas Validadas y Errores Semánticos con formato
+#           `Error Semántico <Categoría> en la línea <N>: ...`.
+#         * Retornar el diccionario de resultados extendido con `"ruta_log"` y `"nombre_log"`.
+# =====================================================================
+# FIN APORTE: Hivor Araujo (@AraujoHivor)
 # =====================================================================

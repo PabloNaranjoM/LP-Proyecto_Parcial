@@ -162,6 +162,8 @@ class GoAnalyzerApp(ctk.CTk):
         botones = [
             ("Léxico", lambda: self._ejecutar_lexico(False), BTN_PRIMARY, 90, 6),
             ("Sintáctico", self._ejecutar_sintactico, BTN_PRIMARY, 95, 6),
+            # TODO (Avance 3 - Paso 4.3 | Pablo Naranjo @PabloNaranjoM):
+            #       Conectar el botón "Semántico" a `self._ejecutar_semantico`.
             ("Semántico", None, BTN_PRIMARY, 95, 8),
             ("▶ Ejecutar Todo", self._ejecutar_todo, BTN_SUCCESS, 130, 0),
         ]
@@ -287,6 +289,13 @@ class GoAnalyzerApp(ctk.CTk):
         )
         self.lbl_log_badge.configure(text=resultado["nombre_log"], text_color=ACCENT)
 
+    # TODO (Avance 3 - Paso 4.3 | Pablo Naranjo @PabloNaranjoM):
+    #       - Implementar `_ejecutar_semantico(self) -> None` invocando
+    #         `ejecutar_analisis_semantico_codigo()`, resaltando líneas de error
+    #         semántico en `self.editor_panel` y llamando a
+    #         `self.diagnostics_panel.mostrar_resultados_semanticos()`.
+    #       - Actualizar `_ejecutar_todo()` para incluir `completo["semantico"]`,
+    #         resaltar errores de las 3 fases y mostrar los 3 nombres de log en `lbl_log_badge`.
     def _ejecutar_todo(self) -> None:
         completo = ejecutar_analisis_completo_codigo(
             codigo_fuente=self.editor_panel.obtener_codigo(),

@@ -44,6 +44,12 @@ def ejecutar_modo_cli(ruta_archivo: str, autor: str, fase: str = "todo") -> None
             f"[SINTÁCTICO] Reglas: {len(res['reglas'])} | "
             f"Errores: {len(res['errores'])} | Log: {res['ruta_log'].as_posix()}"
         )
+    # TODO (Avance 3 - Paso 4.3 | Pablo Naranjo @PabloNaranjoM):
+    #       - Agregar rama `elif fase == "semantico":` ejecutando
+    #         `ejecutar_analisis_semantico_codigo(codigo, autor, nombre)` y mostrando
+    #         símbolos, reglas validadas, errores semánticos y ruta del log.
+    #       - Actualizar la rama `else:` (modo `todo`) para imprimir también el resumen
+    #         de `completo["semantico"]`.
     else:
         completo = ejecutar_analisis_completo_codigo(codigo, autor, nombre)
         r_lex = completo["lexico"]
@@ -65,6 +71,8 @@ def main() -> None:
     parser.add_argument("archivo", nargs="?", default="algoritmos/algoritmo1.go")
     parser.add_argument("autor", nargs="?", default="PabloNaranjoM")
     parser.add_argument("--cli", action="store_true", help="Ejecutar en modo consola")
+    # TODO (Avance 3 - Paso 4.3 | Pablo Naranjo @PabloNaranjoM):
+    #       Agregar `"semantico"` a `choices` en `--fase` (`["lexico", "sintactico", "semantico", "todo"]`).
     parser.add_argument(
         "--fase",
         choices=["lexico", "sintactico", "todo"],

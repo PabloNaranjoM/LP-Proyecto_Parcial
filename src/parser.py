@@ -51,6 +51,11 @@ def registrar_regla(p: Any, nombre_regla: str, descripcion: str = "") -> None:
         "descripcion": descripcion or f"Regla '{nombre_regla}' validada.",
         "mensaje": f"[Línea {linea}] Regla '{nombre_regla}' validada.",
     })
+
+
+# TODO (Avance 3 - Paso 1.1 | Pablo Naranjo @PabloNaranjoM):
+#       Definir contrato estándar de tuplas AST con número de línea (`linea = _linea_de_produccion(p)`)
+#       en todas las producciones del parser para habilitar reportes semánticos exactos.
 # =====================================================================
 # FIN APORTE: Pablo Naranjo (@PabloNaranjoM)
 # =====================================================================
@@ -187,6 +192,10 @@ def p_sentencia(p):
 # =====================================================================
 # INICIO APORTE: Hivor Araujo (@AraujoHivor)
 # =====================================================================
+# TODO (Avance 3 - Paso 2.1 | Hivor Araujo @AraujoHivor):
+#       - Agregar regla `p_declaracion_const` para soportar declaraciones `const`
+#         (con y sin tipo explícito) adjuntando `linea`.
+#       - Adjuntar `linea` en `declaracion_var`.
 def p_declaracion_var_tipada(p):
     """declaracion_var : VARIABLE ID tipo ASIGNACION expresion"""
     registrar_regla(p, "declaracion_var")
@@ -231,6 +240,11 @@ def p_declaracion_corta(p):
 # =====================================================================
 # INICIO APORTE: Hivor Araujo (@AraujoHivor)
 # =====================================================================
+# TODO (Avance 3 - Paso 2.1 | Hivor Araujo @AraujoHivor):
+#       - Etiquetar `p_factor_literales` para distinguir literales de variables:
+#         ("literal", tipo_go, valor, linea) en enteros, flotantes, cadenas y booleanos.
+#       - Modificar `p_referencia` para etiquetar identificadores simples como
+#         ("id", nombre, linea) y agregar `linea` a `campo`, `indice`, `suma` y `multiplicacion`.
 def p_expresion_aritmetica_suma(p):
     """expresion_aritmetica : expresion_aritmetica SUMA termino"""
     registrar_regla(p, "expresion_aritmetica")
@@ -416,6 +430,10 @@ def p_sentencia_if(p):
 # =====================================================================
 # INICIO APORTE: Pablo Naranjo (@PabloNaranjoM)
 # =====================================================================
+# TODO (Avance 3 - Paso 2.3 | Pablo Naranjo @PabloNaranjoM):
+#       - Añadir variante de bucle infinito `PARA bloque` (`for_infinito`).
+#       - Ajustar `p_post_sentencia` (integrando `asignacion` sin conflicto Shift/Reduce
+#         en el estado 87) y adjuntar `linea` en las tuplas AST de bucles `for`.
 def p_sentencia_for_condicional(p):
     """sentencia_for : PARA expresion_booleana bloque"""
     registrar_regla(p, "sentencia_for")
@@ -451,6 +469,11 @@ def p_post_sentencia(p):
 # =====================================================================
 # INICIO APORTE: Josué Pacheco (@JosuePach3co)
 # =====================================================================
+# TODO (Avance 3 - Paso 2.2 | Josué Pacheco @JosuePach3co):
+#       - Soportar `switch` sin expresión booleana (`SEGUN LLAVE_IZQ lista_casos LLAVE_DER`).
+#       - Adjuntar `linea` en todas las tuplas AST de sus bloques (`declaracion_var_inferencia`,
+#         `resta`, `or`, `and`, `not`, `switch`, `case`, `default`, `interrupcion`,
+#         `asignacion`, `asignacion_compuesta`, `incremento`, `slice` y `literal_funcion`).
 def p_sentencia_switch(p):
     """sentencia_switch : SEGUN expresion_booleana LLAVE_IZQ lista_casos LLAVE_DER"""
     registrar_regla(p, "sentencia_switch")
@@ -655,6 +678,9 @@ def p_parametro(p):
 
 def p_sentencia_retorno(p):
     """sentencia_retorno : RETORNAR expresion"""
+    # TODO (Avance 3 - Paso 2.1 | Hivor Araujo @AraujoHivor):
+    #       Permitir `return` vacío (`sentencia_retorno : RETORNAR` -> ("return", None, linea))
+    #       y adjuntar `linea` en `declaracion_funcion` e `if`.
     registrar_regla(p, "sentencia_retorno")
     p[0] = ("return", p[2])
 
@@ -815,6 +841,12 @@ def p_error(p):
 # =====================================================================
 # INICIO APORTE: Pablo Naranjo (@PabloNaranjoM)
 # =====================================================================
+# TODO (Avance 3 - Paso 2.3 | Pablo Naranjo @PabloNaranjoM):
+#       - Cachear la instancia de `build_parser()` (cuando `kwargs` esté vacío)
+#         y evitar el doble escaneo léxico en `analizar_sintaxis()`.
+#       - Adjuntar `linea` en sus demás bloques AST (`declaracion_corta`, `division`,
+#         `modulo`, `unario`, `comparacion`, `mapa`, `struct`, `struct_init`,
+#         `declaracion_funcion_variadica`, `llamada_funcion`, `println`, `print`, `scanln`).
 def build_parser(**kwargs):
     """Construye y retorna una instancia del analizador sintáctico LALR(1)."""
     opciones = {

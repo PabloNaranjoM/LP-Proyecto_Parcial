@@ -356,6 +356,14 @@ class DiagnosticsPanel(ctk.CTkFrame):
                 self._on_line_select(int(valores[1]))
 
     def _construir_tab_simbolos(self) -> None:
+        # TODO (Avance 3 - Paso 4.2 | Josué Pacheco @JosuePach3co):
+        #       Reemplazar este placeholder por la interfaz de Tabla de Símbolos:
+        #       - Cabecera de resumen (`lbl_resumen_simbolos`) con total de símbolos,
+        #         reglas validadas y errores semánticos.
+        #       - `ttk.Treeview` (`self.tree_simbolos`) con 6 columnas:
+        #         ("#", "Identificador", "Categoría", "Tipo de Dato", "Ámbito", "Línea")
+        #         más su `CTkScrollbar` y enlace de selección (`_on_simbolo_seleccionado`)
+        #         para saltar a la línea de declaración en el editor.
         self.tab_simbolos.grid_columnconfigure(0, weight=1)
         self.tab_simbolos.grid_rowconfigure(0, weight=1)
         ctk.CTkLabel(
@@ -593,6 +601,14 @@ class DiagnosticsPanel(ctk.CTkFrame):
             "info",
         )])
         self.tabview.set(self.TAB_TOKENS)
+
+    # TODO (Avance 3 - Paso 4.2 | Josué Pacheco @JosuePach3co):
+    #       - Implementar `def poblar_tabla_simbolos(self, simbolos: list[dict[str, Any]]) -> None`
+    #         para cargar las filas ordenadas en `self.tree_simbolos`.
+    #       - Implementar `def mostrar_resultados_semanticos(self, resultado: dict[str, Any], modo_ejecucion_todo: bool = False) -> None`
+    #         activando el estado del Banner (`"ERROR_SEMANTICO"` cuando existan errores
+    #         semánticos) e imprimiendo el detalle completo de errores semánticos en consola.
+    #       - Actualizar `limpiar_panel()` para limpiar `self.tree_simbolos` y `lbl_resumen_simbolos`.
     # =====================================================================
     # FIN APORTE: Josué Pacheco (@JosuePach3co)
     # =====================================================================

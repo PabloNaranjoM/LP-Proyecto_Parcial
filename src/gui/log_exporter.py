@@ -11,6 +11,7 @@ from typing import Any
 
 from src.lexer import analizar
 from src.parser import analizar_sintaxis
+from src.semantic import analizar_semantica
 
 # =====================================================================
 # INICIO APORTE: Pablo Naranjo (@PabloNaranjoM)
@@ -211,6 +212,121 @@ def ejecutar_analisis_completo_codigo(
 #           sección de Reglas Semánticas Validadas y Errores Semánticos con formato
 #           `Error Semántico <Categoría> en la línea <N>: ...`.
 #         * Retornar el diccionario de resultados extendido con `"ruta_log"` y `"nombre_log"`.
+
+def ejecutar_analisis_semantico_codigo(
+    codigo_fuente: str,
+    desarrollador: str,
+    nombre_archivo: str = "editor_interactivo.go",
+    res_sintactico: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Ejecuta el analisis semantico y genera su archivo de log."""
+
+    # Obtener los resultados del analizador semantico
+    resultado = analizar_semantica(
+        codigo_fuente,
+        res_sintactico=res_sintactico
+    )
+
+    # Crear la carpeta de logs si no existe
+    carpeta_logs = Path("logs")
+    carpeta_logs.mkdir(parents=True, exist_ok=True)
+
+    ahora = datetime.now()
+    usuario_git = normalizar_usuario_git(desarrollador)
+
+    nombre_log = (
+        f"semantico-{usuario_git}-"
+        f"{ahora.strftime('%d%m%Y-%Hh%M')}.txt"
+    )
+
+    ruta_log = carpeta_logs / nombre_log
+
+    # Encabezado del reporte
+    lineas = [
+        "=" * 80,
+        "REPORTE DE ANALISIS SEMANTICO - COMPILADOR GO (ESPOL)",
+        f"Archivo analizado: {nombre_archivo}",
+        f"Fecha y hora: {ahora.strftime('%d-%m-%Y %H:%M:%S')}",
+        f"Desarrollador: {usuario_git}",
+        "=" * 80,
+        "",
+        "--- TABLA DE SIMBOLOS ---",
+    ]
+
+    # Registrar los simbolos encontrados
+    simbolos = resultado["simbolos"]
+
+    if simbolos:
+        lineas.append(
+            f"{'#':<4} {'Identificador':<20} {'Categoria':<15} "
+            f"{'Tipo de Dato':<22} {'Ambito':<18} {'Linea'}"
+        )
+
+        for numero, simbolo in enumerate(simbolos, start=1):
+            lineas.append(
+                f"{numero:<4} "
+                f"{simbolo['nombre']:<20} "
+                f"{simbolo['categoria']:<15} "
+                f"{simbolo['tipo_dato']:<22} "
+                f"{simbolo['ambito']:<18} "
+                f"{simbolo['linea']}"
+            )
+    else:
+        lineas.append("No se registraron simbolos.")
+
+    # Registrar las reglas semanticas validadas
+    lineas.extend([
+        "",
+        "--- REGLAS SEMANTICAS VALIDADAS ---",
+    ])
+
+    reglas = resultado["reglas_semanticas"]
+
+    if reglas:
+        for regla in reglas:
+            lineas.append(regla["mensaje"])
+    else:
+        lineas.append("No se registraron reglas semanticas validadas.")
+
+    # Registrar los errores semanticos
+    lineas.extend([
+        "",
+        "--- ERRORES SEMANTICOS DETECTADOS ---",
+    ])
+
+    errores = resultado["errores"]
+
+    if errores:
+        for error in errores:
+            lineas.append(error["mensaje"])
+    else:
+        lineas.append("No se detectaron errores semanticos.")
+
+    # Resumen final
+    estado = "VALIDO" if resultado["valido"] else "INVALIDO"
+
+    lineas.extend([
+        "",
+        "=" * 80,
+        f"Simbolos registrados: {len(simbolos)}",
+        f"Reglas validadas: {len(reglas)}",
+        f"Errores semanticos: {len(errores)}",
+        f"Estado del analisis: {estado}",
+        "=" * 80,
+    ])
+
+    # Guardar el reporte
+    ruta_log.write_text(
+        "\n".join(lineas) + "\n",
+        encoding="utf-8"
+    )
+
+    return {
+        **resultado,
+        "ruta_log": ruta_log,
+        "nombre_log": nombre_log,
+    }
+
 # =====================================================================
 # FIN APORTE: Hivor Araujo (@AraujoHivor)
 # =====================================================================

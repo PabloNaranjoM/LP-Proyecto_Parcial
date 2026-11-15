@@ -1,0 +1,78 @@
+================================================================================
+REPORTE DE ANALISIS SEMANTICO - COMPILADOR GO (ESPOL)
+Archivo analizado: algoritmos/algoritmo3_error_semantico.go
+Fecha y hora: 15-11-2026 17:05:05
+Desarrollador: JosuePach3co
+================================================================================
+
+--- TABLA DE SIMBOLOS ---
+#    Identificador        Categoria       Tipo de Dato           Ambito             Linea
+1    main                 funcion         func()->void           global             19
+2    LIMITE_MAXIMO        constante       int                    global             16
+3    ETIQUETA_FIJA        constante       string                 global             17
+4    entero               variable        int                    func:main          20
+5    decimal              variable        float64                func:main          21
+6    texto                variable        string                 func:main          22
+7    bandera              variable        bool                   func:main          23
+
+--- REGLAS SEMANTICAS VALIDADAS ---
+[Semántico - Línea 19] RS-2 (Unicidad en el alcance): Función 'main' declarada con firma 'func()->void'.
+[Semántico - Línea 16] RS-3: Constante 'LIMITE_MAXIMO' declarada correctamente como 'int'
+[Semántico - Línea 17] RS-3: Constante 'ETIQUETA_FIJA' declarada correctamente como 'string'
+[Semántico - Línea 20] RS-3: Variable 'entero' declarada correctamente como 'int'
+[Semántico - Línea 21] RS-3: Variable 'decimal' declarada correctamente como 'float64'
+[Semántico - Línea 22] RS-3: Variable 'texto' declarada correctamente como 'string'
+[Semántico - Línea 23] RS-3: Variable 'bandera' declarada correctamente como 'bool'
+[Semántico - Línea 30] RS-1: El identificador 'entero' fue declarado previamente
+[Semántico - Línea 30] RS-1: El identificador 'decimal' fue declarado previamente
+[Semántico - Línea 33] RS-1: El identificador 'entero' fue declarado previamente
+[Semántico - Línea 33] RS-1: El identificador 'decimal' fue declarado previamente
+[Semántico - Línea 36] RS-1: El identificador 'decimal' fue declarado previamente
+[Semántico - Línea 39] RS-1: El identificador 'entero' fue declarado previamente
+[Semántico - Línea 39] RS-1: El identificador 'bandera' fue declarado previamente
+[Semántico - Línea 42] RS-1: El identificador 'bandera' fue declarado previamente
+[Semántico - Línea 42] RS-1: El identificador 'texto' fue declarado previamente
+[Semántico - Línea 45] RS-1: El identificador 'entero' fue declarado previamente
+[Semántico - Línea 48] RS-1: El identificador 'entero' fue declarado previamente
+[Semántico - Línea 48] RS-1: El identificador 'decimal' fue declarado previamente
+[Semántico - Línea 51] RS-1: El identificador 'entero' fue declarado previamente
+[Semántico - Línea 51] RS-1: El identificador 'texto' fue declarado previamente
+[Semántico - Línea 54] RS-1: El identificador 'texto' fue declarado previamente
+[Semántico - Línea 57] RS-1: El identificador 'LIMITE_MAXIMO' fue declarado previamente
+[Semántico - Línea 64] RS-1: El identificador 'entero' fue declarado previamente
+[Semántico - Línea 65] RS-1 (Identificadores): Invocación a 'fmt.Println' validada con 1 argumento(s).
+[Semántico - Línea 69] RS-1: El identificador 'decimal' fue declarado previamente
+[Semántico - Línea 70] RS-1 (Identificadores): Invocación a 'fmt.Println' validada con 1 argumento(s).
+[Semántico - Línea 76] RS-1: El identificador 'entero' fue declarado previamente
+[Semántico - Línea 80] RS-1 (Identificadores): Invocación a 'fmt.Println' validada con 1 argumento(s).
+[Semántico - Línea 82] RS-1 (Identificadores): Invocación a 'fmt.Println' validada con 1 argumento(s).
+[Semántico - Línea 86] RS-1: El identificador 'bandera' fue declarado previamente
+[Semántico - Línea 86] RS-6 (Estructuras de control): Condición booleana válida en sentencia 'if'.
+[Semántico - Línea 19] RS-5 (Retorno de funciones): Función 'main' sin retorno ('void') validada.
+
+--- ERRORES SEMANTICOS DETECTADOS ---
+Error Semántico operaciones permitidas en la línea 30: Operación '+' no válida entre tipos incompatibles 'int' y 'float64'.
+Error Semántico operaciones permitidas en la línea 33: Operación '*' requiere operandos numéricos del mismo tipo, se recibió 'int' y 'float64'.
+Error Semántico operaciones permitidas en la línea 36: El operador '%' solo admite operandos de tipo 'int', se recibió 'float64' y 'float64'.
+Error Semántico operaciones permitidas en la línea 39: El operador lógico '&&' requiere operandos 'bool', se recibió 'int' y 'bool'.
+Error Semántico operaciones permitidas en la línea 42: El operador lógico '||' requiere operandos 'bool', se recibió 'bool' y 'string'.
+Error Semántico operaciones permitidas en la línea 45: El operador '!' requiere un operando de tipo 'bool', se recibió 'int'.
+Error Semántico operaciones permitidas en la línea 48: No se pueden comparar los tipos 'int' y 'float64' con '>'.
+Error Semántico operaciones permitidas en la línea 51: No se puede comparar igualdad '==' entre tipos distintos 'int' y 'string'.
+Error Semántico operaciones permitidas en la línea 54: El operador '++' requiere un operando numérico ('int' o 'float64'), se recibió 'string'.
+Error Semántico asignación de tipo en la línea 57: No se puede aplicar '--' sobre la constante 'LIMITE_MAXIMO'.
+Error Semántico estructuras de control en la línea 64: La condición de la sentencia 'if' debe ser de tipo 'bool', se recibió 'int'.
+Error Semántico estructuras de control en la línea 69: La condición del ciclo 'for' debe ser de tipo 'bool', se recibió 'float64'.
+Error Semántico estructuras de control en la línea 77: La expresión del 'case' es de tipo 'string' y no coincide con el tipo 'int' del 'switch'.
+Error Semántico estructuras de control en la línea 78: La instrucción 'continue' solo puede usarse dentro de un bucle 'for'.
+Error Semántico estructuras de control en la línea 79: La expresión del 'case' es de tipo 'bool' y no coincide con el tipo 'int' del 'switch'.
+Error Semántico estructuras de control en la línea 87: La instrucción 'fallthrough' solo puede usarse dentro de un bloque 'switch'.
+Error Semántico estructuras de control en la línea 91: La instrucción 'continue' solo puede usarse dentro de un bucle 'for'.
+Error Semántico estructuras de control en la línea 94: La instrucción 'break' solo puede usarse dentro de un bucle 'for' o un 'switch'.
+
+================================================================================
+Simbolos registrados: 7
+Reglas validadas: 33
+Errores semanticos: 18
+Estado del analisis: INVALIDO
+================================================================================

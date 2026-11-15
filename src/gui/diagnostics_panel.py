@@ -312,9 +312,9 @@ class DiagnosticsPanel(ctk.CTkFrame):
 
         columnas_sin = [
             ("estado", "Estado", 85, 70, False, "center"),
-            ("linea", "Línea", 70, 55, False, "center"),
+            ("linea", "Linea", 70, 55, False, "center"),
             ("regla", "Regla Gramatical", 185, 140, False, "w"),
-            ("detalle", "Detalle de Validación LALR(1)", 360, 220, True, "w"),
+            ("detalle", "Detalle de Validacion LALR(1)", 360, 220, True, "w"),
         ]
         self.tree_sintactico = ttk.Treeview(
             tree_frame,
@@ -356,23 +356,91 @@ class DiagnosticsPanel(ctk.CTkFrame):
                 self._on_line_select(int(valores[1]))
 
     def _construir_tab_simbolos(self) -> None:
-        # TODO (Avance 3 - Paso 4.2 | Josué Pacheco @JosuePach3co):
-        #       Reemplazar este placeholder por la interfaz de Tabla de Símbolos:
-        #       - Cabecera de resumen (`lbl_resumen_simbolos`) con total de símbolos,
-        #         reglas validadas y errores semánticos.
-        #       - `ttk.Treeview` (`self.tree_simbolos`) con 6 columnas:
-        #         ("#", "Identificador", "Categoría", "Tipo de Dato", "Ámbito", "Línea")
-        #         más su `CTkScrollbar` y enlace de selección (`_on_simbolo_seleccionado`)
-        #         para saltar a la línea de declaración en el editor.
-        self.tab_simbolos.grid_columnconfigure(0, weight=1)
-        self.tab_simbolos.grid_rowconfigure(0, weight=1)
-        ctk.CTkLabel(
-            self.tab_simbolos,
-            text="Tabla de Símbolos y Análisis Semántico — Pendiente para el Avance 3",
-            font=fuente_ui(12, negrita=False),
-            text_color=TEXT_SECONDARY,
-        ).grid(row=0, column=0, padx=20, pady=20)
 
+        self.tab_simbolos.grid_columnconfigure(0, weight=1)
+        self.tab_simbolos.grid_rowconfigure(1, weight=1)
+
+        header = ctk.CTkFrame(
+            self.tab_simbolos, fg_color=BG_MAIN, corner_radius=6, height=28
+        )
+        header.grid(row=0, column=0, sticky="ew", padx=2, pady=(0, 6))
+        header.grid_columnconfigure(0, weight=1)
+
+        self.lbl_contador_simbolos = ctk.CTkLabel(
+            header,
+            text="Tabla de Símbolos (0)",
+            font=fuente_ui(11),
+            text_color=TEXT_SECONDARY,
+        )
+        self.lbl_contador_simbolos.grid(row=0, column=0, padx=10, pady=3, sticky="w")
+
+        self.lbl_resumen_simbolos = ctk.CTkLabel(
+            header,
+            text="0 símbolos • 0 reglas validadas • 0 errores semánticos",
+            font=fuente_mono(11),
+            text_color=TEXT_SECONDARY,
+        )
+        self.lbl_resumen_simbolos.grid(row=0, column=1, padx=10, pady=3, sticky="e")
+
+        tree_frame = ctk.CTkFrame(
+            self.tab_simbolos,
+            fg_color=BG_EDITOR,
+            border_color=BORDER_PANEL,
+            border_width=1,
+            corner_radius=6,
+        )
+        tree_frame.grid(row=1, column=0, sticky="nsew", padx=2)
+        tree_frame.grid_columnconfigure(0, weight=1)
+        tree_frame.grid_rowconfigure(0, weight=1)
+
+        columnas_sim = [
+            ("indice", "#", 48, 40, False, "center"),
+            ("identificador", "Identificador", 150, 110, True, "w"),
+            ("categoria", "Categoria", 110, 90, False, "center"),
+            ("tipo_dato", "Tipo de Dato", 150, 110, True, "w"),
+            ("ambito", "Ambito", 130, 100, False, "w"),
+            ("linea", "Linea", 65, 50, False, "center"),
+        ]
+        self.tree_simbolos = ttk.Treeview(
+            tree_frame,
+            columns=[c[0] for c in columnas_sim],
+            show="headings",
+            style="Tokens.Treeview",
+            selectmode="browse",
+        )
+        for col, titulo, width, minw, stretch, anchor in columnas_sim:
+            self.tree_simbolos.heading(col, text=titulo, anchor=anchor)
+            self.tree_simbolos.column(
+                col, width=width, minwidth=minw, stretch=stretch, anchor=anchor
+            )
+
+        self.tree_simbolos.tag_configure("even", background=BG_EDITOR, foreground=TEXT_PRIMARY)
+        self.tree_simbolos.tag_configure("odd", background=BG_ROW_ALT, foreground=TEXT_PRIMARY)
+        self.tree_simbolos.grid(row=0, column=0, sticky="nsew", padx=(2, 0), pady=2)
+
+        scrollbar = ctk.CTkScrollbar(
+            tree_frame,
+            orientation="vertical",
+            command=self.tree_simbolos.yview,
+            fg_color=BG_EDITOR,
+            button_color=BORDER_PANEL,
+            button_hover_color="#3B4252",
+        )
+        scrollbar.grid(row=0, column=1, sticky="ns", padx=(0, 2), pady=2)
+        self.tree_simbolos.configure(yscrollcommand=scrollbar.set)
+        self.tree_simbolos.bind("<<TreeviewSelect>>", self._on_simbolo_seleccionado)
+
+    def _on_simbolo_seleccionado(self, _event: Any = None) -> None:
+        if not self._on_line_select:
+            return
+        sel = self.tree_simbolos.selection()
+        if sel:
+            valores = self.tree_simbolos.item(sel[0], "values")
+            if len(valores) >= 6:
+                try:
+                    self._on_line_select(int(valores[5]))
+                except ValueError:
+                    pass
     def _construir_consola_inferior(self) -> None:
         frame = ctk.CTkFrame(
             self,
@@ -428,13 +496,20 @@ class DiagnosticsPanel(ctk.CTkFrame):
         botones = self.tabview._segmented_button._buttons_dict
         if self.TAB_TOKENS in botones:
             botones[self.TAB_TOKENS].configure(text=txt_tokens)
-
+    
     def _actualizar_contador_sintactico(self, total_filas: int) -> None:
         txt_sin = f"Reglas Sintácticas ({total_filas})"
         self.lbl_contador_sintactico.configure(text=txt_sin)
         botones = self.tabview._segmented_button._buttons_dict
         if self.TAB_SINTACTICO in botones:
             botones[self.TAB_SINTACTICO].configure(text=txt_sin)
+
+    def _actualizar_contador_simbolos(self, total_filas: int) -> None:
+        txt_sim = f"Tabla de Símbolos ({total_filas})"
+        self.lbl_contador_simbolos.configure(text=txt_sim)
+        botones = self.tabview._segmented_button._buttons_dict
+        if self.TAB_SIMBOLOS in botones:
+            botones[self.TAB_SIMBOLOS].configure(text=txt_sim)
 
     def _escribir_consola(self, segmentos: list[tuple[str, str]]) -> None:
         self.consola_textbox.configure(state="normal")
@@ -458,7 +533,7 @@ class DiagnosticsPanel(ctk.CTkFrame):
             self.actualizar_estado_banner("ERROR_LEXICO")
         else:
             msg = (
-                "ESTADO DEL SISTEMA: Análisis léxico, sintáctico y semántico completado sin errores."
+                "ESTADO DEL SISTEMA: Analisis lexico, sintactico y semantico completado sin errores."
                 if modo_ejecucion_todo
                 else None
             )
@@ -481,18 +556,18 @@ class DiagnosticsPanel(ctk.CTkFrame):
             )
 
         self.lbl_resumen_tokens.configure(
-            text=f"{len(tokens)} válidos • {len(errores)} errores léxicos",
+            text=f"{len(tokens)} validos • {len(errores)} errores lexicos",
             text_color=ERROR_FG if tiene_errores else OK_FG,
         )
         self._actualizar_contador_tokens(len(filas))
 
         if not tiene_errores:
             segmentos = [
-                (f"[OK] Análisis Léxico: {len(tokens)} tokens reconocidos correctamente.\n", "ok")
+                (f"[OK] Analisis Lexico: {len(tokens)} tokens reconocidos correctamente.\n", "ok")
             ]
             if modo_ejecucion_todo:
                 segmentos.append((
-                    "[INFO] Ejecutando fase de Análisis Sintáctico LALR(1)...\n",
+                    "[INFO] Ejecutando fase de Analisis Sintactico LALR(1)...\n",
                     "info",
                 ))
         else:
@@ -513,9 +588,9 @@ class DiagnosticsPanel(ctk.CTkFrame):
             self.actualizar_estado_banner("ERROR_SINTACTICO")
         else:
             msg = (
-                "ESTADO DEL SISTEMA: Análisis léxico y sintáctico completado sin errores."
+                "ESTADO DEL SISTEMA: Analisis lexico y sintactico completado sin errores."
                 if modo_ejecucion_todo
-                else "ESTADO DEL SISTEMA: Análisis sintáctico LALR(1) completado sin errores."
+                else "ESTADO DEL SISTEMA: Analisis sintactico LALR(1) completado sin errores."
             )
             self.actualizar_estado_banner("VALIDO", mensaje_custom=msg)
 
@@ -551,7 +626,7 @@ class DiagnosticsPanel(ctk.CTkFrame):
 
         tiene_err_sin = bool(errores_sin)
         self.lbl_resumen_sintactico.configure(
-            text=f"{len(reglas)} reglas validadas • {len(errores_sin)} errores sintácticos",
+            text=f"{len(reglas)} reglas validadas • {len(errores_sin)} errores sintacticos",
             text_color=ERROR_FG if tiene_err_sin else OK_FG,
         )
         self._actualizar_contador_sintactico(len(filas))
@@ -560,7 +635,7 @@ class DiagnosticsPanel(ctk.CTkFrame):
         if modo_ejecucion_todo:
             if not errores_lex:
                 segmentos.append(
-                    (f"[OK] Análisis Léxico: {len(tokens)} tokens reconocidos correctamente.\n", "ok")
+                    (f"[OK] Analisis Lexico: {len(tokens)} tokens reconocidos correctamente.\n", "ok")
                 )
             else:
                 for el in errores_lex:
@@ -568,12 +643,12 @@ class DiagnosticsPanel(ctk.CTkFrame):
 
         if not errores_sin and not errores_lex:
             segmentos.append((
-                f"[OK] Análisis Sintáctico: Estructura gramatical LALR(1) válida ({len(reglas)} reglas verificadas).\n",
+                f"[OK] Analisis Sintactico: Estructura gramatical LALR(1) valida ({len(reglas)} reglas verificadas).\n",
                 "ok",
             ))
             if modo_ejecucion_todo:
                 segmentos.append((
-                    "[INFO] Análisis Semántico: Pendiente de integración (Avance 3).\n",
+                    "[INFO] Analisis Semantico: Pendiente de integración (Avance 3).\n",
                     "info",
                 ))
         else:
@@ -588,27 +663,112 @@ class DiagnosticsPanel(ctk.CTkFrame):
         self.actualizar_estado_banner("IDLE")
         self.tree_tokens.delete(*self.tree_tokens.get_children())
         self.tree_sintactico.delete(*self.tree_sintactico.get_children())
+        self.tree_simbolos.delete(*self.tree_simbolos.get_children())
         self.lbl_resumen_tokens.configure(
-            text="0 válidos • 0 errores léxicos", text_color=TEXT_SECONDARY
+            text="0 válidos • 0 errores lexicos", text_color=TEXT_SECONDARY
         )
         self.lbl_resumen_sintactico.configure(
-            text="0 reglas validadas • 0 errores sintácticos", text_color=TEXT_SECONDARY
+            text="0 reglas validadas • 0 errores sintacticos", text_color=TEXT_SECONDARY
+        )
+        self.lbl_resumen_simbolos.configure(
+            text="0 simbolos • 0 reglas validadas • 0 errores semanticos",
+            text_color=TEXT_SECONDARY,
         )
         self._actualizar_contador_tokens(0)
         self._actualizar_contador_sintactico(0)
+        self._actualizar_contador_simbolos(0)
         self._escribir_consola([(
-            "Consola lista. Cargue un archivo .go o escriba código en el editor y presione 'Léxico', 'Sintáctico' o '▶ Ejecutar Todo'.\n",
+            "Consola lista. Cargue un archivo .go o escriba codigo en el editor y presione 'Lexico', 'Sintactico', 'Semantico' o '▶ Ejecutar Todo'.\n",
             "info",
         )])
         self.tabview.set(self.TAB_TOKENS)
 
-    # TODO (Avance 3 - Paso 4.2 | Josué Pacheco @JosuePach3co):
-    #       - Implementar `def poblar_tabla_simbolos(self, simbolos: list[dict[str, Any]]) -> None`
-    #         para cargar las filas ordenadas en `self.tree_simbolos`.
-    #       - Implementar `def mostrar_resultados_semanticos(self, resultado: dict[str, Any], modo_ejecucion_todo: bool = False) -> None`
-    #         activando el estado del Banner (`"ERROR_SEMANTICO"` cuando existan errores
-    #         semánticos) e imprimiendo el detalle completo de errores semánticos en consola.
-    #       - Actualizar `limpiar_panel()` para limpiar `self.tree_simbolos` y `lbl_resumen_simbolos`.
+    def poblar_tabla_simbolos(self, simbolos: list[dict[str, Any]]) -> None:
+        self.tree_simbolos.delete(*self.tree_simbolos.get_children())
+        for pos, sim in enumerate(simbolos, start=1):
+            tag = "even" if pos % 2 == 0 else "odd"
+            self.tree_simbolos.insert(
+                "",
+                "end",
+                values=(
+                    pos,
+                    sim.get("nombre", ""),
+                    sim.get("categoria", ""),
+                    sim.get("tipo_dato", ""),
+                    sim.get("ambito", "global"),
+                    sim.get("linea", 1),
+                ),
+                tags=(tag,),
+            )
+        self._actualizar_contador_simbolos(len(simbolos))
+
+    def mostrar_resultados_semanticos(
+        self, resultado: dict[str, Any], modo_ejecucion_todo: bool = False
+    ) -> None:
+        simbolos: list[dict[str, Any]] = resultado.get("simbolos", [])
+        reglas_sem: list[dict[str, Any]] = resultado.get("reglas_semanticas", [])
+        errores_sem: list[dict[str, Any]] = resultado.get("errores", [])
+        errores_sin: list[dict[str, Any]] = resultado.get("errores_sintacticos", [])
+        errores_lex: list[dict[str, Any]] = resultado.get("errores_lexicos", [])
+        tokens: list[dict[str, Any]] = resultado.get("tokens", [])
+        reglas_sin: list[dict[str, Any]] = resultado.get("reglas_sintacticas", [])
+
+        self.poblar_tabla_simbolos(simbolos)
+
+        tiene_err_sem = bool(errores_sem)
+        self.lbl_resumen_simbolos.configure(
+            text=f"{len(simbolos)} símbolos • {len(reglas_sem)} reglas validadas • {len(errores_sem)} errores semánticos",
+            text_color=ERROR_FG if tiene_err_sem else OK_FG,
+        )
+
+        if errores_lex:
+            self.actualizar_estado_banner("ERROR_LEXICO")
+        elif errores_sin:
+            self.actualizar_estado_banner("ERROR_SINTACTICO")
+        elif tiene_err_sem:
+            self.actualizar_estado_banner("ERROR_SEMANTICO")
+        else:
+            msg = (
+                "ESTADO DEL SISTEMA: Analisis lexico, sintactico y semantico completado sin errores."
+                if modo_ejecucion_todo
+                else "ESTADO DEL SISTEMA: Analisis semantico completado sin errores."
+            )
+            self.actualizar_estado_banner("VALIDO", mensaje_custom=msg)
+
+        segmentos: list[tuple[str, str]] = []
+        if modo_ejecucion_todo:
+            if not errores_lex:
+                segmentos.append(
+                    (f"[OK] Analisis Lexico: {len(tokens)} tokens reconocidos correctamente.\n", "ok")
+                )
+            else:
+                for el in errores_lex:
+                    segmentos.append((f"{el['mensaje'].rstrip('.')}.\n", "error"))
+
+            if not errores_sin:
+                segmentos.append(
+                    (f"[OK] Analisis Sintactico: Estructura gramatical LALR(1) valida ({len(reglas_sin)} reglas verificadas).\n", "ok")
+                )
+            else:
+                for es in errores_sin:
+                    segmentos.append((f"{es['mensaje']}\n", "error"))
+
+        if not errores_lex and not errores_sin and not tiene_err_sem:
+            segmentos.append((
+                f"[OK] Analisis Semantico: {len(simbolos)} simbolos registrados y {len(reglas_sem)} comprobaciones semanticas validadas sin errores.\n",
+                "ok",
+            ))
+        else:
+            if not modo_ejecucion_todo:
+                for el in errores_lex:
+                    segmentos.append((f"{el['mensaje'].rstrip('.')}.\n", "error"))
+                for es in errores_sin:
+                    segmentos.append((f"{es['mensaje']}\n", "error"))
+            for esem in errores_sem:
+                segmentos.append((f"{esem['mensaje']}\n", "error"))
+
+        self._escribir_consola(segmentos)
+        self.tabview.set(self.TAB_SIMBOLOS)
     # =====================================================================
     # FIN APORTE: Josué Pacheco (@JosuePach3co)
     # =====================================================================

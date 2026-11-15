@@ -15,6 +15,7 @@ from src.gui import launch_gui
 from src.gui.log_exporter import (
     ejecutar_analisis_completo_codigo,
     ejecutar_analisis_lexico_codigo,
+    ejecutar_analisis_semantico_codigo,
     ejecutar_analisis_sintactico_codigo,
 )
 
@@ -22,8 +23,28 @@ from src.gui.log_exporter import (
 # =====================================================================
 # INICIO APORTE: Pablo Naranjo (@PabloNaranjoM)
 # =====================================================================
+def _imprimir_resumen_cli(fase: str, res: dict) -> None:
+    ruta = res["ruta_log"].as_posix()
+    if fase == "lexico":
+        print(
+            f"[LÉXICO] Tokens: {len(res['tokens'])} | "
+            f"Errores: {len(res['errores'])} | Log: {ruta}"
+        )
+    elif fase == "sintactico":
+        print(
+            f"[SINTÁCTICO] Reglas: {len(res['reglas'])} | "
+            f"Errores: {len(res['errores'])} | Log: {ruta}"
+        )
+    elif fase == "semantico":
+        print(
+            f"[SEMÁNTICO] Símbolos: {len(res['simbolos'])} | "
+            f"Reglas: {len(res['reglas_semanticas'])} | "
+            f"Errores: {len(res['errores'])} | Log: {ruta}"
+        )
+
+
 def ejecutar_modo_cli(ruta_archivo: str, autor: str, fase: str = "todo") -> None:
-    """Ejecuta el análisis indicado (`lexico`, `sintactico` o `todo`) desde consola."""
+    """Ejecuta el análisis indicado (`lexico`, `sintactico`, `semantico` o `todo`) desde consola."""
     path = Path(ruta_archivo)
     if not path.exists():
         print(f"Error: No se encontró el archivo '{ruta_archivo}'.", file=sys.stderr)
@@ -32,36 +53,17 @@ def ejecutar_modo_cli(ruta_archivo: str, autor: str, fase: str = "todo") -> None
     codigo = path.read_text(encoding="utf-8")
     nombre = path.as_posix()
 
-    if fase == "lexico":
-        res = ejecutar_analisis_lexico_codigo(codigo, autor, nombre)
-        print(
-            f"[LÉXICO] Tokens: {len(res['tokens'])} | "
-            f"Errores: {len(res['errores'])} | Log: {res['ruta_log'].as_posix()}"
-        )
-    elif fase == "sintactico":
-        res = ejecutar_analisis_sintactico_codigo(codigo, autor, nombre)
-        print(
-            f"[SINTÁCTICO] Reglas: {len(res['reglas'])} | "
-            f"Errores: {len(res['errores'])} | Log: {res['ruta_log'].as_posix()}"
-        )
-    # TODO (Avance 3 - Paso 4.3 | Pablo Naranjo @PabloNaranjoM):
-    #       - Agregar rama `elif fase == "semantico":` ejecutando
-    #         `ejecutar_analisis_semantico_codigo(codigo, autor, nombre)` y mostrando
-    #         símbolos, reglas validadas, errores semánticos y ruta del log.
-    #       - Actualizar la rama `else:` (modo `todo`) para imprimir también el resumen
-    #         de `completo["semantico"]`.
+    ejecutores = {
+        "lexico": ejecutar_analisis_lexico_codigo,
+        "sintactico": ejecutar_analisis_sintactico_codigo,
+        "semantico": ejecutar_analisis_semantico_codigo,
+    }
+    if fase in ejecutores:
+        _imprimir_resumen_cli(fase, ejecutores[fase](codigo, autor, nombre))
     else:
         completo = ejecutar_analisis_completo_codigo(codigo, autor, nombre)
-        r_lex = completo["lexico"]
-        r_sin = completo["sintactico"]
-        print(
-            f"[LÉXICO] Tokens: {len(r_lex['tokens'])} | "
-            f"Errores: {len(r_lex['errores'])} | Log: {r_lex['ruta_log'].as_posix()}"
-        )
-        print(
-            f"[SINTÁCTICO] Reglas: {len(r_sin['reglas'])} | "
-            f"Errores: {len(r_sin['errores'])} | Log: {r_sin['ruta_log'].as_posix()}"
-        )
+        for etapa in ("lexico", "sintactico", "semantico"):
+            _imprimir_resumen_cli(etapa, completo[etapa])
 
 
 def main() -> None:
@@ -71,11 +73,9 @@ def main() -> None:
     parser.add_argument("archivo", nargs="?", default="algoritmos/algoritmo1.go")
     parser.add_argument("autor", nargs="?", default="PabloNaranjoM")
     parser.add_argument("--cli", action="store_true", help="Ejecutar en modo consola")
-    # TODO (Avance 3 - Paso 4.3 | Pablo Naranjo @PabloNaranjoM):
-    #       Agregar `"semantico"` a `choices` en `--fase` (`["lexico", "sintactico", "semantico", "todo"]`).
     parser.add_argument(
         "--fase",
-        choices=["lexico", "sintactico", "todo"],
+        choices=["lexico", "sintactico", "semantico", "todo"],
         default="todo",
         help="Fase de análisis a ejecutar en modo CLI (por defecto: todo)",
     )

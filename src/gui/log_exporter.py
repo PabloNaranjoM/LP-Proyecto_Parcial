@@ -174,7 +174,7 @@ def ejecutar_analisis_completo_codigo(
     desarrollador: str,
     nombre_archivo: str = "editor_interactivo.go",
 ) -> dict[str, Any]:
-    """Ejecuta las fases léxica y sintáctica en secuencia y exporta ambos registros."""
+    """Ejecuta las fases léxica, sintáctica y semántica en secuencia y exporta sus registros."""
     res_lexico = ejecutar_analisis_lexico_codigo(
         codigo_fuente=codigo_fuente,
         desarrollador=desarrollador,
@@ -185,13 +185,21 @@ def ejecutar_analisis_completo_codigo(
         desarrollador=desarrollador,
         nombre_archivo=nombre_archivo,
     )
-    # TODO (Avance 3 - Paso 4.1 | Hivor Araujo @AraujoHivor):
-    #       Invocar `ejecutar_analisis_semantico_codigo(..., res_sintactico=res_sintactico)`
-    #       e incluir `"semantico"` dentro del diccionario retornado y en `valido`.
+    res_semantico = ejecutar_analisis_semantico_codigo(
+        codigo_fuente=codigo_fuente,
+        desarrollador=desarrollador,
+        nombre_archivo=nombre_archivo,
+        res_sintactico=res_sintactico,
+    )
     return {
         "lexico": res_lexico,
         "sintactico": res_sintactico,
-        "valido": res_lexico["valido"] and res_sintactico["valido"],
+        "semantico": res_semantico,
+        "valido": (
+            res_lexico["valido"]
+            and res_sintactico["valido"]
+            and res_semantico["valido"]
+        ),
     }
 # =====================================================================
 # FIN APORTE: Pablo Naranjo (@PabloNaranjoM)

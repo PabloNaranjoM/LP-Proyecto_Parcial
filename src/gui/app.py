@@ -22,6 +22,7 @@ from .editor_panel import CodeEditorPanel
 from .log_exporter import (
     ejecutar_analisis_completo_codigo,
     ejecutar_analisis_lexico_codigo,
+    ejecutar_analisis_semantico_codigo,
     ejecutar_analisis_sintactico_codigo,
 )
 from .theme import (
@@ -162,9 +163,7 @@ class GoAnalyzerApp(ctk.CTk):
         botones = [
             ("Léxico", lambda: self._ejecutar_lexico(False), BTN_PRIMARY, 90, 6),
             ("Sintáctico", self._ejecutar_sintactico, BTN_PRIMARY, 95, 6),
-            # TODO (Avance 3 - Paso 4.3 | Pablo Naranjo @PabloNaranjoM):
-            #       Conectar el botón "Semántico" a `self._ejecutar_semantico`.
-            ("Semántico", None, BTN_PRIMARY, 95, 8),
+            ("Semántico", self._ejecutar_semantico, BTN_PRIMARY, 95, 8),
             ("▶ Ejecutar Todo", self._ejecutar_todo, BTN_SUCCESS, 130, 0),
         ]
         for col, (texto, cmd, colores, ancho, pad_der) in enumerate(botones):
@@ -250,6 +249,16 @@ class GoAnalyzerApp(ctk.CTk):
             text="Sin registros generados en esta sesión", text_color=TEXT_MUTED
         )
 
+    def _actualizar_resaltado_errores(
+        self, lineas_err: list[int], enfocar_primera: bool = True
+    ) -> None:
+        if lineas_err:
+            self.editor_panel.resaltar_lineas_error(lineas_err)
+            if enfocar_primera:
+                self.editor_panel.ir_a_linea(lineas_err[0])
+        else:
+            self.editor_panel.limpiar_resaltado_errores()
+
     def _ejecutar_lexico(self, modo_todo: bool = False) -> None:
         resultado = ejecutar_analisis_lexico_codigo(
             codigo_fuente=self.editor_panel.obtener_codigo(),
@@ -258,10 +267,7 @@ class GoAnalyzerApp(ctk.CTk):
         )
 
         lineas_err = [e["linea"] for e in resultado["errores"]]
-        if lineas_err:
-            self.editor_panel.resaltar_lineas_error(lineas_err)
-        else:
-            self.editor_panel.limpiar_resaltado_errores()
+        self._actualizar_resaltado_errores(lineas_err, enfocar_primera=False)
 
         self.diagnostics_panel.mostrar_resultados_lexicos(
             resultado, modo_ejecucion_todo=modo_todo
@@ -278,24 +284,32 @@ class GoAnalyzerApp(ctk.CTk):
         lineas_err = [e["linea"] for e in resultado["errores"]] + [
             e["linea"] for e in resultado.get("errores_lexicos", [])
         ]
-        if lineas_err:
-            self.editor_panel.resaltar_lineas_error(lineas_err)
-            self.editor_panel.ir_a_linea(lineas_err[0])
-        else:
-            self.editor_panel.limpiar_resaltado_errores()
+        self._actualizar_resaltado_errores(lineas_err)
 
         self.diagnostics_panel.mostrar_resultados_sintacticos(
             resultado, modo_ejecucion_todo=False
         )
         self.lbl_log_badge.configure(text=resultado["nombre_log"], text_color=ACCENT)
 
-    # TODO (Avance 3 - Paso 4.3 | Pablo Naranjo @PabloNaranjoM):
-    #       - Implementar `_ejecutar_semantico(self) -> None` invocando
-    #         `ejecutar_analisis_semantico_codigo()`, resaltando líneas de error
-    #         semántico en `self.editor_panel` y llamando a
-    #         `self.diagnostics_panel.mostrar_resultados_semanticos()`.
-    #       - Actualizar `_ejecutar_todo()` para incluir `completo["semantico"]`,
-    #         resaltar errores de las 3 fases y mostrar los 3 nombres de log en `lbl_log_badge`.
+    def _ejecutar_semantico(self) -> None:
+        resultado = ejecutar_analisis_semantico_codigo(
+            codigo_fuente=self.editor_panel.obtener_codigo(),
+            desarrollador=self.desarrollador_var.get(),
+            nombre_archivo=self.editor_panel.obtener_nombre_archivo(),
+        )
+
+        lineas_err = [
+            e["linea"]
+            for clave in ("errores_lexicos", "errores_sintacticos", "errores")
+            for e in resultado.get(clave, [])
+        ]
+        self._actualizar_resaltado_errores(lineas_err)
+
+        self.diagnostics_panel.mostrar_resultados_semanticos(
+            resultado, modo_ejecucion_todo=False
+        )
+        self.lbl_log_badge.configure(text=resultado["nombre_log"], text_color=ACCENT)
+
     def _ejecutar_todo(self) -> None:
         completo = ejecutar_analisis_completo_codigo(
             codigo_fuente=self.editor_panel.obtener_codigo(),
@@ -304,15 +318,14 @@ class GoAnalyzerApp(ctk.CTk):
         )
         res_lex = completo["lexico"]
         res_sin = completo["sintactico"]
+        res_sem = completo["semantico"]
 
-        lineas_err = [e["linea"] for e in res_lex["errores"]] + [
-            e["linea"] for e in res_sin["errores"]
-        ]
-        if lineas_err:
-            self.editor_panel.resaltar_lineas_error(lineas_err)
-            self.editor_panel.ir_a_linea(lineas_err[0])
-        else:
-            self.editor_panel.limpiar_resaltado_errores()
+        lineas_err = (
+            [e["linea"] for e in res_lex["errores"]]
+            + [e["linea"] for e in res_sin["errores"]]
+            + [e["linea"] for e in res_sem["errores"]]
+        )
+        self._actualizar_resaltado_errores(lineas_err)
 
         self.diagnostics_panel.mostrar_resultados_lexicos(
             res_lex, modo_ejecucion_todo=True
@@ -320,8 +333,11 @@ class GoAnalyzerApp(ctk.CTk):
         self.diagnostics_panel.mostrar_resultados_sintacticos(
             res_sin, modo_ejecucion_todo=True
         )
+        self.diagnostics_panel.mostrar_resultados_semanticos(
+            res_sem, modo_ejecucion_todo=True
+        )
         self.lbl_log_badge.configure(
-            text=f"{res_lex['nombre_log']} • {res_sin['nombre_log']}",
+            text=f"{res_lex['nombre_log']} • {res_sin['nombre_log']} • {res_sem['nombre_log']}",
             text_color=ACCENT,
         )
 

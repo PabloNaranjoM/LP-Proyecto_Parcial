@@ -843,7 +843,7 @@ def p_llamada_funcion(p):
 def p_sentencia_impresion_ln(p):
     """sentencia_impresion : PAQUETE_FMT PUNTO IMPRIMIR_LN PAR_IZQ argumentos_opc PAR_DER"""
     registrar_regla(p, "sentencia_impresion")
-    p[0] = ("println", p[5])
+    p[0] = ("println", p[5], _linea_de_produccion(p))
 # =====================================================================
 # FIN APORTE: Hivor Araujo (@AraujoHivor)
 # =====================================================================

@@ -229,6 +229,138 @@ def registrar_validacion_semantica(
 #         resuelva a un tipo `struct` registrado en la tabla de símbolos y que
 #         `campo` pertenezca a su diccionario `campos_struct`.
 
+def resolver_tipo_referencia(nodo_ref, tabla_simbolos, contexto):
+    """RS-1: Comprueba que un identificador este declarado."""
+
+    # RS-1: Acceso a campos de una estructura
+    if isinstance(nodo_ref, tuple) and nodo_ref[0] == "campo":
+        base = nodo_ref[1]
+        campo = nodo_ref[2]
+        linea = nodo_ref[3]
+
+        # Obtener el tipo de la variable
+        tipo_base = resolver_tipo_referencia(
+            base, tabla_simbolos, contexto
+        )
+
+        if tipo_base == "error_tipo":
+            return "error_tipo"
+
+        # Buscar la definicion de la estructura
+        simbolo_struct = tabla_simbolos.buscar_visible(tipo_base)
+
+        if simbolo_struct is None or simbolo_struct.categoria != "tipo_struct":
+            registrar_error_semantico(
+                "identificadores",
+                linea,
+                f"El tipo '{tipo_base}' no es una estructura declarada",
+                contexto
+            )
+            return "error_tipo"
+
+        # Comprobar si el campo existe
+        if campo not in simbolo_struct.campos_struct:
+            registrar_error_semantico(
+                "identificadores",
+                linea,
+                f"El campo '{campo}' no existe en la estructura '{tipo_base}'",
+                contexto
+            )
+            return "error_tipo"
+
+        registrar_validacion_semantica(
+            linea,
+            "RS-1",
+            f"El campo '{campo}' existe en la estructura '{tipo_base}'",
+            contexto
+        )
+
+        return simbolo_struct.campos_struct[campo]
+
+    # RS-1: Acceso por indice a arreglos, slices o mapas
+    if isinstance(nodo_ref, tuple) and nodo_ref[0] == "indice":
+        base = nodo_ref[1]
+        indice = nodo_ref[2]
+        linea = nodo_ref[3]
+
+        # Obtener el tipo de la coleccion
+        tipo_base = resolver_tipo_referencia(
+            base, tabla_simbolos, contexto
+        )
+
+        # Obtener el tipo del indice
+        tipo_indice = evaluar_expresion(
+            indice, tabla_simbolos, contexto
+        )
+
+        if tipo_base == "error_tipo" or tipo_indice == "error_tipo":
+            return "error_tipo"
+
+        # Funcion ya implementada por Josue
+        tipos = obtener_tipos_iteracion_range(tipo_base)
+
+        if tipos is None:
+            registrar_error_semantico(
+                "identificadores",
+                linea,
+                f"El tipo '{tipo_base}' no permite acceso por indice",
+                contexto
+            )
+            return "error_tipo"
+
+        tipo_clave, tipo_elemento = tipos
+
+        if tipo_indice != tipo_clave:
+            registrar_error_semantico(
+                "identificadores",
+                linea,
+                f"El indice debe ser '{tipo_clave}', pero se recibio '{tipo_indice}'",
+                contexto
+            )
+            return "error_tipo"
+
+        registrar_validacion_semantica(
+            linea,
+            "RS-1",
+            f"Acceso por indice valido sobre '{tipo_base}'",
+            contexto
+        )
+
+        return tipo_elemento
+
+    if isinstance(nodo_ref, tuple) and nodo_ref[0] == "id":
+        nombre = nodo_ref[1]
+        linea = nodo_ref[2]
+
+    elif isinstance(nodo_ref, str):
+        nombre = nodo_ref
+        linea = 1
+
+    else:
+
+        return "error_tipo"
+
+    simbolo = tabla_simbolos.buscar_visible(nombre)
+
+    if simbolo is None:
+        registrar_error_semantico(
+            "identificadores",
+            linea,
+            f"El identificador '{nombre}' no ha sido declarado",
+            contexto
+        )
+        return "error_tipo"
+
+    registrar_validacion_semantica(
+        linea,
+        "RS-1",
+        f"El identificador '{nombre}' fue declarado previamente",
+        contexto
+    )
+
+    return simbolo.tipo_dato
+
+
 # TODO (RS-3 | Categoría: "asignación de tipo" - Compatibilidad estricta en asignaciones):
 #       Implementar los visitadores de declaraciones simples y cortas:
 #       - `visitar_declaracion_var(nodo, tabla_simbolos, contexto)`: validar que el
@@ -259,6 +391,802 @@ def registrar_validacion_semantica(
 #       - `visitar_sentencia_lectura(nodo, tabla_simbolos, contexto)`: validar
 #         en nodos `scanln` (`fmt.Scan` / `fmt.Scanln`) que cada referencia
 #         esté declarada previamente (RS-1) y sea mutable (no `const`, RS-3).
+
+def visitar_declaracion_var(nodo, tabla_simbolos, contexto):
+    """RS-3: Comprueba el tipo de una variable declarada."""
+
+    nombre = nodo[1]
+    tipo_declarado = nodo[2]
+    expresion = nodo[3]
+    linea = nodo[4]
+
+    # No se permiten variables de tipo void
+    if tipo_declarado == "void":
+        registrar_error_semantico(
+            "asignación de tipo",
+            linea,
+            f"La variable '{nombre}' no puede ser de tipo void",
+            contexto
+        )
+        return
+
+    # Si tiene un valor inicial, comprobar su tipo
+    if expresion is not None:
+        tipo_valor = evaluar_expresion(
+            expresion, tabla_simbolos, contexto
+        )
+
+        # Evitar registrar otro error si la expresion ya fallo
+        if tipo_valor == "error_tipo":
+            return
+
+        if tipo_declarado != tipo_valor:
+            registrar_error_semantico(
+                "asignación de tipo",
+                linea,
+                f"La variable '{nombre}' es de tipo '{tipo_declarado}', pero recibe '{tipo_valor}'",
+                contexto
+            )
+            return
+
+    # Registrar la variable en la tabla de simbolos
+    simbolo = Simbolo(
+        nombre=nombre,
+        categoria="variable",
+        tipo_dato=tipo_declarado,
+        ambito=tabla_simbolos.ambito_actual(),
+        linea=linea
+    )
+
+    registrado, existente = tabla_simbolos.declarar(simbolo)
+
+    if not registrado:
+        registrar_error_semantico(
+            "identificadores",
+            linea,
+            f"El identificador '{nombre}' ya existe en este alcance",
+            contexto
+        )
+        return
+
+    registrar_validacion_semantica(
+        linea,
+        "RS-3",
+        f"Variable '{nombre}' declarada correctamente como '{tipo_declarado}'",
+        contexto
+    )
+
+
+def visitar_declaracion_const(nodo, tabla_simbolos, contexto):
+    """RS-3: Valida el tipo y registra una constante."""
+
+    nombre = nodo[1]
+    tipo_declarado = nodo[2]
+    expresion = nodo[3]
+    linea = nodo[4]
+
+    # Obtener el tipo del valor de la constante
+    tipo_valor = evaluar_expresion(
+        expresion, tabla_simbolos, contexto
+    )
+
+    # No registrar constantes con expresiones incorrectas
+    if tipo_valor == "error_tipo":
+        return
+
+    if tipo_valor == "void":
+        registrar_error_semantico(
+            "asignación de tipo",
+            linea,
+            f"La constante '{nombre}' no puede tener tipo void",
+            contexto
+        )
+        return
+
+    # Comprobar el tipo cuando fue declarado explicitamente
+    if tipo_declarado is not None and tipo_declarado != tipo_valor:
+        registrar_error_semantico(
+            "asignación de tipo",
+            linea,
+            f"La constante '{nombre}' es de tipo '{tipo_declarado}', pero recibe '{tipo_valor}'",
+            contexto
+        )
+        return
+
+    # Si no se especifico el tipo, inferirlo
+    tipo_final = tipo_declarado if tipo_declarado is not None else tipo_valor
+
+    simbolo = Simbolo(
+        nombre=nombre,
+        categoria="constante",
+        tipo_dato=tipo_final,
+        ambito=tabla_simbolos.ambito_actual(),
+        linea=linea,
+        mutable=False
+    )
+
+    registrado, existente = tabla_simbolos.declarar(simbolo)
+
+    if not registrado:
+        registrar_error_semantico(
+            "identificadores",
+            linea,
+            f"El identificador '{nombre}' ya existe en este alcance",
+            contexto
+        )
+        return
+
+    registrar_validacion_semantica(
+        linea,
+        "RS-3",
+        f"Constante '{nombre}' declarada correctamente como '{tipo_final}'",
+        contexto
+    )
+
+
+def visitar_declaracion_var_inferencia(nodo, tabla_simbolos, contexto):
+    """RS-3: Infiere el tipo de una variable a partir de su valor."""
+
+    nombre = nodo[1]
+    expresion = nodo[2]
+    linea = nodo[3]
+
+    # Obtener el tipo del valor asignado
+    tipo_inferido = evaluar_expresion(
+        expresion, tabla_simbolos, contexto
+    )
+
+    # Si la expresion tiene errores, no registrar la variable
+    if tipo_inferido == "error_tipo":
+        return
+
+    # No se puede inferir una variable de tipo void
+    if tipo_inferido == "void":
+        registrar_error_semantico(
+            "asignación de tipo",
+            linea,
+            f"No se puede inferir el tipo de '{nombre}' desde una expresion sin valor",
+            contexto
+        )
+        return
+
+    # Crear la variable con el tipo obtenido
+    simbolo = Simbolo(
+        nombre=nombre,
+        categoria="variable",
+        tipo_dato=tipo_inferido,
+        ambito=tabla_simbolos.ambito_actual(),
+        linea=linea,
+        mutable=True
+    )
+
+    registrado, existente = tabla_simbolos.declarar(simbolo)
+
+    if not registrado:
+        registrar_error_semantico(
+            "identificadores",
+            linea,
+            f"El identificador '{nombre}' ya existe en este alcance",
+            contexto
+        )
+        return
+
+    registrar_validacion_semantica(
+        linea,
+        "RS-3",
+        f"Variable '{nombre}' declarada con tipo inferido '{tipo_inferido}'",
+        contexto
+    )
+
+
+def visitar_declaracion_corta(nodo, tabla_simbolos, contexto):
+    """RS-3: Valida una declaracion corta con :=."""
+
+    nombre = nodo[1]
+    expresion = nodo[2]
+    linea = nodo[3]
+
+    # Comprobar si ya existe en el mismo ambito
+    if tabla_simbolos.buscar_en_ambito_actual(nombre) is not None:
+        registrar_error_semantico(
+            "identificadores",
+            linea,
+            f"El identificador '{nombre}' ya existe en este alcance",
+            contexto
+        )
+        return
+
+    # Inferir el tipo de la expresion
+    tipo_inferido = evaluar_expresion(
+        expresion, tabla_simbolos, contexto
+    )
+
+    if tipo_inferido == "error_tipo":
+        return
+
+    if tipo_inferido == "void":
+        registrar_error_semantico(
+            "asignación de tipo",
+            linea,
+            f"No se puede declarar '{nombre}' con una expresion sin valor",
+            contexto
+        )
+        return
+
+    # Registrar la nueva variable
+    simbolo = Simbolo(
+        nombre=nombre,
+        categoria="variable",
+        tipo_dato=tipo_inferido,
+        ambito=tabla_simbolos.ambito_actual(),
+        linea=linea,
+        mutable=True
+    )
+
+    registrado, existente = tabla_simbolos.declarar(simbolo)
+
+    if not registrado:
+        registrar_error_semantico(
+            "identificadores",
+            linea,
+            f"El identificador '{nombre}' ya existe en este alcance",
+            contexto
+        )
+        return
+
+    registrar_validacion_semantica(
+        linea,
+        "RS-3",
+        f"Declaracion corta de '{nombre}' con tipo '{tipo_inferido}'",
+        contexto
+    )
+
+
+def visitar_asignacion(nodo, tabla_simbolos, contexto):
+    """RS-3: Valida asignaciones y evita modificar constantes."""
+
+    referencia = nodo[1]
+    expresion = nodo[2]
+    linea = nodo[3]
+
+    # Verificar que el destino exista y obtener su tipo
+    tipo_destino = resolver_tipo_referencia(
+        referencia, tabla_simbolos, contexto
+    )
+
+    if tipo_destino == "error_tipo":
+        return
+
+    # Obtener el identificador base de la referencia
+    base = referencia
+
+    while isinstance(base, tuple) and base[0] in ("campo", "indice"):
+        base = base[1]
+
+    if isinstance(base, tuple) and base[0] == "id":
+        nombre = base[1]
+    elif isinstance(base, str):
+        nombre = base
+    else:
+        return
+
+    simbolo = tabla_simbolos.buscar_visible(nombre)
+
+    # Comprobar que no sea una constante
+    if simbolo is not None and not simbolo.mutable:
+        registrar_error_semantico(
+            "asignación de tipo",
+            linea,
+            f"No se puede modificar la constante '{nombre}'",
+            contexto
+        )
+        return
+
+    # Obtener el tipo del nuevo valor
+    tipo_valor = evaluar_expresion(
+        expresion, tabla_simbolos, contexto
+    )
+
+    if tipo_valor == "error_tipo":
+        return
+
+    # Comparar los tipos sin conversiones implicitas
+    if tipo_destino != tipo_valor:
+        registrar_error_semantico(
+            "asignación de tipo",
+            linea,
+            f"No se puede asignar '{tipo_valor}' a '{nombre}' de tipo '{tipo_destino}'",
+            contexto
+        )
+        return
+
+    registrar_validacion_semantica(
+        linea,
+        "RS-3",
+        f"Asignacion valida a '{nombre}' de tipo '{tipo_destino}'",
+        contexto
+    )
+
+
+def visitar_asignacion_compuesta(nodo, tabla_simbolos, contexto):
+    """RS-3: Valida asignaciones como +=, -=, *=, /= y %=."""
+
+    operador = nodo[1]
+    referencia = nodo[2]
+    expresion = nodo[3]
+    linea = nodo[4]
+
+    # RS-1: Comprobar que el destino exista
+    tipo_destino = resolver_tipo_referencia(
+        referencia, tabla_simbolos, contexto
+    )
+
+    if tipo_destino == "error_tipo":
+        return
+
+    # Obtener el nombre de la variable base
+    base = referencia
+
+    while isinstance(base, tuple) and base[0] in ("campo", "indice"):
+        base = base[1]
+
+    if isinstance(base, tuple) and base[0] == "id":
+        nombre = base[1]
+    elif isinstance(base, str):
+        nombre = base
+    else:
+        return
+
+    simbolo = tabla_simbolos.buscar_visible(nombre)
+
+    # No se pueden modificar constantes
+    if simbolo is not None and not simbolo.mutable:
+        registrar_error_semantico(
+            "asignación de tipo",
+            linea,
+            f"No se puede modificar la constante '{nombre}'",
+            contexto
+        )
+        return
+
+    # Obtener el tipo del valor a asignar
+    tipo_valor = evaluar_expresion(
+        expresion, tabla_simbolos, contexto
+    )
+
+    if tipo_valor == "error_tipo":
+        return
+
+    # Convertir += en +, -= en -, etc.
+    operadores = {
+        "+=": "+",
+        "-=": "-",
+        "*=": "*",
+        "/=": "/",
+        "%=": "%"
+    }
+
+    if operador not in operadores:
+        registrar_error_semantico(
+            "asignación de tipo",
+            linea,
+            f"Operador de asignacion no reconocido: '{operador}'",
+            contexto
+        )
+        return
+
+    # Utilizar la validacion de operadores de Josue (RS-4)
+    tipo_resultado = validar_operacion_binaria(
+        operadores[operador],
+        tipo_destino,
+        tipo_valor,
+        linea,
+        contexto
+    )
+
+    if tipo_resultado == "error_tipo":
+        return
+
+    # El resultado debe coincidir con el tipo del destino
+    if tipo_resultado != tipo_destino:
+        registrar_error_semantico(
+            "asignación de tipo",
+            linea,
+            f"El resultado '{tipo_resultado}' no coincide con '{tipo_destino}'",
+            contexto
+        )
+        return
+
+    registrar_validacion_semantica(
+        linea,
+        "RS-3",
+        f"Asignacion '{operador}' valida sobre '{nombre}'",
+        contexto
+    )
+
+
+def visitar_sentencia_lectura(nodo, tabla_simbolos, contexto):
+    """RS-1 y RS-3: Valida las variables usadas en fmt.Scan y fmt.Scanln."""
+
+    referencias = nodo[1]
+    linea = nodo[2]
+
+    for referencia in referencias:
+
+        # Comprobar que exista la referencia
+        tipo = resolver_tipo_referencia(
+            referencia, tabla_simbolos, contexto
+        )
+
+        if tipo == "error_tipo":
+            continue
+
+        # Obtener el identificador principal
+        base = referencia
+
+        while isinstance(base, tuple) and base[0] in ("campo", "indice"):
+            base = base[1]
+
+        if isinstance(base, tuple) and base[0] == "id":
+            nombre = base[1]
+        elif isinstance(base, str):
+            nombre = base
+        else:
+            continue
+
+        simbolo = tabla_simbolos.buscar_visible(nombre)
+
+        # No se permite ingresar datos en constantes
+        if simbolo is not None and not simbolo.mutable:
+            registrar_error_semantico(
+                "asignación de tipo",
+                linea,
+                f"No se puede modificar la constante '{nombre}' mediante lectura",
+                contexto
+            )
+            continue
+
+        registrar_validacion_semantica(
+            linea,
+            "RS-3",
+            f"Lectura valida sobre '{nombre}' de tipo '{tipo}'",
+            contexto
+        )
+
+
+def visitar_declaraciones_compuestas(nodo, tabla_simbolos, contexto):
+    """RS-3: Valida arreglos, slices, mapas y estructuras."""
+
+    etiqueta = nodo[0]
+
+    # Primera parte: declaraciones de arreglos
+    if etiqueta == "arreglo":
+        nombre = nodo[1]
+        nodo_tamano = nodo[2]
+        tipo_elemento = nodo[3]
+        elementos = nodo[4]
+        linea = nodo[5]
+
+        # Por ahora trabajamos con tamaños enteros literales
+        if (
+            not isinstance(nodo_tamano, tuple)
+            or nodo_tamano[0] != "literal"
+            or nodo_tamano[1] != "int"
+            or type(nodo_tamano[2]) is not int
+            or nodo_tamano[2] < 0
+        ):
+            registrar_error_semantico(
+                "asignación de tipo",
+                linea,
+                f"El arreglo '{nombre}' debe tener un tamaño entero constante",
+                contexto
+            )
+            return "error_tipo"
+
+        tamano = nodo_tamano[2]
+
+        # Revisar los valores iniciales, si existen
+        if elementos is not None:
+
+
+            if len(elementos) > tamano:
+                registrar_error_semantico(
+                    "asignación de tipo",
+                    linea,
+                    f"El arreglo '{nombre}' admite maximo {tamano} elementos, pero recibe {len(elementos)}",
+                    contexto
+                )
+                return "error_tipo"
+
+
+            for elemento in elementos:
+                tipo_valor = evaluar_expresion(
+                    elemento, tabla_simbolos, contexto
+                )
+
+                if tipo_valor == "error_tipo":
+                    return "error_tipo"
+
+                if tipo_valor != tipo_elemento:
+                    registrar_error_semantico(
+                        "asignación de tipo",
+                        linea,
+                        f"El arreglo '{nombre}' espera '{tipo_elemento}', pero recibe '{tipo_valor}'",
+                        contexto
+                    )
+                    return "error_tipo"
+
+        # Crear el tipo del arreglo: [3]int
+        tipo_arreglo = f"[{tamano}]{tipo_elemento}"
+
+        simbolo = Simbolo(
+            nombre=nombre,
+            categoria="arreglo",
+            tipo_dato=tipo_arreglo,
+            ambito=tabla_simbolos.ambito_actual(),
+            linea=linea,
+            inicializado=True
+        )
+
+        registrado, existente = tabla_simbolos.declarar(simbolo)
+
+        if not registrado:
+            registrar_error_semantico(
+                "identificadores",
+                linea,
+                f"El identificador '{nombre}' ya existe en este alcance",
+                contexto
+            )
+            return "error_tipo"
+
+        registrar_validacion_semantica(
+            linea,
+            "RS-3",
+            f"Arreglo '{nombre}' declarado como '{tipo_arreglo}'",
+            contexto
+        )
+
+        return tipo_arreglo
+
+
+    # Segunda parte: declaraciones de slices
+    if etiqueta == "slice":
+        nombre = nodo[1]
+        tipo_elemento = nodo[2]
+        elementos = nodo[3]
+        linea = nodo[4]
+
+        # Comprobar que todos los elementos tengan el mismo tipo
+        for elemento in elementos:
+            tipo_valor = evaluar_expresion(
+                elemento, tabla_simbolos, contexto
+            )
+
+            if tipo_valor == "error_tipo":
+                return "error_tipo"
+
+            if tipo_valor != tipo_elemento:
+                registrar_error_semantico(
+                    "asignación de tipo",
+                    linea,
+                    f"El slice '{nombre}' espera '{tipo_elemento}', pero recibe '{tipo_valor}'",
+                    contexto
+                )
+                return "error_tipo"
+
+        # Construir el tipo del slice
+        tipo_slice = f"[]{tipo_elemento}"
+
+        simbolo = Simbolo(
+            nombre=nombre,
+            categoria="slice",
+            tipo_dato=tipo_slice,
+            ambito=tabla_simbolos.ambito_actual(),
+            linea=linea
+        )
+
+        registrado, existente = tabla_simbolos.declarar(simbolo)
+
+        if not registrado:
+            registrar_error_semantico(
+                "identificadores",
+                linea,
+                f"El identificador '{nombre}' ya existe en este alcance",
+                contexto
+            )
+            return "error_tipo"
+
+        registrar_validacion_semantica(
+            linea,
+            "RS-3",
+            f"Slice '{nombre}' declarado como '{tipo_slice}'",
+            contexto
+        )
+
+        return tipo_slice
+
+
+    # Tercera parte: declaraciones de mapas
+    if etiqueta == "mapa":
+        nombre = nodo[1]
+        tipo_clave = nodo[2]
+        tipo_valor = nodo[3]
+        elementos = nodo[4]
+        linea = nodo[5]
+
+        # Revisar cada pareja de clave y valor
+        for clave, valor in elementos:
+            tipo_clave_actual = evaluar_expresion(
+                clave, tabla_simbolos, contexto
+            )
+
+            tipo_valor_actual = evaluar_expresion(
+                valor, tabla_simbolos, contexto
+            )
+
+            # Evitar errores adicionales si una expresion fallo
+            if (
+                tipo_clave_actual == "error_tipo"
+                or tipo_valor_actual == "error_tipo"
+            ):
+                return "error_tipo"
+
+            # Comprobar el tipo de la clave
+            if tipo_clave_actual != tipo_clave:
+                registrar_error_semantico(
+                    "asignación de tipo",
+                    linea,
+                    f"El mapa '{nombre}' espera claves '{tipo_clave}', pero recibe '{tipo_clave_actual}'",
+                    contexto
+                )
+                return "error_tipo"
+
+            # Comprobar el tipo del valor
+            if tipo_valor_actual != tipo_valor:
+                registrar_error_semantico(
+                    "asignación de tipo",
+                    linea,
+                    f"El mapa '{nombre}' espera valores '{tipo_valor}', pero recibe '{tipo_valor_actual}'",
+                    contexto
+                )
+                return "error_tipo"
+
+        # Construir el tipo completo del mapa
+        tipo_mapa = f"map[{tipo_clave}]{tipo_valor}"
+
+        simbolo = Simbolo(
+            nombre=nombre,
+            categoria="mapa",
+            tipo_dato=tipo_mapa,
+            ambito=tabla_simbolos.ambito_actual(),
+            linea=linea
+        )
+
+        registrado, existente = tabla_simbolos.declarar(simbolo)
+
+        if not registrado:
+            registrar_error_semantico(
+                "identificadores",
+                linea,
+                f"El identificador '{nombre}' ya existe en este alcance",
+                contexto
+            )
+            return "error_tipo"
+
+        registrar_validacion_semantica(
+            linea,
+            "RS-3",
+            f"Mapa '{nombre}' declarado como '{tipo_mapa}'",
+            contexto
+        )
+
+        return tipo_mapa
+
+
+    # Cuarta parte: inicializacion de estructuras
+    if etiqueta == "struct_init":
+        referencia_tipo = nodo[1]
+        campos_iniciales = nodo[2]
+        linea = nodo[3]
+
+        # Obtener el nombre de la estructura
+        if isinstance(referencia_tipo, tuple) and referencia_tipo[0] == "id":
+            nombre_tipo = referencia_tipo[1]
+        elif isinstance(referencia_tipo, str):
+            nombre_tipo = referencia_tipo
+        else:
+            registrar_error_semantico(
+                "identificadores",
+                linea,
+                "Referencia de estructura no valida",
+                contexto
+            )
+            return "error_tipo"
+
+        # Buscar la definicion del struct
+        simbolo_struct = tabla_simbolos.buscar_visible(nombre_tipo)
+
+        if simbolo_struct is None or simbolo_struct.categoria != "tipo_struct":
+            registrar_error_semantico(
+                "identificadores",
+                linea,
+                f"La estructura '{nombre_tipo}' no ha sido declarada",
+                contexto
+            )
+            return "error_tipo"
+
+        campos_usados = set()
+
+        for clave, valor in campos_iniciales:
+            # La clave es el nombre de un campo, no una variable
+            if isinstance(clave, tuple) and clave[0] == "id":
+                nombre_campo = clave[1]
+            elif isinstance(clave, str):
+                nombre_campo = clave
+            else:
+                registrar_error_semantico(
+                    "identificadores",
+                    linea,
+                    f"Nombre de campo no valido en '{nombre_tipo}'",
+                    contexto
+                )
+                return "error_tipo"
+
+            # Comprobar que el campo exista
+            if nombre_campo not in simbolo_struct.campos_struct:
+                registrar_error_semantico(
+                    "identificadores",
+                    linea,
+                    f"El campo '{nombre_campo}' no existe en la estructura '{nombre_tipo}'",
+                    contexto
+                )
+                return "error_tipo"
+
+            # Evitar repetir un mismo campo
+            if nombre_campo in campos_usados:
+                registrar_error_semantico(
+                    "identificadores",
+                    linea,
+                    f"El campo '{nombre_campo}' esta repetido",
+                    contexto
+                )
+                return "error_tipo"
+
+            campos_usados.add(nombre_campo)
+
+            # Comparar el tipo del valor
+            tipo_esperado = simbolo_struct.campos_struct[nombre_campo]
+            tipo_actual = evaluar_expresion(
+                valor, tabla_simbolos, contexto
+            )
+
+            if tipo_actual == "error_tipo":
+                return "error_tipo"
+
+            if tipo_actual != tipo_esperado:
+                registrar_error_semantico(
+                    "asignación de tipo",
+                    linea,
+                    f"El campo '{nombre_campo}' espera '{tipo_esperado}', pero recibe '{tipo_actual}'",
+                    contexto
+                )
+                return "error_tipo"
+
+        registrar_validacion_semantica(
+            linea,
+            "RS-3",
+            f"Estructura '{nombre_tipo}' inicializada correctamente",
+            contexto
+        )
+
+        return nombre_tipo
+
+    return "error_tipo"
+
+
+
+
+
 # =====================================================================
 # FIN APORTE: Hivor Araujo (@AraujoHivor)
 # =====================================================================

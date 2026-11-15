@@ -1887,46 +1887,635 @@ def visitar_interrupcion_control(
 # =====================================================================
 # INICIO APORTE: Pablo Naranjo (@PabloNaranjoM)
 # =====================================================================
-# TODO (RS-2 | Categoría: "identificadores" - Unicidad en el alcance):
-#       Implementar `verificar_unicidad_alcance(nombre, linea, tabla_simbolos, contexto) -> bool`
-#       consultando `tabla_simbolos.buscar_en_ambito_actual(nombre)`:
-#       - Impedir la redeclaración de variables, constantes, parámetros, `struct`
-#         o funciones en el mismo ámbito actual (manteniendo shadowing válido en
-#         bloques internos anidados).
+def _extraer_linea_nodo(nodo: Any, por_defecto: int = 1) -> int:
+    """Obtiene la línea adjunta al final de una tupla AST cuando es entera."""
+    if isinstance(nodo, tuple) and nodo and isinstance(nodo[-1], int):
+        return nodo[-1]
+    return por_defecto
 
-# TODO (RS-5 | Categoría: "retorno de funciones" - Tipos de retorno, firmas y llamadas):
-#       Implementar el registro y validación de estructuras, funciones y llamadas:
-#       - `visitar_definicion_struct(nodo, tabla_simbolos, contexto)`: registrar
-#         `tipo_struct` en la tabla de símbolos y verificar unicidad de campos.
-#       - `visitar_declaracion_funcion(nodo, tabla_simbolos, contexto)`: registrar
-#         la firma en el ámbito global, abrir ámbito `func:<nombre>`, declarar
-#         parámetros formales (registrando parámetros variádicos `...T` como
-#         slice `[]T` dentro del cuerpo), fijar `funcion_actual` en el contexto
-#         y verificar que toda función con retorno distinto de `"void"` posea al
-#         menos una sentencia `return` válida.
-#       - `visitar_literal_funcion(nodo, tabla_simbolos, contexto) -> str`: al
-#         ser una función anónima, abrir ámbito temporal `func:anonima_<linea>`,
-#         validar parámetros y `return` (RS-5) y retornar su tipo firma (ej. `"func(int)->int"`).
-#       - `visitar_sentencia_retorno(nodo, tabla_simbolos, contexto)`: validar que
-#         `return` vacío corresponda a funciones `"void"` y `return expr` coincida
-#         estrictamente con el `tipo_retorno` declarado en la función actual.
-#       - `validar_llamada_funcion(nodo, tabla_simbolos, contexto) -> str`: validar
-#         llamadas a funciones declaradas por el usuario (y evaluar argumentos de
-#         los nodos `println` / `print` de `fmt`), verificando existencia previa
-#         (RS-1), cantidad y compatibilidad de tipos de argumentos (incluyendo
-#         soporte para parámetros variádicos `...T`).
 
-# TODO (Despachador del AST y Fachada Principal):
-#       - Implementar `visitar_nodo(nodo, tabla_simbolos, contexto)` para enrutar
-#         cada nodo del AST hacia su visitador correspondiente en las Secciones 1,
-#         2 y 3.
-#       - Implementar `analizar_semantica(codigo: str, res_sintactico: dict[str, Any] | None = None) -> dict[str, Any]`
-#         como punto de entrada público del analizador semántico, reutilizando
-#         `res_sintactico` cuando sea provisto para evitar doble parseo e invocando
-#         al parser solo si `res_sintactico is None`. Retornar un diccionario
-#         compatible con `log_exporter.py` y la GUI con las claves:
-#         `tokens`, `errores_lexicos`, `arbol`, `reglas_sintacticas`,
-#         `errores_sintacticos`, `simbolos`, `reglas_semanticas`, `errores` y `valido`.
+def _construir_firma_funcion(
+    parametros: list[tuple[str, str]],
+    tipo_retorno: str | None,
+) -> str:
+    """Construye la representación canónica `func(t1, t2)->ret` de una función."""
+    tipos_param = ", ".join(tipo for _, tipo in parametros)
+    ret = tipo_retorno if tipo_retorno else "void"
+    return f"func({tipos_param})->{ret}"
+
+
+def _descomponer_firma_funcion(
+    firma: str,
+) -> tuple[list[tuple[str, str]], str] | None:
+    """Extrae lista de parámetros sintéticos y tipo de retorno desde una firma."""
+    if not firma.startswith("func(") or ")->" not in firma:
+        return None
+    cuerpo_params, tipo_ret = firma[len("func("):].rsplit(")->", 1)
+    if not cuerpo_params.strip():
+        return [], tipo_ret
+    params = [
+        (f"arg{idx}", parte.strip())
+        for idx, parte in enumerate(cuerpo_params.split(","), start=1)
+        if parte.strip()
+    ]
+    return params, tipo_ret
+
+
+def verificar_unicidad_alcance(
+    nombre: str,
+    linea: int,
+    tabla_simbolos: TablaSimbolos,
+    contexto: dict[str, Any] | None = None,
+) -> bool:
+    """RS-2: Verifica que `nombre` no exista previamente en el ámbito actual."""
+    existente = tabla_simbolos.buscar_en_ambito_actual(nombre)
+    if existente is not None:
+        registrar_error_semantico(
+            "identificadores",
+            linea,
+            f"El identificador '{nombre}' ya fue declarado previamente en este bloque (línea {existente.linea}).",
+            contexto,
+        )
+        return False
+    return True
+
+
+def visitar_definicion_struct(
+    nodo: tuple[Any, ...],
+    tabla_simbolos: TablaSimbolos,
+    contexto: dict[str, Any],
+) -> None:
+    """RS-2 y RS-5: Registra un tipo `struct` y valida la unicidad de sus campos."""
+    nombre = str(nodo[1])
+    campos_crudos = nodo[2] or []
+    linea = _extraer_linea_nodo(nodo)
+
+    if not verificar_unicidad_alcance(nombre, linea, tabla_simbolos, contexto):
+        return
+
+    campos_struct: dict[str, str] = {}
+    tiene_error_campos = False
+    for campo_nombre, campo_tipo in campos_crudos:
+        if campo_nombre in campos_struct:
+            registrar_error_semantico(
+                "identificadores",
+                linea,
+                f"El campo '{campo_nombre}' está duplicado en la estructura '{nombre}'.",
+                contexto,
+            )
+            tiene_error_campos = True
+            continue
+        campos_struct[str(campo_nombre)] = str(campo_tipo)
+
+    if tiene_error_campos:
+        return
+
+    simbolo = Simbolo(
+        nombre=nombre,
+        categoria="tipo_struct",
+        tipo_dato=nombre,
+        ambito=tabla_simbolos.ambito_actual(),
+        linea=linea,
+        mutable=False,
+        inicializado=True,
+        campos_struct=campos_struct,
+    )
+    tabla_simbolos.declarar(simbolo)
+    registrar_validacion_semantica(
+        linea,
+        "RS-2 (Unicidad en el alcance)",
+        f"Estructura '{nombre}' declarada con {len(campos_struct)} campo(s).",
+        contexto,
+    )
+
+
+def _registrar_firma_funcion(
+    nodo: tuple[Any, ...],
+    tabla_simbolos: TablaSimbolos,
+    contexto: dict[str, Any],
+) -> Simbolo | None:
+    """Registra la firma de una función en el ámbito actual respetando RS-2."""
+    nombre = str(nodo[1])
+    parametros = [(str(n), str(t)) for n, t in (nodo[2] or [])]
+    tipo_retorno = str(nodo[3]) if nodo[3] else "void"
+    linea = _extraer_linea_nodo(nodo)
+
+    if not verificar_unicidad_alcance(nombre, linea, tabla_simbolos, contexto):
+        return None
+
+    firma = _construir_firma_funcion(parametros, tipo_retorno)
+    simbolo = Simbolo(
+        nombre=nombre,
+        categoria="funcion",
+        tipo_dato=firma,
+        ambito=tabla_simbolos.ambito_actual(),
+        linea=linea,
+        mutable=False,
+        inicializado=True,
+        parametros=parametros,
+        tipo_retorno=tipo_retorno,
+    )
+    tabla_simbolos.declarar(simbolo)
+    registrar_validacion_semantica(
+        linea,
+        "RS-2 (Unicidad en el alcance)",
+        f"Función '{nombre}' declarada con firma '{firma}'.",
+        contexto,
+    )
+    return simbolo
+
+
+def _declarar_parametros_en_ambito(
+    parametros: list[tuple[str, str]],
+    linea: int,
+    tabla_simbolos: TablaSimbolos,
+    contexto: dict[str, Any],
+) -> None:
+    """Declara los parámetros formales dentro del ámbito de la función."""
+    for nombre_param, tipo_param in parametros:
+        if not verificar_unicidad_alcance(nombre_param, linea, tabla_simbolos, contexto):
+            continue
+        tipo_interno = (
+            f"[]{tipo_param[3:]}"
+            if tipo_param.startswith("...")
+            else tipo_param
+        )
+        tabla_simbolos.declarar(
+            Simbolo(
+                nombre=nombre_param,
+                categoria="parametro",
+                tipo_dato=tipo_interno,
+                ambito=tabla_simbolos.ambito_actual(),
+                linea=linea,
+                mutable=True,
+                inicializado=True,
+            )
+        )
+
+
+def _ejecutar_cuerpo_funcion(
+    simbolo_func: Simbolo,
+    parametros: list[tuple[str, str]],
+    bloque: list[Any],
+    linea: int,
+    tabla_simbolos: TablaSimbolos,
+    contexto: dict[str, Any],
+    *,
+    etiqueta_funcion: str,
+) -> bool:
+    """Valida parámetros, cuerpo y retorno de una función aislando ámbito y contexto."""
+    func_anterior = contexto["funcion_actual"]
+    retorno_anterior = contexto["tiene_retorno"]
+    for_anterior = contexto["profundidad_for"]
+    switch_anterior = contexto["profundidad_switch"]
+
+    tabla_simbolos.entrar_ambito(f"func:{simbolo_func.nombre}")
+    contexto["funcion_actual"] = simbolo_func
+    contexto["tiene_retorno"] = False
+    contexto["profundidad_for"] = 0
+    contexto["profundidad_switch"] = 0
+
+    try:
+        _declarar_parametros_en_ambito(parametros, linea, tabla_simbolos, contexto)
+        for sentencia in bloque:
+            if isinstance(sentencia, tuple):
+                visitar_nodo(sentencia, tabla_simbolos, contexto)
+
+        tipo_retorno = simbolo_func.tipo_retorno or "void"
+        if tipo_retorno != "void" and not contexto["tiene_retorno"]:
+            registrar_error_semantico(
+                "retorno de funciones",
+                linea,
+                f"{etiqueta_funcion} no contiene una sentencia 'return' que devuelva el tipo esperado '{tipo_retorno}'.",
+                contexto,
+            )
+            return False
+        return True
+    finally:
+        tabla_simbolos.salir_ambito()
+        contexto["funcion_actual"] = func_anterior
+        contexto["tiene_retorno"] = retorno_anterior
+        contexto["profundidad_for"] = for_anterior
+        contexto["profundidad_switch"] = switch_anterior
+
+
+def visitar_declaracion_funcion(
+    nodo: tuple[Any, ...],
+    tabla_simbolos: TablaSimbolos,
+    contexto: dict[str, Any],
+    simbolo_preregistrado: Simbolo | None = None,
+) -> None:
+    """RS-2 y RS-5: Valida declaración, parámetros, cuerpo y retorno de funciones."""
+    nombre = str(nodo[1])
+    parametros = [(str(n), str(t)) for n, t in (nodo[2] or [])]
+    tipo_retorno = str(nodo[3]) if nodo[3] else "void"
+    bloque = nodo[4] or []
+    linea = _extraer_linea_nodo(nodo)
+
+    simbolo_func = (
+        simbolo_preregistrado
+        if simbolo_preregistrado is not None
+        else _registrar_firma_funcion(nodo, tabla_simbolos, contexto)
+    )
+    if simbolo_func is None:
+        return
+
+    valido = _ejecutar_cuerpo_funcion(
+        simbolo_func,
+        parametros,
+        bloque,
+        linea,
+        tabla_simbolos,
+        contexto,
+        etiqueta_funcion=f"La función '{nombre}'",
+    )
+    if valido and tipo_retorno == "void":
+        registrar_validacion_semantica(
+            linea,
+            "RS-5 (Retorno de funciones)",
+            f"Función '{nombre}' sin retorno ('void') validada.",
+            contexto,
+        )
+
+
+def visitar_literal_funcion(
+    nodo: tuple[Any, ...],
+    tabla_simbolos: TablaSimbolos,
+    contexto: dict[str, Any],
+) -> str:
+    """RS-5: Valida una función anónima en ámbito temporal y retorna su firma."""
+    parametros = [(str(n), str(t)) for n, t in (nodo[1] or [])]
+    tipo_retorno = str(nodo[2]) if nodo[2] else "void"
+    bloque = nodo[3] or []
+    linea = _extraer_linea_nodo(nodo)
+    firma = _construir_firma_funcion(parametros, tipo_retorno)
+
+    simbolo_anonima = Simbolo(
+        nombre=f"anonima_{linea}",
+        categoria="funcion",
+        tipo_dato=firma,
+        ambito=tabla_simbolos.ambito_actual(),
+        linea=linea,
+        mutable=False,
+        inicializado=True,
+        parametros=parametros,
+        tipo_retorno=tipo_retorno,
+    )
+
+    valido = _ejecutar_cuerpo_funcion(
+        simbolo_anonima,
+        parametros,
+        bloque,
+        linea,
+        tabla_simbolos,
+        contexto,
+        etiqueta_funcion="La función anónima",
+    )
+    if not valido:
+        return "error_tipo"
+
+    registrar_validacion_semantica(
+        linea,
+        "RS-5 (Retorno de funciones)",
+        f"Literal de función con firma '{firma}' validado.",
+        contexto,
+    )
+    return firma
+
+
+def visitar_sentencia_retorno(
+    nodo: tuple[Any, ...],
+    tabla_simbolos: TablaSimbolos,
+    contexto: dict[str, Any],
+) -> None:
+    """RS-5: Valida existencia y compatibilidad del tipo en sentencias `return`."""
+    expr = nodo[1]
+    linea = _extraer_linea_nodo(nodo)
+    funcion_actual: Simbolo | None = contexto.get("funcion_actual")
+
+    if funcion_actual is None:
+        registrar_error_semantico(
+            "retorno de funciones",
+            linea,
+            "La sentencia 'return' solo puede utilizarse dentro de una función.",
+            contexto,
+        )
+        return
+
+    tipo_esperado = funcion_actual.tipo_retorno or "void"
+    nombre_func = funcion_actual.nombre
+
+    if expr is None:
+        contexto["tiene_retorno"] = True
+        if tipo_esperado != "void":
+            registrar_error_semantico(
+                "retorno de funciones",
+                linea,
+                f"La función '{nombre_func}' debe retornar un valor de tipo '{tipo_esperado}'.",
+                contexto,
+            )
+            return
+        registrar_validacion_semantica(
+            linea,
+            "RS-5 (Retorno de funciones)",
+            f"Retorno vacío válido en función '{nombre_func}'.",
+            contexto,
+        )
+        return
+
+    tipo_ret = evaluar_expresion(expr, tabla_simbolos, contexto)
+    contexto["tiene_retorno"] = True
+
+    if tipo_ret == "error_tipo":
+        return
+
+    if tipo_esperado == "void":
+        registrar_error_semantico(
+            "retorno de funciones",
+            linea,
+            f"La función '{nombre_func}' no declara tipo de retorno pero intenta retornar un valor de tipo '{tipo_ret}'.",
+            contexto,
+        )
+        return
+
+    if tipo_ret != tipo_esperado:
+        registrar_error_semantico(
+            "retorno de funciones",
+            linea,
+            f"El valor retornado '{tipo_ret}' no coincide con el tipo esperado '{tipo_esperado}' en la función '{nombre_func}'.",
+            contexto,
+        )
+        return
+
+    registrar_validacion_semantica(
+        linea,
+        "RS-5 (Retorno de funciones)",
+        f"Retorno de tipo '{tipo_ret}' válido en '{nombre_func}'.",
+        contexto,
+    )
+
+
+def validar_llamada_funcion(
+    nodo: tuple[Any, ...],
+    tabla_simbolos: TablaSimbolos,
+    contexto: dict[str, Any],
+) -> str:
+    """RS-1 y RS-5: Valida llamadas a funciones de usuario y `fmt.Print`/`fmt.Println`."""
+    etiqueta = nodo[0]
+    linea = _extraer_linea_nodo(nodo)
+
+    if etiqueta in ("println", "print"):
+        argumentos = nodo[1] or []
+        nombre_fn = "fmt.Println" if etiqueta == "println" else "fmt.Print"
+        for arg in argumentos:
+            tipo_arg = evaluar_expresion(arg, tabla_simbolos, contexto)
+            if tipo_arg == "void":
+                registrar_error_semantico(
+                    "asignación de tipo",
+                    linea,
+                    f"La expresión pasada a '{nombre_fn}' no produce ningún valor (tipo 'void').",
+                    contexto,
+                )
+        registrar_validacion_semantica(
+            linea,
+            "RS-1 (Identificadores)",
+            f"Invocación a '{nombre_fn}' validada con {len(argumentos)} argumento(s).",
+            contexto,
+        )
+        return "void"
+
+    nombre = str(nodo[1])
+    argumentos = nodo[2] or []
+    simbolo = tabla_simbolos.buscar_visible(nombre)
+
+    if simbolo is None:
+        registrar_error_semantico(
+            "identificadores",
+            linea,
+            f"La función '{nombre}' no ha sido declarada en este alcance.",
+            contexto,
+        )
+        return "error_tipo"
+
+    if simbolo.categoria == "funcion":
+        parametros = list(simbolo.parametros)
+        tipo_retorno = simbolo.tipo_retorno or "void"
+    else:
+        descompuesta = _descomponer_firma_funcion(simbolo.tipo_dato)
+        if descompuesta is None:
+            registrar_error_semantico(
+                "identificadores",
+                linea,
+                f"El identificador '{nombre}' de tipo '{simbolo.tipo_dato}' no es una función invocable.",
+                contexto,
+            )
+            return "error_tipo"
+        parametros, tipo_retorno = descompuesta
+
+    es_variadica = bool(parametros and parametros[-1][1].startswith("..."))
+    if es_variadica:
+        min_args = len(parametros) - 1
+        if len(argumentos) < min_args:
+            registrar_error_semantico(
+                "retorno de funciones",
+                linea,
+                f"La función variádica '{nombre}' requiere al menos {min_args} argumento(s), pero recibió {len(argumentos)}.",
+                contexto,
+            )
+            return "error_tipo"
+    elif len(argumentos) != len(parametros):
+        registrar_error_semantico(
+            "retorno de funciones",
+            linea,
+            f"La función '{nombre}' espera {len(parametros)} argumento(s), pero recibió {len(argumentos)}.",
+            contexto,
+        )
+        return "error_tipo"
+
+    tiene_error_arg = False
+    for idx, arg in enumerate(argumentos):
+        tipo_arg = evaluar_expresion(arg, tabla_simbolos, contexto)
+        if tipo_arg == "error_tipo":
+            tiene_error_arg = True
+            continue
+
+        if es_variadica and idx >= len(parametros) - 1:
+            tipo_esperado = parametros[-1][1][3:]
+        else:
+            tipo_esperado = parametros[idx][1]
+
+        if tipo_arg != tipo_esperado:
+            registrar_error_semantico(
+                "asignación de tipo",
+                linea,
+                f"El argumento {idx + 1} de '{nombre}' espera '{tipo_esperado}', pero recibió '{tipo_arg}'.",
+                contexto,
+            )
+            tiene_error_arg = True
+
+    if tiene_error_arg:
+        return "error_tipo"
+
+    registrar_validacion_semantica(
+        linea,
+        "RS-5 (Retorno de funciones)",
+        f"Llamada a '{nombre}' válida (retorna '{tipo_retorno}').",
+        contexto,
+    )
+    return tipo_retorno
+
+
+def _visitar_raiz_programa(
+    elementos_top: list[Any],
+    tabla_simbolos: TablaSimbolos,
+    contexto: dict[str, Any],
+) -> None:
+    """Pre-registra structs y firmas de funciones globales, y luego recorre sus cuerpos."""
+    firmas_preregistradas: dict[int, Simbolo | None] = {}
+    structs_procesados: set[int] = set()
+
+    for elem in elementos_top:
+        if not isinstance(elem, tuple):
+            continue
+        if elem[0] == "struct":
+            visitar_definicion_struct(elem, tabla_simbolos, contexto)
+            structs_procesados.add(id(elem))
+        elif elem[0] in ("declaracion_funcion", "declaracion_funcion_variadica"):
+            firmas_preregistradas[id(elem)] = _registrar_firma_funcion(
+                elem, tabla_simbolos, contexto
+            )
+
+    for elem in elementos_top:
+        if not isinstance(elem, tuple):
+            continue
+        if id(elem) in structs_procesados:
+            continue
+        if elem[0] in ("declaracion_funcion", "declaracion_funcion_variadica"):
+            simbolo_pre = firmas_preregistradas.get(id(elem))
+            if simbolo_pre is not None:
+                visitar_declaracion_funcion(
+                    elem,
+                    tabla_simbolos,
+                    contexto,
+                    simbolo_preregistrado=simbolo_pre,
+                )
+            continue
+        visitar_nodo(elem, tabla_simbolos, contexto)
+
+
+_DESPACHADORES_AST: dict[str, Any] = {
+    # Sección 3 (Pablo): Structs, funciones, retorno y llamadas
+    "struct": visitar_definicion_struct,
+    "declaracion_funcion": visitar_declaracion_funcion,
+    "declaracion_funcion_variadica": visitar_declaracion_funcion,
+    "return": visitar_sentencia_retorno,
+    "llamada_funcion": validar_llamada_funcion,
+    "println": validar_llamada_funcion,
+    "print": validar_llamada_funcion,
+    # Sección 1 (Hivor): Declaraciones, asignaciones, compuestas y lectura
+    "declaracion_var": visitar_declaracion_var,
+    "declaracion_const": visitar_declaracion_const,
+    "declaracion_var_inferencia": visitar_declaracion_var_inferencia,
+    "declaracion_corta": visitar_declaracion_corta,
+    "asignacion": visitar_asignacion,
+    "asignacion_compuesta": visitar_asignacion_compuesta,
+    "scanln": visitar_sentencia_lectura,
+    "arreglo": visitar_declaraciones_compuestas,
+    "slice": visitar_declaraciones_compuestas,
+    "mapa": visitar_declaraciones_compuestas,
+    "struct_init": visitar_declaraciones_compuestas,
+    # Sección 2 (Josué): Control de flujo e interrupciones
+    "if": visitar_sentencia_if,
+    "for_infinito": visitar_sentencia_for,
+    "for_cond": visitar_sentencia_for,
+    "for_clasico": visitar_sentencia_for,
+    "for_range": visitar_sentencia_for,
+    "switch": visitar_sentencia_switch,
+    "interrupcion": visitar_interrupcion_control,
+}
+
+
+def visitar_nodo(
+    nodo: Any,
+    tabla_simbolos: TablaSimbolos,
+    contexto: dict[str, Any],
+) -> Any:
+    """Despachador general del AST hacia los visitadores de las Secciones 1, 2 y 3."""
+    if nodo is None or not isinstance(nodo, tuple):
+        return None
+
+    etiqueta = nodo[0]
+
+    if etiqueta == "programa":
+        _visitar_raiz_programa(nodo[3] or [], tabla_simbolos, contexto)
+        return None
+
+    if etiqueta == "fragmento":
+        _visitar_raiz_programa(nodo[1] or [], tabla_simbolos, contexto)
+        return None
+
+    if etiqueta == "import":
+        return None
+
+    if etiqueta == "incremento":
+        return validar_operacion_unaria(
+            str(nodo[1]),
+            nodo[2],
+            _extraer_linea_nodo(nodo),
+            tabla_simbolos,
+            contexto,
+        )
+
+    visitador = _DESPACHADORES_AST.get(etiqueta)
+    if visitador is not None:
+        return visitador(nodo, tabla_simbolos, contexto)
+
+    return evaluar_expresion(nodo, tabla_simbolos, contexto)
+
+
+def analizar_semantica(
+    codigo: str,
+    res_sintactico: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """
+    Fachada principal del Analizador Semántico.
+    Reutiliza `res_sintactico` si se provee (evitando doble parseo) e inspecciona
+    el AST para construir la tabla de símbolos y validar las reglas RS-1 a RS-6.
+    """
+    if res_sintactico is None:
+        from src.parser import analizar_sintaxis
+
+        res_sintactico = analizar_sintaxis(codigo)
+
+    tabla = TablaSimbolos()
+    contexto = crear_contexto_semantico(usar_globales=True)
+
+    arbol = res_sintactico.get("arbol")
+    if arbol is not None:
+        visitar_nodo(arbol, tabla, contexto)
+
+    errores_lexicos = list(res_sintactico.get("errores_lexicos", []))
+    errores_sintacticos = list(res_sintactico.get("errores", []))
+    errores_sem = list(contexto["errores"])
+
+    valido = (
+        not errores_lexicos
+        and not errores_sintacticos
+        and not errores_sem
+        and (arbol is not None or not codigo.strip())
+    )
+
+    return {
+        "tokens": list(res_sintactico.get("tokens", [])),
+        "errores_lexicos": errores_lexicos,
+        "arbol": arbol,
+        "reglas_sintacticas": list(res_sintactico.get("reglas", [])),
+        "errores_sintacticos": errores_sintacticos,
+        "simbolos": tabla.exportar_lista_diccionarios(),
+        "reglas_semanticas": list(contexto["reglas_semanticas"]),
+        "errores": errores_sem,
+        "valido": valido,
+    }
 # =====================================================================
 # FIN APORTE: Pablo Naranjo (@PabloNaranjoM)
 # =====================================================================

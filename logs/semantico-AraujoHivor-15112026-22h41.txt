@@ -1,0 +1,68 @@
+================================================================================
+REPORTE DE ANALISIS SEMANTICO - COMPILADOR GO (ESPOL)
+Archivo analizado: algoritmo2_semantico.go
+Fecha y hora: 15-11-2026 22:41:31
+Desarrollador: AraujoHivor
+================================================================================
+
+--- TABLA DE SIMBOLOS ---
+#    Identificador        Categoria       Tipo de Dato           Ambito             Linea
+1    Persona              tipo_struct     Persona                global             17
+2    main                 funcion         func()->void           global             22
+3    edad                 variable        int                    func:main          24
+4    limite               constante       int                    func:main          25
+5    nombre               variable        string                 func:main          32
+6    mensaje              variable        string                 func:main          33
+7    numeros              arreglo         [3]int                 func:main          36
+8    lista                slice           []int                  func:main          37
+9    edades               mapa            map[string]int         func:main          40
+10   persona              variable        Persona                func:main          43
+
+--- REGLAS SEMANTICAS VALIDADAS ---
+[Semántico - Línea 17] RS-2 (Unicidad en el alcance): Estructura 'Persona' declarada con 2 campo(s).
+[Semántico - Línea 22] RS-2 (Unicidad en el alcance): Función 'main' declarada con firma 'func()->void'.
+[Semántico - Línea 24] RS-3: Variable 'edad' declarada correctamente como 'int'
+[Semántico - Línea 25] RS-3: Constante 'limite' declarada correctamente como 'int'
+[Semántico - Línea 28] RS-1: El identificador 'edad' fue declarado previamente
+[Semántico - Línea 28] RS-3: Asignacion valida a 'edad' de tipo 'int'
+[Semántico - Línea 29] RS-1: El identificador 'edad' fue declarado previamente
+[Semántico - Línea 29] RS-4 (Operaciones permitidas): Operación '+' válida entre operandos 'int'.
+[Semántico - Línea 29] RS-3: Asignacion '+=' valida sobre 'edad'
+[Semántico - Línea 32] RS-3: Declaracion corta de 'nombre' con tipo 'string'
+[Semántico - Línea 33] RS-1: El identificador 'nombre' fue declarado previamente
+[Semántico - Línea 33] RS-3: Variable 'mensaje' declarada con tipo inferido 'string'
+[Semántico - Línea 36] RS-3: Arreglo 'numeros' declarado como '[3]int'
+[Semántico - Línea 37] RS-3: Slice 'lista' declarado como '[]int'
+[Semántico - Línea 40] RS-3: Mapa 'edades' declarado como 'map[string]int'
+[Semántico - Línea 43] RS-3: Estructura 'Persona' inicializada correctamente
+[Semántico - Línea 43] RS-3: Declaracion corta de 'persona' con tipo 'Persona'
+[Semántico - Línea 46] RS-1: El identificador 'edad' fue declarado previamente
+[Semántico - Línea 46] RS-1: El identificador 'limite' fue declarado previamente
+[Semántico - Línea 46] RS-1: El identificador 'mensaje' fue declarado previamente
+[Semántico - Línea 46] RS-1 (Identificadores): Invocación a 'fmt.Println' validada con 3 argumento(s).
+[Semántico - Línea 47] RS-1: El identificador 'numeros' fue declarado previamente
+[Semántico - Línea 47] RS-1: Acceso por indice valido sobre '[3]int'
+[Semántico - Línea 47] RS-1: El identificador 'lista' fue declarado previamente
+[Semántico - Línea 47] RS-1: Acceso por indice valido sobre '[]int'
+[Semántico - Línea 47] RS-1 (Identificadores): Invocación a 'fmt.Println' validada con 2 argumento(s).
+[Semántico - Línea 48] RS-1: El identificador 'edades' fue declarado previamente
+[Semántico - Línea 48] RS-1: Acceso por indice valido sobre 'map[string]int'
+[Semántico - Línea 48] RS-1 (Identificadores): Invocación a 'fmt.Println' validada con 1 argumento(s).
+[Semántico - Línea 49] RS-1: El identificador 'persona' fue declarado previamente
+[Semántico - Línea 49] RS-1: El campo 'nombre' existe en la estructura 'Persona'
+[Semántico - Línea 49] RS-1: El identificador 'persona' fue declarado previamente
+[Semántico - Línea 49] RS-1: El campo 'edad' existe en la estructura 'Persona'
+[Semántico - Línea 49] RS-1 (Identificadores): Invocación a 'fmt.Println' validada con 2 argumento(s).
+[Semántico - Línea 52] RS-1: El identificador 'edad' fue declarado previamente
+[Semántico - Línea 52] RS-3: Lectura valida sobre 'edad' de tipo 'int'
+[Semántico - Línea 22] RS-5 (Retorno de funciones): Función 'main' sin retorno ('void') validada.
+
+--- ERRORES SEMANTICOS DETECTADOS ---
+No se detectaron errores semanticos.
+
+================================================================================
+Simbolos registrados: 10
+Reglas validadas: 37
+Errores semanticos: 0
+Estado del analisis: VALIDO
+================================================================================

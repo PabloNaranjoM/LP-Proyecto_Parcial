@@ -1,0 +1,30 @@
+================================================================================
+REPORTE DE ANÁLISIS SINTÁCTICO - COMPILADOR GO (ESPOL)
+Archivo analizado: algoritmo2_error_sintactico.go
+Fecha y hora     : 15-11-2026 22:45:37
+Desarrollador    : AraujoHivor
+================================================================================
+
+--- REGLAS GRAMATICALES VALIDADAS ---
+[Línea  11] REGLA VALIDADA: declaracion_import
+[Línea  13] REGLA VALIDADA: declaracion_funcion
+[Línea  15] REGLA VALIDADA: declaracion_var
+[Línea  16] REGLA VALIDADA: declaracion_arreglo
+[Línea  17] REGLA VALIDADA: sentencia_impresion
+[Línea  20] REGLA VALIDADA: declaracion_var
+[Línea  26] REGLA VALIDADA: declaracion_var
+[Línea  29] REGLA VALIDADA: comparacion
+[Línea  30] REGLA VALIDADA: sentencia_impresion
+[Línea  40] REGLA VALIDADA: comparacion
+
+--- ERRORES SINTÁCTICOS DETECTADOS ---
+[Línea  20, Columna  22] Error sintáctico en la línea 20, columna 22: Token inesperado ';', se esperaba una expresión, delimitador o sentencia válida según la gramática de Go.
+[Línea  23, Columna  19] Error sintáctico en la línea 23, columna 19: Token inesperado 'int', se esperaba una expresión, delimitador o sentencia válida según la gramática de Go.
+[Línea  26, Columna  27] Error sintáctico en la línea 26, columna 27: Token inesperado '*', se esperaba una expresión, delimitador o sentencia válida según la gramática de Go.
+[Línea  29, Columna  22] Error sintáctico en la línea 29, columna 22: Token inesperado '{', se esperaba una expresión, delimitador o sentencia válida según la gramática de Go.
+[Línea  34, Columna  24] Error sintáctico en la línea 34, columna 24: Token inesperado ')', se esperaba completar la expresión o instrucción previa antes del delimitador de cierre.
+[Línea  40, Columna  19] Error sintáctico en la línea 40, columna 19: Token inesperado 'fmt', se esperaba una expresión, delimitador o sentencia válida según la gramática de Go.
+[Línea  43, Columna  26] Error sintáctico en la línea 43, columna 26: Token inesperado 'notas', se esperaba una expresión, delimitador o sentencia válida según la gramática de Go.
+================================================================================
+RESUMEN: Reglas Validadas: 10 | Errores Sintácticos: 7 | Estado: INVÁLIDO
+================================================================================

@@ -194,10 +194,6 @@ def p_sentencia(p):
 # =====================================================================
 # INICIO APORTE: Hivor Araujo (@AraujoHivor)
 # =====================================================================
-# TODO (Avance 3 - Paso 2.1 | Hivor Araujo @AraujoHivor):
-#       - Agregar regla `p_declaracion_const` para soportar declaraciones `const`
-#         (con y sin tipo explícito) adjuntando `linea`.
-#       - Adjuntar `linea` en `declaracion_var`.
 
 def p_declaracion_const(p):
     """declaracion_const : CONSTANTE ID tipo ASIGNACION expresion
@@ -260,11 +256,6 @@ def p_declaracion_corta(p):
 # =====================================================================
 # INICIO APORTE: Hivor Araujo (@AraujoHivor)
 # =====================================================================
-# TODO (Avance 3 - Paso 2.1 | Hivor Araujo @AraujoHivor):
-#       - Etiquetar `p_factor_literales` para distinguir literales de variables:
-#         ("literal", tipo_go, valor, linea) en enteros, flotantes, cadenas y booleanos.
-#       - Modificar `p_referencia` para etiquetar identificadores simples como
-#         ("id", nombre, linea) y agregar `linea` a `campo`, `indice`, `suma` y `multiplicacion`.
 def p_expresion_aritmetica_suma(p):
     """expresion_aritmetica : expresion_aritmetica SUMA termino"""
     registrar_regla(p, "expresion_aritmetica")
@@ -537,11 +528,6 @@ def p_post_sentencia(p):
 # =====================================================================
 # INICIO APORTE: Josué Pacheco (@JosuePach3co)
 # =====================================================================
-# TODO (Avance 3 - Paso 2.2 | Josué Pacheco @JosuePach3co):
-#       - Soportar `switch` sin expresión booleana (`SEGUN LLAVE_IZQ lista_casos LLAVE_DER`).
-#       - Adjuntar `linea` en todas las tuplas AST de sus bloques (`declaracion_var_inferencia`,
-#         `resta`, `or`, `and`, `not`, `switch`, `case`, `default`, `interrupcion`,
-#         `asignacion`, `asignacion_compuesta`, `incremento`, `slice` y `literal_funcion`).
 def p_sentencia_switch(p):
     """sentencia_switch : SEGUN expresion_booleana LLAVE_IZQ lista_casos LLAVE_DER
                         | SEGUN LLAVE_IZQ lista_casos LLAVE_DER"""

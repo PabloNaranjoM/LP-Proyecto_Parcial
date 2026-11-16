@@ -648,7 +648,7 @@ class DiagnosticsPanel(ctk.CTkFrame):
             ))
             if modo_ejecucion_todo:
                 segmentos.append((
-                    "[INFO] Analisis Semantico: Pendiente de integración (Avance 3).\n",
+                    "[INFO] Ejecutando fase de Analisis Semantico...\n",
                     "info",
                 ))
         else:

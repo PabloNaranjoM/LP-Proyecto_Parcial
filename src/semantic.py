@@ -215,19 +215,6 @@ def registrar_validacion_semantica(
 # =====================================================================
 # INICIO APORTE: Hivor Araujo (@AraujoHivor)
 # =====================================================================
-# TODO (RS-1 | Categoría: "identificadores" - Declaración previa obligatoria):
-#       Implementar `resolver_tipo_referencia(nodo_ref, tabla_simbolos, contexto) -> str`
-#       para resolver referencias en expresiones y receptores de asignación:
-#       - Identificadores simples ("id", nombre, linea) o str: validar con
-#         `tabla_simbolos.buscar_visible(nombre)` que exista declaración previa;
-#         caso contrario emitir Error Semántico de categoría "identificadores".
-#       - Indexaciones ("indice", base, indice, linea): verificar que la base sea
-#         arreglo `[N]T`, slice `[]T` o mapa `map[K]V`; validar que el índice
-#         sea `int` (en arreglos/slices) o compatible con la clave `K` (en mapas),
-#         y retornar el tipo del elemento o valor.
-#       - Acceso a campos ("campo", base, campo, linea): verificar que `base`
-#         resuelva a un tipo `struct` registrado en la tabla de símbolos y que
-#         `campo` pertenezca a su diccionario `campos_struct`.
 
 def resolver_tipo_referencia(nodo_ref, tabla_simbolos, contexto):
     """RS-1: Comprueba que un identificador este declarado."""
@@ -360,37 +347,6 @@ def resolver_tipo_referencia(nodo_ref, tabla_simbolos, contexto):
 
     return simbolo.tipo_dato
 
-
-# TODO (RS-3 | Categoría: "asignación de tipo" - Compatibilidad estricta en asignaciones):
-#       Implementar los visitadores de declaraciones simples y cortas:
-#       - `visitar_declaracion_var(nodo, tabla_simbolos, contexto)`: validar que el
-#         tipo explícito coincida estrictamente con la expresión inicial (sin
-#         coerción implícita `int` <-> `float64`) y prohibir tipo `void`.
-#       - `visitar_declaracion_const(nodo, tabla_simbolos, contexto)`: validar
-#         constantes con `mutable=False` y comprobar compatibilidad si lleva tipo.
-#       - `visitar_declaracion_var_inferencia(nodo, tabla_simbolos, contexto)`:
-#         inferir el tipo desde la expresión evaluada en `var x = expr`, evitando
-#         registrar variables con tipo `void` o `error_tipo`.
-#       - `visitar_declaracion_corta(nodo, tabla_simbolos, contexto)`: inferir el
-#         tipo en `x := expr` validando unicidad en el alcance (RS-2) y compatibilidad.
-
-# TODO (RS-3 | Declaraciones compuestas e instanciación de struct):
-#       Implementar `visitar_declaraciones_compuestas(nodo, tabla_simbolos, contexto)`
-#       para manejar las tuplas AST reales (`"arreglo"`, `"slice"`, `"mapa"`),
-#       verificando homogeneidad de elementos/claves/valores, y manejar
-#       `"struct_init"` evitando falsos positivos de RS-1 sobre sus claves
-#       nominales al validarlas directamente contra `campos_struct` del `struct`.
-
-# TODO (RS-3 | Asignaciones, inmutabilidad y lectura por consola):
-#       Implementar:
-#       - `visitar_asignacion(nodo, tabla_simbolos, contexto)`: verificar existencia
-#         previa del receptor (RS-1), impedir reasignación sobre símbolos con
-#         `mutable == False` (`const`) y validar igualdad estricta de tipos.
-#       - `visitar_asignacion_compuesta(nodo, tabla_simbolos, contexto)`: validar
-#         `+=`, `-=`, `*=`, `/=`, `%=` según mutabilidad y tipos permitidos.
-#       - `visitar_sentencia_lectura(nodo, tabla_simbolos, contexto)`: validar
-#         en nodos `scanln` (`fmt.Scan` / `fmt.Scanln`) que cada referencia
-#         esté declarada previamente (RS-1) y sea mutable (no `const`, RS-3).
 
 def visitar_declaracion_var(nodo, tabla_simbolos, contexto):
     """RS-3: Comprueba el tipo de una variable declarada."""
@@ -1199,53 +1155,6 @@ def visitar_declaraciones_compuestas(nodo, tabla_simbolos, contexto):
 # =====================================================================
 # INICIO APORTE: Josué Pacheco (@JosuePach3co)
 # =====================================================================
-# TODO (Evaluador Recursivo de Expresiones):
-#       Implementar `evaluar_expresion(nodo, tabla_simbolos, contexto) -> str`
-#       para deducir el tipo resultante de cualquier nodo de expresión del AST:
-#       - Literales etiquetados ("literal", tipo_go, valor, linea): "int",
-#         "float64", "string", "bool".
-#       - Referencias ("id", ...), ("campo", ...), ("indice", ...): delegar a
-#         `resolver_tipo_referencia()`.
-#       - Llamadas ("llamada_funcion", ...), literales compuestos, operaciones
-#         binarias y unarias. Propagar `"error_tipo"` cuando un subárbol ya
-#         reportó error para evitar falsos positivos en cascada.
-
-# TODO (RS-4 | Categoría: "operaciones permitidas" - Coherencia de tipos en operaciones):
-#       Implementar `validar_operacion_binaria(operador, tipo_izq, tipo_der, linea, contexto) -> str`
-#       y `validar_operacion_unaria(operador, operando, linea, tabla_simbolos, contexto) -> str`:
-#       - `+`: permitido entre `int + int`, `float64 + float64` o `string + string`.
-#       - `-`, `*`, `/`: permitidos únicamente entre tipos numéricos iguales
-#         (`int` con `int` o `float64` con `float64`), sin promoción implícita.
-#       - `%`: exclusivo para `int` con `int`.
-#       - Relacionales (`<`, `>`, `<=`, `>=`): ambos operandos del mismo tipo
-#         comparable (`int`, `float64` o `string`) -> retorna `"bool"`.
-#       - Igualdad (`==`, `!=`): operandos de tipos iguales compatibles -> `"bool"`.
-#       - Lógicos (`&&`, `||`) y unario `!`: exclusivos de `"bool"` -> `"bool"`.
-#       - Unario `-`: exclusivo de tipos numéricos (`int`, `float64`).
-#       - Unario `&`: si aparece como nodo `("unario", "&", ref, ...)`, validar
-#         existencia de `ref` (RS-1) sin introducir tipos puntero `*T`.
-#       - Incremento/decremento (`++`, `--` en nodo `incremento`): exigir variable
-#         declarada, mutable (`mutable=True`) y de tipo numérico (`int` o `float64`).
-
-# TODO (RS-6 | Categoría: "estructuras de control" - Validez lógica de flujos e interrupciones):
-#       Implementar los visitadores de bloques y estructuras de control gestionando
-#       la pila de ámbitos y los contadores `profundidad_for` / `profundidad_switch`:
-#       - `visitar_bloque(lista_sentencias, tabla_simbolos, contexto)`: recibir
-#         la `list` de sentencias que entrega `p_bloque`, abrir un ámbito léxico
-#         propio, recorrer cada sentencia y cerrar el ámbito en un bloque `try/finally`.
-#       - `visitar_sentencia_if(nodo, tabla_simbolos, contexto)`: validar que la
-#         condición sea estrictamente `"bool"` y recorrer ramas `then` y `else`.
-#       - `visitar_sentencia_for(nodo, tabla_simbolos, contexto)` y el helper
-#         `obtener_tipos_iteracion_range(tipo_coleccion)`: manejar variantes
-#         `for` infinito, `for_cond`, `for_clasico` (condición `"bool"`) y
-#         `for_range` (`[N]T`/`[]T` -> `(int, T)` y `map[K]V` -> `(K, V)`),
-#         actualizando `profundidad_for`.
-#       - `visitar_sentencia_switch(nodo, tabla_simbolos, contexto)`: actualizar
-#         `profundidad_switch`, validar que cada expresión de `case` sea compatible
-#         con la expresión selector (o `"bool"` en switch sin expresión).
-#       - `visitar_interrupcion_control(nodo, tabla_simbolos, contexto)`: validar
-#         `break` (`profundidad_for > 0` o `profundidad_switch > 0`), `continue`
-#         (`profundidad_for > 0`) y `fallthrough` (`profundidad_switch > 0`).
 
 def _extraer_linea(nodo: Any, por_defecto: int = 1) -> int:
     """Obtiene de forma segura la línea adjunta al final de una tupla AST."""

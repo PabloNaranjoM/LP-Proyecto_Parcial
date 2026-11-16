@@ -8,18 +8,97 @@ package main
  * Responsable: Pablo Naranjo (@PabloNaranjoM)
  *
  * Descripción:
- * Plantilla base para el algoritmo de prueba semántica válido 1.
- * No utilizar el identificador en blanco '_' (usar identificadores nombrados).
+ * Programa válido en Go enfocado en validar RS-2 (unicidad en el alcance
+ * y shadowing entre ámbitos) y RS-5 (definición de structs, funciones
+ * tipadas, variádicas sin '_', funciones void con return vacío, literales
+ * de función y llamadas válidas).
  */
 
+import "fmt"
+
+// Ámbito global único (RS-2)
+const bonoBase int = 5
+
+var etiquetaGlobal string = "ESPOL"
+
+// Definición de struct con campos únicos (RS-2 / RS-5)
+type Estudiante struct {
+	nombre    string
+	matricula int
+	promedio  float64
+}
+
+// Función void con return vacío temprano (RS-5)
+func registrarAviso(activo bool) {
+	if !activo {
+		return
+	}
+	fmt.Println("Aviso:", etiquetaGlobal)
+}
+
+// Función variádica sin identificador '_' (RS-5)
+func acumularPuntos(base int, extras ...int) int {
+	total := base
+	for idx, valor := range extras {
+		if idx >= 0 {
+			total += valor
+		}
+	}
+	return total
+}
+
+// Función con retorno bool que invoca a otra declarada más abajo (pre-registro RS-5)
+func esAprobado(nota float64, limite float64) bool {
+	if nota >= limite {
+		return true
+	}
+	return false
+}
+
 func main() {
-	// TODO (Pablo Naranjo): Implementar programa en Go semánticamente válido
-	//       cubriendo principalmente las reglas definidas por el responsable:
-	//       - RS-2 (Unicidad en el alcance): declaración única por ámbito y
-	//         shadowing válido dentro de bloques internos (`if` / `for` / `{}`).
-	//       - RS-5 (Retorno de funciones y llamadas): definición de `struct`,
-	//         funciones con tipo de retorno explícito (`int`, `string`, `bool`),
-	//         funciones variádicas (`valores ...int` iterado con `for idx, v := range valores`),
-	//         funciones `void` con `return` vacío (opcional) y llamadas con aridad
-	//         y tipos de argumentos correctos.
+	// Shadowing válido: 'etiquetaGlobal' local oculta la global sin conflicto RS-2
+	etiquetaGlobal := 2026
+	fmt.Println("Periodo local:", etiquetaGlobal)
+
+	// Instanciación de struct sin comillas en los nombres de campo
+	alumno := Estudiante{
+		nombre:    "Pablo",
+		matricula: 202601,
+		promedio:  9.15,
+	}
+
+	// Literal de función (ámbito propio y firma funcional)
+	duplicar := func(n int) int {
+		return n * 2
+	}
+
+	// Invocaciones con aridad y tipos exactos (RS-5)
+	registrarAviso(false)
+	registrarAviso(true)
+
+	puntosBase := duplicar(bonoBase)
+	puntajeTotal := acumularPuntos(puntosBase, 10, 15, 20)
+	aprobado := esAprobado(alumno.promedio, 7.0)
+	resumen := construirResumen(alumno.nombre, puntajeTotal, aprobado)
+
+	// Shadowing válido dentro de bloque if y bloque for (RS-2)
+	estado := "pendiente"
+	if aprobado {
+		estado := 100
+		fmt.Println("Estado interno if:", estado)
+	}
+	for paso := 0; paso < 2; paso++ {
+		estado := true
+		fmt.Println("Iteración", paso, "-> activo:", estado)
+	}
+
+	fmt.Println(resumen, "-> estado externo:", estado)
+}
+
+// Función declarada después de main() para comprobar el pre-registro de firmas
+func construirResumen(nombre string, puntos int, aprobado bool) string {
+	if aprobado {
+		return nombre + " aprobado"
+	}
+	return nombre + " reprobado"
 }

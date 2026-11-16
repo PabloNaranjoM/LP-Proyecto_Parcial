@@ -18,8 +18,8 @@ type Estudiante struct {
 
 func sumarPuntos(valores ...int) int {
 	total := 0
-	for _, v := range valores {
-		total = total + v
+	for idx, v := range valores {
+		total = total + v + (idx * 0)
 	}
 	return total
 }
@@ -37,9 +37,9 @@ func main() {
 	}
 
 	alumno := Estudiante{
-		"nombre":    nombre,
-		"matricula": 202601,
-		"promedio":  9.25,
+		nombre:    nombre,
+		matricula: 202601,
+		promedio:  9.25,
 	}
 
 	residuo := (edad + 10) / 3 % 2

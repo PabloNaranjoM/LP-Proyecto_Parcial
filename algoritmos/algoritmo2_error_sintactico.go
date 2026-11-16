@@ -11,15 +11,34 @@ package main
 import "fmt"
 
 func main() {
-	var edad int = 25
-	notas := [3]int{10, 9, 8}
+    // Instrucciones correctas para dar contexto a la prueba.
+    var edad int = 25
+    notas := [3]int{10, 9, 8}
+    fmt.Println("Edad:", edad, "Primera nota:", notas[0])
 
-	// Error sintáctico 1: declaración explícita 'var' sin expresión tras '='
-	var limite int = ;
+    // Error sintactico 1: falta la expresion despues del signo igual.
+    var limite int = ;
 
-	// Error sintáctico 2: declaración de arreglo sin corchete de cierre ']'
-	var edades [3 int;
+    // Error sintactico 2: falta cerrar el corchete del arreglo.
+    var edades [3 int;
 
-	// Error sintáctico 3: expresión aritmética incompleta con doble operador
-	var suma int = edad + * 5;
+    // Error sintactico 3: hay dos operadores seguidos, sin operando.
+    var suma int = edad + * 5;
+
+    // Error sintactico 4: la condicion del if termina en &&.
+    if edad >= 18 && {
+        fmt.Println("Mayor de edad")
+    }
+
+    // Error sintactico 5: coma final sin otro argumento en Println.
+    fmt.Println("Hola",)
+
+    // Error sintactico 6: asignacion sin valor a la derecha.
+    edad = ;
+
+    // Error sintactico 7: falta un bloque entre llaves en el if.
+    if edad >= 18 fmt.Println("Adulto")
+
+    // Error sintactico 8: falta la coma entre dos argumentos.
+    fmt.Println("Notas:" notas[0])
 }

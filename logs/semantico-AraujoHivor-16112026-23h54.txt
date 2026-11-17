@@ -1,0 +1,137 @@
+================================================================================
+REPORTE DE ANALISIS SEMANTICO - COMPILADOR GO (ESPOL)
+Archivo analizado: algoritmo_general_hivor_valido.go
+Fecha y hora: 16-11-2026 23:54:53
+Desarrollador: AraujoHivor
+================================================================================
+
+--- TABLA DE SIMBOLOS ---
+#    Identificador        Categoria       Tipo de Dato           Ambito             Linea
+1    Persona              tipo_struct     Persona                global             14
+2    calcularArea         funcion         func(int, int)->int    global             20
+3    main                 funcion         func()->void           global             24
+4    base                 parametro       int                    func:calcularArea  20
+5    altura               parametro       int                    func:calcularArea  20
+6    edad                 variable        int                    func:main          26
+7    nombre               variable        string                 func:main          27
+8    promedio             variable        float64                func:main          28
+9    activo               variable        bool                   func:main          29
+10   auxiliar             variable        int                    func:main          30
+11   limite               constante       int                    func:main          31
+12   mensaje              variable        string                 func:main          32
+13   apodo                variable        string                 func:main          33
+14   edades               arreglo         [3]int                 func:main          36
+15   numeros              arreglo         [3]int                 func:main          37
+16   notas                slice           []int                  func:main          38
+17   edadesPorNombre      mapa            map[string]int         func:main          39
+18   persona              variable        Persona                func:main          40
+19   total                variable        int                    func:main          43
+20   area                 variable        int                    func:main          44
+21   saludo               variable        string                 func:main          45
+
+--- REGLAS SEMANTICAS VALIDADAS ---
+[Semántico - Línea 14] RS-2 (Unicidad en el alcance): Estructura 'Persona' declarada con 2 campo(s).
+[Semántico - Línea 20] RS-2 (Unicidad en el alcance): Función 'calcularArea' declarada con firma 'func(int, int)->int'.
+[Semántico - Línea 24] RS-2 (Unicidad en el alcance): Función 'main' declarada con firma 'func()->void'.
+[Semántico - Línea 21] RS-1: El identificador 'base' fue declarado previamente
+[Semántico - Línea 21] RS-1: El identificador 'altura' fue declarado previamente
+[Semántico - Línea 21] RS-4 (Operaciones permitidas): Operación '*' válida entre operandos 'int'.
+[Semántico - Línea 21] RS-5 (Retorno de funciones): Retorno de tipo 'int' válido en 'calcularArea'.
+[Semántico - Línea 26] RS-3: Variable 'edad' declarada correctamente como 'int'
+[Semántico - Línea 27] RS-3: Variable 'nombre' declarada correctamente como 'string'
+[Semántico - Línea 28] RS-3: Variable 'promedio' declarada correctamente como 'float64'
+[Semántico - Línea 29] RS-3: Variable 'activo' declarada correctamente como 'bool'
+[Semántico - Línea 30] RS-3: Variable 'auxiliar' declarada correctamente como 'int'
+[Semántico - Línea 31] RS-3: Constante 'limite' declarada correctamente como 'int'
+[Semántico - Línea 32] RS-1: El identificador 'nombre' fue declarado previamente
+[Semántico - Línea 32] RS-3: Variable 'mensaje' declarada con tipo inferido 'string'
+[Semántico - Línea 33] RS-3: Declaracion corta de 'apodo' con tipo 'string'
+[Semántico - Línea 36] RS-3: Arreglo 'edades' declarado como '[3]int'
+[Semántico - Línea 37] RS-3: Arreglo 'numeros' declarado como '[3]int'
+[Semántico - Línea 38] RS-3: Slice 'notas' declarado como '[]int'
+[Semántico - Línea 39] RS-3: Mapa 'edadesPorNombre' declarado como 'map[string]int'
+[Semántico - Línea 40] RS-3: Estructura 'Persona' inicializada correctamente
+[Semántico - Línea 40] RS-3: Declaracion corta de 'persona' con tipo 'Persona'
+[Semántico - Línea 43] RS-4 (Operaciones permitidas): Operación '*' válida entre operandos 'int'.
+[Semántico - Línea 43] RS-4 (Operaciones permitidas): Operación '+' válida entre operandos 'int'.
+[Semántico - Línea 43] RS-3: Variable 'total' declarada correctamente como 'int'
+[Semántico - Línea 44] RS-1: El identificador 'numeros' fue declarado previamente
+[Semántico - Línea 44] RS-1: Acceso por indice valido sobre '[3]int'
+[Semántico - Línea 44] RS-5 (Retorno de funciones): Llamada a 'calcularArea' válida (retorna 'int').
+[Semántico - Línea 44] RS-3: Declaracion corta de 'area' con tipo 'int'
+[Semántico - Línea 45] RS-1: El identificador 'nombre' fue declarado previamente
+[Semántico - Línea 45] RS-4 (Operaciones permitidas): Operación '+' válida entre operandos 'string'.
+[Semántico - Línea 45] RS-3: Variable 'saludo' declarada correctamente como 'string'
+[Semántico - Línea 48] RS-1: El identificador 'edad' fue declarado previamente
+[Semántico - Línea 48] RS-3: Asignacion valida a 'edad' de tipo 'int'
+[Semántico - Línea 49] RS-1: El identificador 'edad' fue declarado previamente
+[Semántico - Línea 49] RS-4 (Operaciones permitidas): Operación '+' válida entre operandos 'int'.
+[Semántico - Línea 49] RS-3: Asignacion '+=' valida sobre 'edad'
+[Semántico - Línea 50] RS-1: El identificador 'numeros' fue declarado previamente
+[Semántico - Línea 50] RS-1: Acceso por indice valido sobre '[3]int'
+[Semántico - Línea 50] RS-3: Asignacion valida a 'numeros' de tipo 'int'
+[Semántico - Línea 51] RS-1: El identificador 'notas' fue declarado previamente
+[Semántico - Línea 51] RS-1: Acceso por indice valido sobre '[]int'
+[Semántico - Línea 51] RS-3: Asignacion valida a 'notas' de tipo 'int'
+[Semántico - Línea 52] RS-1: El identificador 'edadesPorNombre' fue declarado previamente
+[Semántico - Línea 52] RS-1: Acceso por indice valido sobre 'map[string]int'
+[Semántico - Línea 52] RS-3: Asignacion valida a 'edadesPorNombre' de tipo 'int'
+[Semántico - Línea 53] RS-1: El identificador 'persona' fue declarado previamente
+[Semántico - Línea 53] RS-1: El campo 'edad' existe en la estructura 'Persona'
+[Semántico - Línea 53] RS-3: Asignacion valida a 'persona' de tipo 'int'
+[Semántico - Línea 56] RS-1: El identificador 'edad' fue declarado previamente
+[Semántico - Línea 56] RS-4 (Operaciones permitidas): Comparación '>=' válida entre 'int'.
+[Semántico - Línea 56] RS-1: El identificador 'edad' fue declarado previamente
+[Semántico - Línea 56] RS-4 (Operaciones permitidas): Comparación '<=' válida entre 'int'.
+[Semántico - Línea 56] RS-4 (Operaciones permitidas): Operador lógico '&&' válido entre booleanos.
+[Semántico - Línea 56] RS-6 (Estructuras de control): Condición booleana válida en sentencia 'if'.
+[Semántico - Línea 57] RS-1: El identificador 'nombre' fue declarado previamente
+[Semántico - Línea 57] RS-1 (Identificadores): Invocación a 'fmt.Println' validada con 2 argumento(s).
+[Semántico - Línea 58] RS-1: El identificador 'edad' fue declarado previamente
+[Semántico - Línea 58] RS-4 (Operaciones permitidas): Comparación '>=' válida entre 'int'.
+[Semántico - Línea 58] RS-1: El identificador 'edad' fue declarado previamente
+[Semántico - Línea 58] RS-4 (Operaciones permitidas): Comparación '<=' válida entre 'int'.
+[Semántico - Línea 58] RS-4 (Operaciones permitidas): Operador lógico '&&' válido entre booleanos.
+[Semántico - Línea 58] RS-6 (Estructuras de control): Condición booleana válida en sentencia 'if'.
+[Semántico - Línea 59] RS-1: El identificador 'nombre' fue declarado previamente
+[Semántico - Línea 59] RS-1 (Identificadores): Invocación a 'fmt.Println' validada con 2 argumento(s).
+[Semántico - Línea 61] RS-1 (Identificadores): Invocación a 'fmt.Println' validada con 1 argumento(s).
+[Semántico - Línea 65] RS-1: El identificador 'edad' fue declarado previamente
+[Semántico - Línea 65] RS-1: El identificador 'nombre' fue declarado previamente
+[Semántico - Línea 65] RS-1: El identificador 'promedio' fue declarado previamente
+[Semántico - Línea 65] RS-1: El identificador 'activo' fue declarado previamente
+[Semántico - Línea 65] RS-1: El identificador 'auxiliar' fue declarado previamente
+[Semántico - Línea 65] RS-1: El identificador 'limite' fue declarado previamente
+[Semántico - Línea 65] RS-1: El identificador 'mensaje' fue declarado previamente
+[Semántico - Línea 65] RS-1: El identificador 'apodo' fue declarado previamente
+[Semántico - Línea 65] RS-1 (Identificadores): Invocación a 'fmt.Println' validada con 8 argumento(s).
+[Semántico - Línea 66] RS-1: El identificador 'edades' fue declarado previamente
+[Semántico - Línea 66] RS-1: Acceso por indice valido sobre '[3]int'
+[Semántico - Línea 66] RS-1: El identificador 'numeros' fue declarado previamente
+[Semántico - Línea 66] RS-1: Acceso por indice valido sobre '[3]int'
+[Semántico - Línea 66] RS-1: El identificador 'notas' fue declarado previamente
+[Semántico - Línea 66] RS-1: Acceso por indice valido sobre '[]int'
+[Semántico - Línea 66] RS-1: El identificador 'edadesPorNombre' fue declarado previamente
+[Semántico - Línea 66] RS-1: Acceso por indice valido sobre 'map[string]int'
+[Semántico - Línea 66] RS-1 (Identificadores): Invocación a 'fmt.Println' validada con 4 argumento(s).
+[Semántico - Línea 67] RS-1: El identificador 'persona' fue declarado previamente
+[Semántico - Línea 67] RS-1: El campo 'nombre' existe en la estructura 'Persona'
+[Semántico - Línea 67] RS-1: El identificador 'persona' fue declarado previamente
+[Semántico - Línea 67] RS-1: El campo 'edad' existe en la estructura 'Persona'
+[Semántico - Línea 67] RS-1: El identificador 'total' fue declarado previamente
+[Semántico - Línea 67] RS-1: El identificador 'area' fue declarado previamente
+[Semántico - Línea 67] RS-1: El identificador 'saludo' fue declarado previamente
+[Semántico - Línea 67] RS-1 (Identificadores): Invocación a 'fmt.Println' validada con 5 argumento(s).
+[Semántico - Línea 70] RS-1: El identificador 'edad' fue declarado previamente
+[Semántico - Línea 70] RS-3: Lectura valida sobre 'edad' de tipo 'int'
+[Semántico - Línea 24] RS-5 (Retorno de funciones): Función 'main' sin retorno ('void') validada.
+
+--- ERRORES SEMANTICOS DETECTADOS ---
+No se detectaron errores semanticos.
+
+================================================================================
+Simbolos registrados: 21
+Reglas validadas: 95
+Errores semanticos: 0
+Estado del analisis: VALIDO
+================================================================================

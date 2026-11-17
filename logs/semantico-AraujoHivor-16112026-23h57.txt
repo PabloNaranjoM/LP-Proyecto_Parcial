@@ -1,0 +1,65 @@
+================================================================================
+REPORTE DE ANALISIS SEMANTICO - COMPILADOR GO (ESPOL)
+Archivo analizado: algoritmo_hivor_practica_errores.go
+Fecha y hora: 16-11-2026 23:57:45
+Desarrollador: AraujoHivor
+================================================================================
+
+--- TABLA DE SIMBOLOS ---
+#    Identificador        Categoria       Tipo de Dato           Ambito             Linea
+1    Persona              tipo_struct     Persona                global             9
+2    sumar                funcion         func(int, int)->int    global             14
+3    main                 funcion         func()->void           global             22
+4    a                    parametro       int                    func:sumar         14
+5    b                    parametro       int                    func:sumar         14
+6    edad                 variable        int                    func:main          23
+7    nombre               variable        string                 func:main          24
+8    limite               constante       int                    func:main          25
+9    numeros              arreglo         [3]int                 func:main          26
+10   lista                slice           []int                  func:main          27
+11   edades               mapa            map[string]int         func:main          28
+12   persona              variable        Persona                func:main          29
+13   total                variable        int                    func:main          30
+
+--- REGLAS SEMANTICAS VALIDADAS ---
+[Semántico - Línea 9] RS-2 (Unicidad en el alcance): Estructura 'Persona' declarada con 2 campo(s).
+[Semántico - Línea 14] RS-2 (Unicidad en el alcance): Función 'sumar' declarada con firma 'func(int, int)->int'.
+[Semántico - Línea 22] RS-2 (Unicidad en el alcance): Función 'main' declarada con firma 'func()->void'.
+[Semántico - Línea 15] RS-1: El identificador 'a' fue declarado previamente
+[Semántico - Línea 15] RS-1: El identificador 'b' fue declarado previamente
+[Semántico - Línea 15] RS-4 (Operaciones permitidas): Operación '+' válida entre operandos 'int'.
+[Semántico - Línea 15] RS-5 (Retorno de funciones): Retorno de tipo 'int' válido en 'sumar'.
+[Semántico - Línea 23] RS-3: Variable 'edad' declarada correctamente como 'int'
+[Semántico - Línea 24] RS-3: Variable 'nombre' declarada correctamente como 'string'
+[Semántico - Línea 25] RS-3: Constante 'limite' declarada correctamente como 'int'
+[Semántico - Línea 26] RS-3: Arreglo 'numeros' declarado como '[3]int'
+[Semántico - Línea 27] RS-3: Slice 'lista' declarado como '[]int'
+[Semántico - Línea 28] RS-3: Mapa 'edades' declarado como 'map[string]int'
+[Semántico - Línea 29] RS-3: Estructura 'Persona' inicializada correctamente
+[Semántico - Línea 29] RS-3: Declaracion corta de 'persona' con tipo 'Persona'
+[Semántico - Línea 30] RS-5 (Retorno de funciones): Llamada a 'sumar' válida (retorna 'int').
+[Semántico - Línea 30] RS-3: Declaracion corta de 'total' con tipo 'int'
+[Semántico - Línea 31] RS-1: El identificador 'edad' fue declarado previamente
+[Semántico - Línea 31] RS-1: El identificador 'nombre' fue declarado previamente
+[Semántico - Línea 31] RS-1: El identificador 'limite' fue declarado previamente
+[Semántico - Línea 31] RS-1: El identificador 'numeros' fue declarado previamente
+[Semántico - Línea 31] RS-1: Acceso por indice valido sobre '[3]int'
+[Semántico - Línea 31] RS-1: El identificador 'lista' fue declarado previamente
+[Semántico - Línea 31] RS-1: Acceso por indice valido sobre '[]int'
+[Semántico - Línea 31] RS-1: El identificador 'edades' fue declarado previamente
+[Semántico - Línea 31] RS-1: Acceso por indice valido sobre 'map[string]int'
+[Semántico - Línea 31] RS-1: El identificador 'persona' fue declarado previamente
+[Semántico - Línea 31] RS-1: El campo 'nombre' existe en la estructura 'Persona'
+[Semántico - Línea 31] RS-1: El identificador 'total' fue declarado previamente
+[Semántico - Línea 31] RS-1 (Identificadores): Invocación a 'fmt.Println' validada con 8 argumento(s).
+[Semántico - Línea 22] RS-5 (Retorno de funciones): Función 'main' sin retorno ('void') validada.
+
+--- ERRORES SEMANTICOS DETECTADOS ---
+No se detectaron errores semanticos.
+
+================================================================================
+Simbolos registrados: 13
+Reglas validadas: 31
+Errores semanticos: 0
+Estado del analisis: VALIDO
+================================================================================

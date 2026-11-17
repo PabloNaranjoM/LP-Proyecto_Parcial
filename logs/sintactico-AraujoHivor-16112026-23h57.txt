@@ -1,0 +1,32 @@
+================================================================================
+REPORTE DE ANÁLISIS SINTÁCTICO - COMPILADOR GO (ESPOL)
+Archivo analizado: algoritmo_hivor_practica_errores.go
+Fecha y hora     : 16-11-2026 23:57:45
+Desarrollador    : AraujoHivor
+================================================================================
+
+--- REGLAS GRAMATICALES VALIDADAS ---
+[Línea   1] REGLA VALIDADA: programa
+[Línea   3] REGLA VALIDADA: declaracion_import
+[Línea   9] REGLA VALIDADA: definicion_struct
+[Línea  14] REGLA VALIDADA: declaracion_funcion
+[Línea  15] REGLA VALIDADA: expresion_aritmetica
+[Línea  15] REGLA VALIDADA: sentencia_retorno
+[Línea  22] REGLA VALIDADA: declaracion_funcion
+[Línea  23] REGLA VALIDADA: declaracion_var
+[Línea  24] REGLA VALIDADA: declaracion_var
+[Línea  25] REGLA VALIDADA: declaracion_const
+[Línea  26] REGLA VALIDADA: declaracion_arreglo
+[Línea  27] REGLA VALIDADA: declaracion_slice
+[Línea  28] REGLA VALIDADA: declaracion_mapa
+[Línea  29] REGLA VALIDADA: instanciacion_struct
+[Línea  29] REGLA VALIDADA: declaracion_corta
+[Línea  30] REGLA VALIDADA: llamada_funcion
+[Línea  30] REGLA VALIDADA: declaracion_corta
+[Línea  31] REGLA VALIDADA: sentencia_impresion
+
+--- ERRORES SINTÁCTICOS DETECTADOS ---
+No se detectaron errores sintácticos.
+================================================================================
+RESUMEN: Reglas Validadas: 18 | Errores Sintácticos: 0 | Estado: VÁLIDO
+================================================================================

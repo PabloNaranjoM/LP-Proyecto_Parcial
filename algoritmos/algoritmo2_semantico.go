@@ -9,8 +9,8 @@ import "fmt"
  * Responsable: Hivor Araujo (@AraujoHivor)
  *
  * Descripción:
- * Plantilla base para el algoritmo de prueba semántica válido 2.
- * No utilizar el identificador en blanco '_' (usar identificadores nombrados).
+ * Programa válido en Go enfocado en validar RS-1 (declaración previa,
+ * indexación y campos) y RS-3 (compatibilidad de tipos y constantes).
  */
 
 

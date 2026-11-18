@@ -1,55 +1,23 @@
 ================================================================================
 REPORTE DE ANÁLISIS SINTÁCTICO - COMPILADOR GO (ESPOL)
-Desarrollador    : Josue Pacheco (@JosuePach3co)
+Archivo analizado: algoritmos/algoritmo3_error_sintactico.go
+Fecha y hora     : 07-11-2026 20:51:00
+Desarrollador    : JosuePach3co
 ================================================================================
 
-PRUEBA 1: 
-var promedio = 9.45
->>> Estado: VALIDO
-    - Arbol Yacc: ('var_inferencia', 'promedio', 9.45)
---------------------------------------------------------------------------------
-PRUEBA 2: 
-var total = 10 - 5
->>> Estado: VALIDO
-    - Arbol Yacc: ('var_inferencia', 'total', ('resta', 10, 5))
---------------------------------------------------------------------------------
-PRUEBA 3: 
-switch opcion {
-            case 1:
-                fmt.Print("Uno")
-            default:
-                fmt.Print("Otro")
-        }
->>> Estado: VALIDO
-    - Arbol Yacc: ('switch', 'opcion', [('case', 1, [('print', ['"Uno"'])]), ('default', [('print', ['"Otro"'])])])
---------------------------------------------------------------------------------
-PRUEBA 4: 
-notas := []float64{8.5, 9.0, 10.0}
->>> Estado: VALIDO
-    - Arbol Yacc: ('slice', 'notas', 'float64', [8.5, 9.0, 10.0])
---------------------------------------------------------------------------------
-PRUEBA 5: 
-duplicar := func(n int) int { var x = n }
->>> Estado: VALIDO
-    - Arbol Yacc: duplicar
---------------------------------------------------------------------------------
-PRUEBA 6: 
-fmt.Print("Resultado: ", 10)
->>> Estado: VALIDO
-    - Arbol Yacc: ('print', ['"Resultado: "', 10])
---------------------------------------------------------------------------------
-PRUEBA 7: 
-var = 10
->>> Estado: INVALIDO
-    - Error sintactico en linea 1: token inesperado '='
---------------------------------------------------------------------------------
-PRUEBA 8: 
-switch opcion { case 1 fmt.Print(1) }
->>> Estado: INVALIDO
-    - Error sintactico en linea 1: token inesperado 'fmt'
---------------------------------------------------------------------------------
-PRUEBA 9: 
-fmt.Print("Hola", )
->>> Estado: INVALIDO
-    - Error sintactico en linea 1: token inesperado ')'
---------------------------------------------------------------------------------
+--- REGLAS GRAMATICALES VALIDADAS ---
+[Línea   1] REGLA VALIDADA: programa
+[Línea  11] REGLA VALIDADA: declaracion_import
+[Línea  13] REGLA VALIDADA: declaracion_funcion
+[Línea  14] REGLA VALIDADA: declaracion_var
+[Línea  15] REGLA VALIDADA: declaracion_var
+[Línea  24] REGLA VALIDADA: comparacion
+[Línea  24] REGLA VALIDADA: asignacion
+
+--- ERRORES SINTÁCTICOS DETECTADOS ---
+[Línea  18, Columna  35] Error sintáctico en la línea 18, columna 35: Token inesperado ')', se esperaba completar la expresión o instrucción previa antes del delimitador de cierre.
+[Línea  21, Columna  14] Error sintáctico en la línea 21, columna 14: Token inesperado ';', se esperaba una expresión, delimitador o sentencia válida según la gramática de Go.
+[Línea  24, Columna  31] Error sintáctico en la línea 24, columna 31: Token inesperado ';', se esperaba una expresión, delimitador o sentencia válida según la gramática de Go.
+================================================================================
+RESUMEN: Reglas Validadas: 7 | Errores Sintácticos: 3 | Estado: INVÁLIDO
+================================================================================

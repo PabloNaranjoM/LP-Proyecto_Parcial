@@ -7,7 +7,7 @@ del lenguaje de programación Go, utilizando la biblioteca PLY (Python Lex-Yacc)
 El analizador está estructurado de forma modular y colaborativa entre los
 tres integrantes del equipo, siguiendo el contrato de nombres establecido
 en el documento de propuesta técnica:
-- Hivor Araujo (@AraujoHivor): 23 palabras reservadas base de Go (excluyendo map y struct),
+- Hivor Araujo (@AraujoHivor): 17 palabras reservadas base del subconjunto de Go (excluyendo map, struct y palabras reservadas fuera del subconjunto),
   tipo predefinido 'string' ('TIPO_CADENA'), función 'Println' ('IMPRIMIR_LN'),
   identificadores ('ID'), literales enteros ('LITERAL_ENTERO'), operadores aritméticos
   ('SUMA', 'RESTA', 'MULTIPLICACION', 'DIVISION', 'MODULO'), asignación simple ('ASIGNACION')
@@ -51,24 +51,18 @@ except ImportError:
 keywords_hivor: dict[str, str] = {
     'break': 'ROMPER',
     'case': 'CASO',
-    'chan': 'CANAL',
     'const': 'CONSTANTE',
     'continue': 'CONTINUAR',
     'default': 'DEFECTO',
-    'defer': 'DIFERIR',
     'else': 'SINO',
     'fallthrough': 'CAIDA',
     'for': 'PARA',
     'func': 'FUNCION',
-    'go': 'CORRUTINA',
-    'goto': 'IR_A',
     'if': 'SI',
     'import': 'IMPORTAR',
-    'interface': 'INTERFAZ',
     'package': 'PAQUETE',
     'range': 'RANGO',
     'return': 'RETORNAR',
-    'select': 'SELECCIONAR',
     'switch': 'SEGUN',
     'type': 'TIPO',
     'var': 'VARIABLE',
@@ -263,7 +257,6 @@ def calcular_columna(data, lexpos):
 
 def registrar_error_lexico(lexer, linea, caracter, mensaje, lexpos=0):
     """Encapsula el reporte y almacenamiento de errores para main.py y la GUI."""
-    print(mensaje)
     if not hasattr(lexer, 'errores_lexicos'):
         lexer.errores_lexicos = []
     lexer.errores_lexicos.append({

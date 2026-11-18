@@ -1,7 +1,7 @@
 ================================================================================
 REPORTE DE ANALISIS SEMANTICO - COMPILADOR GO (ESPOL)
 Archivo analizado: algoritmo1_semantico.go
-Fecha y hora: 15-11-2026 19:28:10
+Fecha y hora: 15-11-2026 21:32:52
 Desarrollador: PabloNaranjoM
 ================================================================================
 

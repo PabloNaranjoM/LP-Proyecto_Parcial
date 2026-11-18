@@ -241,13 +241,13 @@ def ejecutar_analisis_semantico_codigo(
     # Encabezado del reporte
     lineas = [
         "=" * 80,
-        "REPORTE DE ANALISIS SEMANTICO - COMPILADOR GO (ESPOL)",
+        "REPORTE DE ANÁLISIS SEMÁNTICO - COMPILADOR GO (ESPOL)",
         f"Archivo analizado: {nombre_archivo}",
-        f"Fecha y hora: {ahora.strftime('%d-%m-%Y %H:%M:%S')}",
-        f"Desarrollador: {usuario_git}",
+        f"Fecha y hora     : {ahora.strftime('%d-%m-%Y %H:%M:%S')}",
+        f"Desarrollador    : {usuario_git}",
         "=" * 80,
         "",
-        "--- TABLA DE SIMBOLOS ---",
+        "--- TABLA DE SÍMBOLOS ---",
     ]
 
     # Registrar los simbolos encontrados
@@ -255,8 +255,8 @@ def ejecutar_analisis_semantico_codigo(
 
     if simbolos:
         lineas.append(
-            f"{'#':<4} {'Identificador':<20} {'Categoria':<15} "
-            f"{'Tipo de Dato':<22} {'Ambito':<18} {'Linea'}"
+            f"{'#':<4} {'Identificador':<20} {'Categoría':<15} "
+            f"{'Tipo de Dato':<22} {'Ámbito':<18} {'Línea'}"
         )
 
         for numero, simbolo in enumerate(simbolos, start=1):
@@ -269,12 +269,12 @@ def ejecutar_analisis_semantico_codigo(
                 f"{simbolo['linea']}"
             )
     else:
-        lineas.append("No se registraron simbolos.")
+        lineas.append("No se registraron símbolos.")
 
     # Registrar las reglas semanticas validadas
     lineas.extend([
         "",
-        "--- REGLAS SEMANTICAS VALIDADAS ---",
+        "--- REGLAS SEMÁNTICAS VALIDADAS ---",
     ])
 
     reglas = resultado["reglas_semanticas"]
@@ -283,12 +283,12 @@ def ejecutar_analisis_semantico_codigo(
         for regla in reglas:
             lineas.append(regla["mensaje"])
     else:
-        lineas.append("No se registraron reglas semanticas validadas.")
+        lineas.append("No se registraron reglas semánticas validadas.")
 
     # Registrar los errores semanticos
     lineas.extend([
         "",
-        "--- ERRORES SEMANTICOS DETECTADOS ---",
+        "--- ERRORES SEMÁNTICOS DETECTADOS ---",
     ])
 
     errores = resultado["errores"]
@@ -297,18 +297,18 @@ def ejecutar_analisis_semantico_codigo(
         for error in errores:
             lineas.append(error["mensaje"])
     else:
-        lineas.append("No se detectaron errores semanticos.")
+        lineas.append("No se detectaron errores semánticos.")
 
     # Resumen final
-    estado = "VALIDO" if resultado["valido"] else "INVALIDO"
+    estado = "VÁLIDO" if resultado["valido"] else "INVÁLIDO"
 
     lineas.extend([
         "",
         "=" * 80,
-        f"Simbolos registrados: {len(simbolos)}",
+        f"Símbolos registrados: {len(simbolos)}",
         f"Reglas validadas: {len(reglas)}",
-        f"Errores semanticos: {len(errores)}",
-        f"Estado del analisis: {estado}",
+        f"Errores semánticos: {len(errores)}",
+        f"Estado del análisis: {estado}",
         "=" * 80,
     ])
 

@@ -10,7 +10,7 @@ package main
  * Descripción:
  * Programa válido en Go enfocado en validar RS-2 (unicidad en el alcance
  * y shadowing entre ámbitos) y RS-5 (definición de structs, funciones
- * tipadas, variádicas sin '_', funciones void con return vacío, literales
+ * tipadas, variádicas, funciones void con return vacío, literales
  * de función y llamadas válidas).
  */
 
@@ -36,7 +36,7 @@ func registrarAviso(activo bool) {
 	fmt.Println("Aviso:", etiquetaGlobal)
 }
 
-// Función variádica sin identificador '_' (RS-5)
+// Función variádica con parámetros enteros (RS-5)
 func acumularPuntos(base int, extras ...int) int {
 	total := base
 	for idx, valor := range extras {

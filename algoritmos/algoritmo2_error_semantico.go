@@ -8,8 +8,8 @@ package main
  * Responsable: Hivor Araujo (@AraujoHivor)
  *
  * Descripción:
- * Plantilla base para el algoritmo de prueba semántica con errores
- * deliberados enfocados en declaración previa y compatibilidad de asignaciones.
+ * Caso de prueba semántica con errores deliberados enfocados en RS-1
+ * (declaración previa) y RS-3 (compatibilidad de asignaciones).
  */
 
  import "fmt"

@@ -35,6 +35,11 @@ from src.lexer import (
 
 start = "programa"
 
+precedence = (
+    ("nonassoc", "RETORNAR"),
+    ("nonassoc", "ID", "FUNCION"),
+)
+
 errores_sintacticos: list[dict[str, Any]] = []
 reglas_validadas: list[dict[str, Any]] = []
 _codigo_actual: str = ""
@@ -368,6 +373,12 @@ def p_factor_unario(p):
     """factor : AMPERSAND referencia
               | RESTA factor"""
     p[0] = ("unario", p[1], p[2], _linea_de_produccion(p))
+
+
+def p_factor_negacion(p):
+    """factor : NEGACION factor"""
+    registrar_regla(p, "comparacion")
+    p[0] = ("not", p[2], _linea_de_produccion(p))
 # =====================================================================
 # FIN APORTE: Pablo Naranjo (@PabloNaranjoM)
 # =====================================================================
@@ -435,12 +446,6 @@ def p_op_relacional(p):
                      | MENOR_IGUAL
                      | MAYOR_IGUAL"""
     p[0] = p[1]
-
-
-def p_comparacion_negacion(p):
-    """comparacion : NEGACION comparacion"""
-    registrar_regla(p, "comparacion")
-    p[0] = ("not", p[2], _linea_de_produccion(p))
 
 
 def p_comparacion_base(p):
@@ -949,7 +954,6 @@ def build_parser(**kwargs):
         "start": start,
         "debug": False,
         "write_tables": False,
-        "errorlog": yacc.NullLogger(),
     }
     opciones.update(kwargs)
     instancia = yacc.yacc(**opciones)

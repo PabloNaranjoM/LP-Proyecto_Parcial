@@ -400,7 +400,7 @@ def visitar_declaracion_var(nodo, tabla_simbolos, contexto):
         registrar_error_semantico(
             "identificadores",
             linea,
-            f"El identificador '{nombre}' ya existe en este alcance",
+            f"El identificador '{nombre}' ya fue declarado previamente en este bloque (línea {existente.linea}).",
             contexto
         )
         return
@@ -467,7 +467,7 @@ def visitar_declaracion_const(nodo, tabla_simbolos, contexto):
         registrar_error_semantico(
             "identificadores",
             linea,
-            f"El identificador '{nombre}' ya existe en este alcance",
+            f"El identificador '{nombre}' ya fue declarado previamente en este bloque (línea {existente.linea}).",
             contexto
         )
         return
@@ -522,7 +522,7 @@ def visitar_declaracion_var_inferencia(nodo, tabla_simbolos, contexto):
         registrar_error_semantico(
             "identificadores",
             linea,
-            f"El identificador '{nombre}' ya existe en este alcance",
+            f"El identificador '{nombre}' ya fue declarado previamente en este bloque (línea {existente.linea}).",
             contexto
         )
         return
@@ -542,12 +542,23 @@ def visitar_declaracion_corta(nodo, tabla_simbolos, contexto):
     expresion = nodo[2]
     linea = nodo[3]
 
+    # En un programa completo (con 'package'), ':=' solo se permite dentro de funciones
+    if tabla_simbolos.ambito_actual() == "global" and contexto.get("es_programa_completo"):
+        registrar_error_semantico(
+            "asignación de tipo",
+            linea,
+            f"La declaración corta ':=' para '{nombre}' solo se permite dentro de una función; utilice 'var' en el ámbito global",
+            contexto
+        )
+        return
+
     # Comprobar si ya existe en el mismo ambito
-    if tabla_simbolos.buscar_en_ambito_actual(nombre) is not None:
+    existente = tabla_simbolos.buscar_en_ambito_actual(nombre)
+    if existente is not None:
         registrar_error_semantico(
             "identificadores",
             linea,
-            f"El identificador '{nombre}' ya existe en este alcance",
+            f"El identificador '{nombre}' ya fue declarado previamente en este bloque (línea {existente.linea}).",
             contexto
         )
         return
@@ -585,7 +596,7 @@ def visitar_declaracion_corta(nodo, tabla_simbolos, contexto):
         registrar_error_semantico(
             "identificadores",
             linea,
-            f"El identificador '{nombre}' ya existe en este alcance",
+            f"El identificador '{nombre}' ya fue declarado previamente en este bloque (línea {existente.linea}).",
             contexto
         )
         return
@@ -890,7 +901,7 @@ def visitar_declaraciones_compuestas(nodo, tabla_simbolos, contexto):
             registrar_error_semantico(
                 "identificadores",
                 linea,
-                f"El identificador '{nombre}' ya existe en este alcance",
+                f"El identificador '{nombre}' ya fue declarado previamente en este bloque (línea {existente.linea}).",
                 contexto
             )
             return "error_tipo"
@@ -947,7 +958,7 @@ def visitar_declaraciones_compuestas(nodo, tabla_simbolos, contexto):
             registrar_error_semantico(
                 "identificadores",
                 linea,
-                f"El identificador '{nombre}' ya existe en este alcance",
+                f"El identificador '{nombre}' ya fue declarado previamente en este bloque (línea {existente.linea}).",
                 contexto
             )
             return "error_tipo"
@@ -1024,7 +1035,7 @@ def visitar_declaraciones_compuestas(nodo, tabla_simbolos, contexto):
             registrar_error_semantico(
                 "identificadores",
                 linea,
-                f"El identificador '{nombre}' ya existe en este alcance",
+                f"El identificador '{nombre}' ya fue declarado previamente en este bloque (línea {existente.linea}).",
                 contexto
             )
             return "error_tipo"
@@ -1962,6 +1973,69 @@ def _declarar_parametros_en_ambito(
         )
 
 
+def _como_bloque(rama: Any) -> list[Any]:
+    """Normaliza una rama (`list` o nodo `if` anidado de `else if`) a lista de sentencias."""
+    if isinstance(rama, list):
+        return rama
+    return [rama] if isinstance(rama, tuple) else []
+
+
+def _tiene_break(sentencias: list[Any] | None) -> bool:
+    """Detecta un `break` directo o dentro de un `if` (sin entrar en bucles internos)."""
+    for sent in sentencias or []:
+        if not isinstance(sent, tuple):
+            continue
+        if sent[0] == "interrupcion" and sent[1] == "break":
+            return True
+        if sent[0] == "if" and (
+            _tiene_break(sent[2]) or (len(sent) == 5 and _tiene_break(_como_bloque(sent[3])))
+        ):
+            return True
+    return False
+
+
+def _switch_garantiza_retorno(casos: list[Any]) -> bool:
+    """Un `switch` garantiza retorno si tiene `default` y cada rama aplicable retorna sin `break`."""
+    tiene_default = False
+    for idx, caso in enumerate(casos):
+        if not isinstance(caso, tuple) or caso[0] not in ("case", "default"):
+            continue
+        tiene_default = tiene_default or caso[0] == "default"
+        sents = (caso[1] if caso[0] == "default" else caso[2]) or []
+
+        if _tiene_break(sents):
+            return False
+        termina_fallthrough = (
+            bool(sents)
+            and isinstance(sents[-1], tuple)
+            and sents[-1][:2] == ("interrupcion", "fallthrough")
+        )
+        if termina_fallthrough and idx + 1 < len(casos):
+            continue
+        if not _bloque_garantiza_retorno(sents):
+            return False
+    return tiene_default
+
+
+def _sentencia_garantiza_retorno(sent: Any) -> bool:
+    """Verifica si una sentencia (`return`, `if/else` o `switch`) retorna en todas sus rutas."""
+    if not isinstance(sent, tuple):
+        return False
+    etiqueta = sent[0]
+    if etiqueta == "return":
+        return True
+    if etiqueta == "if" and len(sent) == 5:
+        return _bloque_garantiza_retorno(sent[2]) and _bloque_garantiza_retorno(_como_bloque(sent[3]))
+    if etiqueta == "switch":
+        return _switch_garantiza_retorno(sent[2] or [])
+    return False
+
+
+def _bloque_garantiza_retorno(sentencias: list[Any] | None) -> bool:
+    """Verifica estructuralmente si algún paso del bloque garantiza un `return`."""
+    return any(_sentencia_garantiza_retorno(sent) for sent in (sentencias or []))
+
+
 def _ejecutar_cuerpo_funcion(
     simbolo_func: Simbolo,
     parametros: list[tuple[str, str]],
@@ -1991,7 +2065,7 @@ def _ejecutar_cuerpo_funcion(
                 visitar_nodo(sentencia, tabla_simbolos, contexto)
 
         tipo_retorno = simbolo_func.tipo_retorno or "void"
-        if tipo_retorno != "void" and not contexto["tiene_retorno"]:
+        if tipo_retorno != "void" and not _bloque_garantiza_retorno(bloque):
             registrar_error_semantico(
                 "retorno de funciones",
                 linea,
@@ -2356,10 +2430,12 @@ def visitar_nodo(
     etiqueta = nodo[0]
 
     if etiqueta == "programa":
+        contexto["es_programa_completo"] = True
         _visitar_raiz_programa(nodo[3] or [], tabla_simbolos, contexto)
         return None
 
     if etiqueta == "fragmento":
+        contexto["es_programa_completo"] = False
         _visitar_raiz_programa(nodo[1] or [], tabla_simbolos, contexto)
         return None
 

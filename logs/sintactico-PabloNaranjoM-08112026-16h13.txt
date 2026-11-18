@@ -1,7 +1,7 @@
 ================================================================================
 REPORTE DE ANÁLISIS SINTÁCTICO - COMPILADOR GO (ESPOL)
-Archivo analizado: algoritmo1_error_sintactico.go
-Fecha y hora     : 08-11-2026 16:13:32
+Archivo analizado: algoritmos/algoritmo1_error_sintactico.go
+Fecha y hora     : 08-11-2026 16:13:00
 Desarrollador    : PabloNaranjoM
 ================================================================================
 

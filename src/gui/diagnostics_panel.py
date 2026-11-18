@@ -312,9 +312,9 @@ class DiagnosticsPanel(ctk.CTkFrame):
 
         columnas_sin = [
             ("estado", "Estado", 85, 70, False, "center"),
-            ("linea", "Linea", 70, 55, False, "center"),
+            ("linea", "Línea", 70, 55, False, "center"),
             ("regla", "Regla Gramatical", 185, 140, False, "w"),
-            ("detalle", "Detalle de Validacion LALR(1)", 360, 220, True, "w"),
+            ("detalle", "Detalle de Validación LALR(1)", 360, 220, True, "w"),
         ]
         self.tree_sintactico = ttk.Treeview(
             tree_frame,
@@ -396,10 +396,10 @@ class DiagnosticsPanel(ctk.CTkFrame):
         columnas_sim = [
             ("indice", "#", 48, 40, False, "center"),
             ("identificador", "Identificador", 150, 110, True, "w"),
-            ("categoria", "Categoria", 110, 90, False, "center"),
+            ("categoria", "Categoría", 110, 90, False, "center"),
             ("tipo_dato", "Tipo de Dato", 150, 110, True, "w"),
-            ("ambito", "Ambito", 130, 100, False, "w"),
-            ("linea", "Linea", 65, 50, False, "center"),
+            ("ambito", "Ámbito", 130, 100, False, "w"),
+            ("linea", "Línea", 65, 50, False, "center"),
         ]
         self.tree_simbolos = ttk.Treeview(
             tree_frame,
@@ -522,23 +522,10 @@ class DiagnosticsPanel(ctk.CTkFrame):
     # ------------------------------------------------------------------
     # API pública
     # ------------------------------------------------------------------
-    def mostrar_resultados_lexicos(
-        self, resultado: dict[str, Any], modo_ejecucion_todo: bool = False
+    def _poblar_tabla_tokens(
+        self, tokens: list[dict[str, Any]], errores: list[dict[str, Any]]
     ) -> None:
-        tokens: list[dict[str, Any]] = resultado["tokens"]
-        errores: list[dict[str, Any]] = resultado["errores"]
         tiene_errores = bool(errores)
-
-        if tiene_errores:
-            self.actualizar_estado_banner("ERROR_LEXICO")
-        else:
-            msg = (
-                "ESTADO DEL SISTEMA: Analisis lexico, sintactico y semantico completado sin errores."
-                if modo_ejecucion_todo
-                else None
-            )
-            self.actualizar_estado_banner("VALIDO", mensaje_custom=msg)
-
         self.tree_tokens.delete(*self.tree_tokens.get_children())
         filas = [
             (t["linea"], t["columna"], False, str(t["indice"]), t["categoria"], str(t["valor"]))
@@ -556,44 +543,15 @@ class DiagnosticsPanel(ctk.CTkFrame):
             )
 
         self.lbl_resumen_tokens.configure(
-            text=f"{len(tokens)} validos • {len(errores)} errores lexicos",
+            text=f"{len(tokens)} válidos • {len(errores)} errores léxicos",
             text_color=ERROR_FG if tiene_errores else OK_FG,
         )
         self._actualizar_contador_tokens(len(filas))
 
-        if not tiene_errores:
-            segmentos = [
-                (f"[OK] Analisis Lexico: {len(tokens)} tokens reconocidos correctamente.\n", "ok")
-            ]
-            if modo_ejecucion_todo:
-                segmentos.append((
-                    "[INFO] Ejecutando fase de Analisis Sintactico LALR(1)...\n",
-                    "info",
-                ))
-        else:
-            segmentos = [(f"{e['mensaje'].rstrip('.')}.\n", "error") for e in errores]
-        self._escribir_consola(segmentos)
-
-    def mostrar_resultados_sintacticos(
-        self, resultado: dict[str, Any], modo_ejecucion_todo: bool = False
+    def _poblar_tabla_sintactica(
+        self, reglas: list[dict[str, Any]], errores_sin: list[dict[str, Any]]
     ) -> None:
-        reglas: list[dict[str, Any]] = resultado["reglas"]
-        errores_sin: list[dict[str, Any]] = resultado["errores"]
-        errores_lex: list[dict[str, Any]] = resultado.get("errores_lexicos", [])
-        tokens: list[dict[str, Any]] = resultado.get("tokens", [])
-
-        if errores_lex:
-            self.actualizar_estado_banner("ERROR_LEXICO")
-        elif errores_sin:
-            self.actualizar_estado_banner("ERROR_SINTACTICO")
-        else:
-            msg = (
-                "ESTADO DEL SISTEMA: Analisis lexico y sintactico completado sin errores."
-                if modo_ejecucion_todo
-                else "ESTADO DEL SISTEMA: Analisis sintactico LALR(1) completado sin errores."
-            )
-            self.actualizar_estado_banner("VALIDO", mensaje_custom=msg)
-
+        tiene_err_sin = bool(errores_sin)
         self.tree_sintactico.delete(*self.tree_sintactico.get_children())
         filas = [
             (
@@ -624,18 +582,77 @@ class DiagnosticsPanel(ctk.CTkFrame):
                 "", "end", values=(estado_txt, linea, regla_txt, detalle_txt), tags=(tag,)
             )
 
-        tiene_err_sin = bool(errores_sin)
         self.lbl_resumen_sintactico.configure(
-            text=f"{len(reglas)} reglas validadas • {len(errores_sin)} errores sintacticos",
+            text=f"{len(reglas)} reglas validadas • {len(errores_sin)} errores sintácticos",
             text_color=ERROR_FG if tiene_err_sin else OK_FG,
         )
         self._actualizar_contador_sintactico(len(filas))
+
+    def mostrar_resultados_lexicos(
+        self, resultado: dict[str, Any], modo_ejecucion_todo: bool = False
+    ) -> None:
+        tokens: list[dict[str, Any]] = resultado["tokens"]
+        errores: list[dict[str, Any]] = resultado["errores"]
+        tiene_errores = bool(errores)
+
+        if tiene_errores:
+            self.actualizar_estado_banner("ERROR_LEXICO")
+        else:
+            msg = (
+                "ESTADO DEL SISTEMA: Análisis léxico, sintáctico y semántico completado sin errores."
+                if modo_ejecucion_todo
+                else None
+            )
+            self.actualizar_estado_banner("VALIDO", mensaje_custom=msg)
+
+        self._poblar_tabla_tokens(tokens, errores)
+
+        if not tiene_errores:
+            segmentos = [
+                (f"[OK] Análisis Léxico: {len(tokens)} tokens reconocidos correctamente.\n", "ok")
+            ]
+            if modo_ejecucion_todo:
+                segmentos.append((
+                    "[INFO] Ejecutando fase de Análisis Sintáctico LALR(1)...\n",
+                    "info",
+                ))
+        else:
+            segmentos = [(f"{e['mensaje'].rstrip('.')}.\n", "error") for e in errores]
+        self._escribir_consola(segmentos)
+        if not modo_ejecucion_todo:
+            self.tabview.set(self.TAB_TOKENS)
+
+    def mostrar_resultados_sintacticos(
+        self, resultado: dict[str, Any], modo_ejecucion_todo: bool = False
+    ) -> None:
+        reglas: list[dict[str, Any]] = resultado["reglas"]
+        errores_sin: list[dict[str, Any]] = resultado["errores"]
+        errores_lex: list[dict[str, Any]] = resultado.get("errores_lexicos", [])
+        tokens: list[dict[str, Any]] = resultado.get("tokens", [])
+
+        if not modo_ejecucion_todo:
+            self._poblar_tabla_tokens(tokens, errores_lex)
+
+        if errores_lex:
+            self.actualizar_estado_banner("ERROR_LEXICO")
+        elif errores_sin:
+            self.actualizar_estado_banner("ERROR_SINTACTICO")
+        else:
+            msg = (
+                "ESTADO DEL SISTEMA: Análisis léxico y sintáctico completado sin errores."
+                if modo_ejecucion_todo
+                else "ESTADO DEL SISTEMA: Análisis sintáctico LALR(1) completado sin errores."
+            )
+            self.actualizar_estado_banner("VALIDO", mensaje_custom=msg)
+
+        self._poblar_tabla_sintactica(reglas, errores_sin)
+        tiene_err_sin = bool(errores_sin)
 
         segmentos: list[tuple[str, str]] = []
         if modo_ejecucion_todo:
             if not errores_lex:
                 segmentos.append(
-                    (f"[OK] Analisis Lexico: {len(tokens)} tokens reconocidos correctamente.\n", "ok")
+                    (f"[OK] Análisis Léxico: {len(tokens)} tokens reconocidos correctamente.\n", "ok")
                 )
             else:
                 for el in errores_lex:
@@ -643,15 +660,18 @@ class DiagnosticsPanel(ctk.CTkFrame):
 
         if not errores_sin and not errores_lex:
             segmentos.append((
-                f"[OK] Analisis Sintactico: Estructura gramatical LALR(1) valida ({len(reglas)} reglas verificadas).\n",
+                f"[OK] Análisis Sintáctico: Estructura gramatical LALR(1) válida ({len(reglas)} reglas verificadas).\n",
                 "ok",
             ))
             if modo_ejecucion_todo:
                 segmentos.append((
-                    "[INFO] Ejecutando fase de Analisis Semantico...\n",
+                    "[INFO] Ejecutando fase de Análisis Semántico...\n",
                     "info",
                 ))
         else:
+            if not modo_ejecucion_todo:
+                for el in errores_lex:
+                    segmentos.append((f"{el['mensaje'].rstrip('.')}.\n", "error"))
             for es in errores_sin:
                 segmentos.append((f"{es['mensaje']}\n", "error"))
 
@@ -665,20 +685,20 @@ class DiagnosticsPanel(ctk.CTkFrame):
         self.tree_sintactico.delete(*self.tree_sintactico.get_children())
         self.tree_simbolos.delete(*self.tree_simbolos.get_children())
         self.lbl_resumen_tokens.configure(
-            text="0 válidos • 0 errores lexicos", text_color=TEXT_SECONDARY
+            text="0 válidos • 0 errores léxicos", text_color=TEXT_SECONDARY
         )
         self.lbl_resumen_sintactico.configure(
-            text="0 reglas validadas • 0 errores sintacticos", text_color=TEXT_SECONDARY
+            text="0 reglas validadas • 0 errores sintácticos", text_color=TEXT_SECONDARY
         )
         self.lbl_resumen_simbolos.configure(
-            text="0 simbolos • 0 reglas validadas • 0 errores semanticos",
+            text="0 símbolos • 0 reglas validadas • 0 errores semánticos",
             text_color=TEXT_SECONDARY,
         )
         self._actualizar_contador_tokens(0)
         self._actualizar_contador_sintactico(0)
         self._actualizar_contador_simbolos(0)
         self._escribir_consola([(
-            "Consola lista. Cargue un archivo .go o escriba codigo en el editor y presione 'Lexico', 'Sintactico', 'Semantico' o '▶ Ejecutar Todo'.\n",
+            "Consola lista. Cargue un archivo .go o escriba código en el editor y presione 'Léxico', 'Sintáctico', 'Semántico' o '▶ Ejecutar Todo'.\n",
             "info",
         )])
         self.tabview.set(self.TAB_TOKENS)
@@ -713,6 +733,10 @@ class DiagnosticsPanel(ctk.CTkFrame):
         tokens: list[dict[str, Any]] = resultado.get("tokens", [])
         reglas_sin: list[dict[str, Any]] = resultado.get("reglas_sintacticas", [])
 
+        if not modo_ejecucion_todo:
+            self._poblar_tabla_tokens(tokens, errores_lex)
+            self._poblar_tabla_sintactica(reglas_sin, errores_sin)
+
         self.poblar_tabla_simbolos(simbolos)
 
         tiene_err_sem = bool(errores_sem)
@@ -729,9 +753,9 @@ class DiagnosticsPanel(ctk.CTkFrame):
             self.actualizar_estado_banner("ERROR_SEMANTICO")
         else:
             msg = (
-                "ESTADO DEL SISTEMA: Analisis lexico, sintactico y semantico completado sin errores."
+                "ESTADO DEL SISTEMA: Análisis léxico, sintáctico y semántico completado sin errores."
                 if modo_ejecucion_todo
-                else "ESTADO DEL SISTEMA: Analisis semantico completado sin errores."
+                else "ESTADO DEL SISTEMA: Análisis semántico completado sin errores."
             )
             self.actualizar_estado_banner("VALIDO", mensaje_custom=msg)
 
@@ -739,7 +763,7 @@ class DiagnosticsPanel(ctk.CTkFrame):
         if modo_ejecucion_todo:
             if not errores_lex:
                 segmentos.append(
-                    (f"[OK] Analisis Lexico: {len(tokens)} tokens reconocidos correctamente.\n", "ok")
+                    (f"[OK] Análisis Léxico: {len(tokens)} tokens reconocidos correctamente.\n", "ok")
                 )
             else:
                 for el in errores_lex:
@@ -747,7 +771,7 @@ class DiagnosticsPanel(ctk.CTkFrame):
 
             if not errores_sin:
                 segmentos.append(
-                    (f"[OK] Analisis Sintactico: Estructura gramatical LALR(1) valida ({len(reglas_sin)} reglas verificadas).\n", "ok")
+                    (f"[OK] Análisis Sintáctico: Estructura gramatical LALR(1) válida ({len(reglas_sin)} reglas verificadas).\n", "ok")
                 )
             else:
                 for es in errores_sin:
@@ -755,7 +779,7 @@ class DiagnosticsPanel(ctk.CTkFrame):
 
         if not errores_lex and not errores_sin and not tiene_err_sem:
             segmentos.append((
-                f"[OK] Analisis Semantico: {len(simbolos)} simbolos registrados y {len(reglas_sem)} comprobaciones semanticas validadas sin errores.\n",
+                f"[OK] Análisis Semántico: {len(simbolos)} símbolos registrados y {len(reglas_sem)} comprobaciones semánticas validadas sin errores.\n",
                 "ok",
             ))
         else:
@@ -768,7 +792,12 @@ class DiagnosticsPanel(ctk.CTkFrame):
                 segmentos.append((f"{esem['mensaje']}\n", "error"))
 
         self._escribir_consola(segmentos)
-        self.tabview.set(self.TAB_SIMBOLOS)
+        if modo_ejecucion_todo and errores_lex:
+            self.tabview.set(self.TAB_TOKENS)
+        elif modo_ejecucion_todo and errores_sin:
+            self.tabview.set(self.TAB_SINTACTICO)
+        else:
+            self.tabview.set(self.TAB_SIMBOLOS)
     # =====================================================================
     # FIN APORTE: Josué Pacheco (@JosuePach3co)
     # =====================================================================

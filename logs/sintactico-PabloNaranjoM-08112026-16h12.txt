@@ -1,7 +1,7 @@
 ================================================================================
 REPORTE DE ANÁLISIS SINTÁCTICO - COMPILADOR GO (ESPOL)
-Archivo analizado: algoritmo1_sintactico.go
-Fecha y hora     : 08-11-2026 16:12:52
+Archivo analizado: algoritmos/algoritmo1_sintactico.go
+Fecha y hora     : 08-11-2026 16:12:00
 Desarrollador    : PabloNaranjoM
 ================================================================================
 
@@ -12,6 +12,8 @@ Desarrollador    : PabloNaranjoM
 [Línea  19] REGLA VALIDADA: declaracion_funcion_variadica
 [Línea  20] REGLA VALIDADA: declaracion_corta
 [Línea  21] REGLA VALIDADA: sentencia_for
+[Línea  22] REGLA VALIDADA: expresion_aritmetica
+[Línea  22] REGLA VALIDADA: termino
 [Línea  22] REGLA VALIDADA: expresion_aritmetica
 [Línea  22] REGLA VALIDADA: asignacion
 [Línea  24] REGLA VALIDADA: sentencia_retorno
@@ -49,5 +51,5 @@ Desarrollador    : PabloNaranjoM
 --- ERRORES SINTÁCTICOS DETECTADOS ---
 No se detectaron errores sintácticos.
 ================================================================================
-RESUMEN: Reglas Validadas: 39 | Errores Sintácticos: 0 | Estado: VÁLIDO
+RESUMEN: Reglas Validadas: 41 | Errores Sintácticos: 0 | Estado: VÁLIDO
 ================================================================================

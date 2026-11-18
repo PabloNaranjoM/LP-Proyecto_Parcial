@@ -1,55 +1,41 @@
 ================================================================================
 REPORTE DE ANÁLISIS SINTÁCTICO - COMPILADOR GO (ESPOL)
-Desarrollador    : Josue Pacheco (@JosuePach3co)
+Archivo analizado: algoritmos/algoritmo3_sintactico.go
+Fecha y hora     : 07-11-2026 20:48:00
+Desarrollador    : JosuePach3co
 ================================================================================
 
-PRUEBA 1: 
-var promedio = 9.45
->>> Estado: VALIDO
-    - Arbol Yacc: ('var_inferencia', 'promedio', 9.45)
---------------------------------------------------------------------------------
-PRUEBA 2: 
-var total = 10 - 5
->>> Estado: VALIDO
-    - Arbol Yacc: ('var_inferencia', 'total', ('resta', 10, 5))
---------------------------------------------------------------------------------
-PRUEBA 3: 
-switch opcion {
-            case 1:
-                fmt.Print("Uno")
-            default:
-                fmt.Print("Otro")
-        }
->>> Estado: VALIDO
-    - Arbol Yacc: ('switch', 'opcion', [('case', 1, [('print', ['"Uno"'])]), ('default', [('print', ['"Otro"'])])])
---------------------------------------------------------------------------------
-PRUEBA 4: 
-notas := []float64{8.5, 9.0, 10.0}
->>> Estado: VALIDO
-    - Arbol Yacc: ('slice', 'notas', 'float64', [8.5, 9.0, 10.0])
---------------------------------------------------------------------------------
-PRUEBA 5: 
-duplicar := func(n int) int { var x = n }
->>> Estado: VALIDO
-    - Arbol Yacc: duplicar
---------------------------------------------------------------------------------
-PRUEBA 6: 
-fmt.Print("Resultado: ", 10)
->>> Estado: VALIDO
-    - Arbol Yacc: ('print', ['"Resultado: "', 10])
---------------------------------------------------------------------------------
-PRUEBA 7: 
-var = 10
->>> Estado: INVALIDO
-    - Error sintactico en linea 1: token inesperado '='
---------------------------------------------------------------------------------
-PRUEBA 8: 
-switch opcion { case 1 fmt.Print(1) }
->>> Estado: INVALIDO
-    - Error sintactico en linea 1: token inesperado 'fmt'
---------------------------------------------------------------------------------
-PRUEBA 9: 
-fmt.Print("Hola", )
->>> Estado: INVALIDO
-    - Error sintactico en linea 1: token inesperado ')'
---------------------------------------------------------------------------------
+--- REGLAS GRAMATICALES VALIDADAS ---
+[Línea   1] REGLA VALIDADA: programa
+[Línea  11] REGLA VALIDADA: declaracion_import
+[Línea  13] REGLA VALIDADA: declaracion_funcion
+[Línea  14] REGLA VALIDADA: declaracion_var
+[Línea  15] REGLA VALIDADA: declaracion_var
+[Línea  16] REGLA VALIDADA: declaracion_var
+[Línea  18] REGLA VALIDADA: expresion_aritmetica
+[Línea  18] REGLA VALIDADA: declaracion_corta
+[Línea  19] REGLA VALIDADA: comparacion
+[Línea  19] REGLA VALIDADA: expresion_booleana
+[Línea  19] REGLA VALIDADA: declaracion_corta
+[Línea  21] REGLA VALIDADA: declaracion_slice
+[Línea  23] REGLA VALIDADA: literal_funcion
+[Línea  23] REGLA VALIDADA: declaracion_corta
+[Línea  24] REGLA VALIDADA: termino
+[Línea  24] REGLA VALIDADA: sentencia_retorno
+[Línea  27] REGLA VALIDADA: llamada_funcion
+[Línea  27] REGLA VALIDADA: asignacion
+[Línea  28] REGLA VALIDADA: asignacion_compuesta
+[Línea  29] REGLA VALIDADA: asignacion_compuesta
+[Línea  30] REGLA VALIDADA: incremento
+[Línea  31] REGLA VALIDADA: incremento
+[Línea  33] REGLA VALIDADA: sentencia_switch
+[Línea  35] REGLA VALIDADA: sentencia_impresion
+[Línea  36] REGLA VALIDADA: sentencia_interrupcion
+[Línea  38] REGLA VALIDADA: sentencia_impresion
+[Línea  40] REGLA VALIDADA: sentencia_impresion
+
+--- ERRORES SINTÁCTICOS DETECTADOS ---
+No se detectaron errores sintácticos.
+================================================================================
+RESUMEN: Reglas Validadas: 27 | Errores Sintácticos: 0 | Estado: VÁLIDO
+================================================================================

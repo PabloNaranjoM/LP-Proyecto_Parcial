@@ -44,5 +44,5 @@ func main() {
     }
 
     var codigo@ int = 7             // Error 5: otro @ en identificador
-    _ = codigo
+    fmt.Println(codigo)
 }

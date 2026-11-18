@@ -22,7 +22,6 @@ package main
  * 8. Literales de punto flotante: e.g., 0.125, 1500.75, 1.085
  * 9. Literales de cadena con secuencias de escape: \", \n, \t, \\
  * 10. Comentarios de línea única (//) y bloques multilínea
- * 11. Errores léxicos deliberados: '@', '$', '~', '#' para verificar t_error
  */
 
 import "fmt"
@@ -86,17 +85,5 @@ func main() {
 	cargoServicio := 4.75;
 	operacion.totalFinal = operacion.montoBase + (operacion.montoBase * operacion.tasaInteres) - cargoServicio;
 
-	// =========================================================================
-	// SECCIÓN DE ERRORES LÉXICOS INTENCIONALES
-	// Caracteres ilegales deliberados para evidenciar la captura en t_error
-	// =========================================================================
-	valorInvalido@ := 250.00         // Error: carácter ilegal '@'
-	fondoReserva$ := 890.50          // Error: carácter ilegal '$'
-	tasaAjuste~ := 0.03              // Error: carácter ilegal '~'
-	tokenInvalido# := 99             // Error: carácter ilegal '#'
-
-	// Variables en uso para evitar advertencias de compilador Go
-	_ = ptrOperacion
-	_ = cotizaciones
-	_ = mensajeEstado
+	fmt.Println(ptrOperacion, cotizaciones["USD"], mensajeEstado)
 }

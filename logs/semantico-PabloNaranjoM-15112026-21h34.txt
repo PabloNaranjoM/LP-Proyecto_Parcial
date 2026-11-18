@@ -1,7 +1,7 @@
 ================================================================================
 REPORTE DE ANALISIS SEMANTICO - COMPILADOR GO (ESPOL)
 Archivo analizado: algoritmo1_error_semantico.go
-Fecha y hora: 15-11-2026 19:27:38
+Fecha y hora: 15-11-2026 21:34:17
 Desarrollador: PabloNaranjoM
 ================================================================================
 
@@ -82,8 +82,8 @@ Error Semántico retorno de funciones en la línea 41: El valor retornado 'strin
 Error Semántico retorno de funciones en la línea 47: La función 'retornoVacioEnTipada' debe retornar un valor de tipo 'string'.
 Error Semántico retorno de funciones en la línea 53: La función 'faltaRetorno' no contiene una sentencia 'return' que devuelva el tipo esperado 'float64'.
 Error Semántico retorno de funciones en la línea 60: La función 'voidConRetorno' no declara tipo de retorno pero intenta retornar un valor de tipo 'int'.
-Error Semántico identificadores en la línea 86: El identificador 'edad' ya existe en este alcance.
-Error Semántico identificadores en la línea 90: El identificador 'total' ya existe en este alcance.
+Error Semántico identificadores en la línea 86: El identificador 'edad' ya fue declarado previamente en este bloque (línea 85).
+Error Semántico identificadores en la línea 90: El identificador 'total' ya fue declarado previamente en este bloque (línea 89).
 Error Semántico retorno de funciones en la línea 93: La función variádica 'sumarVariadico' requiere al menos 1 argumento(s), pero recibió 0.
 Error Semántico asignación de tipo en la línea 96: El argumento 2 de 'sumarVariadico' espera 'int', pero recibió 'string'.
 Error Semántico retorno de funciones en la línea 99: La función 'conParametroRepetido' espera 2 argumento(s), pero recibió 1.

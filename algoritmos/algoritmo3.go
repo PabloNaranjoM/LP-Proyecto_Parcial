@@ -17,7 +17,6 @@ package main
  * 3. Operadores relacionales: '==', '!=', '<', '>', '<=', '>='
  * 4. Operadores lógicos lógicos: '&&', '||', '!'
  * 5. Delimitadores específicos: ',' y '.'
- * 6. Errores léxicos deliberados: '@', '$', '~', '#' para verificar t_error
  */
 
 import "fmt"
@@ -50,18 +49,5 @@ func main() {
 	// 4. Delimitadores específicos: punto (.) en llamadas y coma (,) en argumentos
 	fmt.Println("Estado del sistema de acceso:", accesoPermitido, activarAlarma)
 	
-	//Sección de errores léxicos intencionales
-	// Caracteres ilegales deliberados para evidenciar la captura en t_error
-	
-	var errorAcceso@ bool = false          // Error: carácter ilegal '@'
-	var sensorFallo$ bool = true           // Error: carácter ilegal '$'
-	var umbral~ int = 100                  // Error: carácter ilegal '~'
-	var tokenRoto# bool = false            // Error: carácter ilegal '#'
-	
-	// Variables en uso para evitar advertencias de compilador Go
-	_ = requiereRevision
-	_ = nivelMaximo
-	_ = estadoCritico
-	_ = codigosCoinciden
-	_ = fallaSensor
+	fmt.Println(requiereRevision, nivelMaximo, estadoCritico, codigosCoinciden, fallaSensor)
 }

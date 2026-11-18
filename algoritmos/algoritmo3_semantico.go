@@ -8,8 +8,8 @@ package main
  * Responsable: Josué Pacheco (@JosuePach3co)
  *
  * Descripción:
- * Plantilla base para el algoritmo de prueba semántica válido 3.
- * No utilizar el identificador en blanco '_' (usar identificadores nombrados).
+ * Programa válido en Go enfocado en validar RS-4 (coherencia en
+ * operaciones permitidas) y RS-6 (estructuras de control e interrupciones).
  */
  
 import "fmt"
@@ -93,7 +93,7 @@ func main() {
 		ciclosExtra++
 	}
 
-	// --- 4. RS-6: for range con variables nombradas (sin '_') sobre slice y map ---
+	// --- 4. RS-6: for range con variables nombradas sobre slice y map ---
 	calificaciones := []float64{8.8, 9.4, 7.2, 9.7}
 	sumaNotas := 0.0
 

@@ -1,0 +1,51 @@
+================================================================================
+REPORTE DE ANÁLISIS SINTÁCTICO - COMPILADOR GO (ESPOL)
+Archivo analizado: algoritmos/algoritmo2_sintactico.go
+Fecha y hora     : 08-11-2026 13:38:00
+Desarrollador    : AraujoHivor
+================================================================================
+
+--- REGLAS GRAMATICALES VALIDADAS ---
+[Línea   1] REGLA VALIDADA: programa
+[Línea  11] REGLA VALIDADA: declaracion_import
+[Línea  13] REGLA VALIDADA: declaracion_funcion
+[Línea  14] REGLA VALIDADA: termino
+[Línea  14] REGLA VALIDADA: sentencia_retorno
+[Línea  17] REGLA VALIDADA: declaracion_funcion
+[Línea  18] REGLA VALIDADA: declaracion_var
+[Línea  19] REGLA VALIDADA: declaracion_var
+[Línea  20] REGLA VALIDADA: declaracion_var
+[Línea  21] REGLA VALIDADA: declaracion_var
+[Línea  22] REGLA VALIDADA: declaracion_var
+[Línea  24] REGLA VALIDADA: declaracion_arreglo
+[Línea  25] REGLA VALIDADA: declaracion_arreglo
+[Línea  27] REGLA VALIDADA: termino
+[Línea  27] REGLA VALIDADA: expresion_aritmetica
+[Línea  27] REGLA VALIDADA: declaracion_var
+[Línea  28] REGLA VALIDADA: llamada_funcion
+[Línea  28] REGLA VALIDADA: declaracion_var
+[Línea  30] REGLA VALIDADA: comparacion
+[Línea  30] REGLA VALIDADA: comparacion
+[Línea  30] REGLA VALIDADA: conjuncion
+[Línea  30] REGLA VALIDADA: sentencia_if
+[Línea  31] REGLA VALIDADA: declaracion_var
+[Línea  32] REGLA VALIDADA: sentencia_impresion
+[Línea  33] REGLA VALIDADA: comparacion
+[Línea  33] REGLA VALIDADA: comparacion
+[Línea  33] REGLA VALIDADA: conjuncion
+[Línea  33] REGLA VALIDADA: sentencia_if
+[Línea  34] REGLA VALIDADA: declaracion_var
+[Línea  35] REGLA VALIDADA: sentencia_impresion
+[Línea  37] REGLA VALIDADA: declaracion_var
+[Línea  38] REGLA VALIDADA: sentencia_impresion
+[Línea  41] REGLA VALIDADA: comparacion
+[Línea  41] REGLA VALIDADA: conjuncion
+[Línea  41] REGLA VALIDADA: sentencia_if
+[Línea  42] REGLA VALIDADA: sentencia_impresion
+[Línea  44] REGLA VALIDADA: sentencia_impresion
+
+--- ERRORES SINTÁCTICOS DETECTADOS ---
+No se detectaron errores sintácticos.
+================================================================================
+RESUMEN: Reglas Validadas: 37 | Errores Sintácticos: 0 | Estado: VÁLIDO
+================================================================================

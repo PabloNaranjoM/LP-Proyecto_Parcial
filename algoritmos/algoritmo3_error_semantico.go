@@ -8,8 +8,8 @@ package main
  * Responsable: Josué Pacheco (@JosuePach3co)
  *
  * Descripción:
- * Plantilla base para el algoritmo de prueba semántica con errores
- * deliberados enfocados en operaciones permitidas y estructuras de control.
+ * Caso de prueba semántica con errores deliberados enfocados en RS-4
+ * (operaciones permitidas) y RS-6 (estructuras de control).
  */
 
  import "fmt"

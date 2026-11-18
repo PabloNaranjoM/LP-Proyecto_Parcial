@@ -1,0 +1,68 @@
+================================================================================
+REPORTE DE ANÁLISIS SINTÁCTICO - COMPILADOR GO (ESPOL)
+Archivo analizado: algoritmos/algoritmo3_error.go
+Fecha y hora     : 17-11-2026 23:38:38
+Desarrollador    : JosuePach3co
+================================================================================
+
+--- REGLAS GRAMATICALES VALIDADAS ---
+[Línea   1] REGLA VALIDADA: programa
+[Línea  16] REGLA VALIDADA: declaracion_import
+[Línea  18] REGLA VALIDADA: declaracion_const
+[Línea  19] REGLA VALIDADA: declaracion_const
+[Línea  21] REGLA VALIDADA: declaracion_funcion
+[Línea  22] REGLA VALIDADA: declaracion_var
+[Línea  23] REGLA VALIDADA: declaracion_var
+[Línea  24] REGLA VALIDADA: declaracion_var
+[Línea  25] REGLA VALIDADA: declaracion_var
+[Línea  30] REGLA VALIDADA: declaracion_var
+[Línea  31] REGLA VALIDADA: declaracion_var
+[Línea  32] REGLA VALIDADA: declaracion_var
+[Línea  33] REGLA VALIDADA: declaracion_var
+[Línea  40] REGLA VALIDADA: comparacion
+[Línea  40] REGLA VALIDADA: asignacion
+[Línea  46] REGLA VALIDADA: expresion_aritmetica
+[Línea  46] REGLA VALIDADA: declaracion_corta
+[Línea  49] REGLA VALIDADA: termino
+[Línea  49] REGLA VALIDADA: declaracion_corta
+[Línea  52] REGLA VALIDADA: termino
+[Línea  52] REGLA VALIDADA: declaracion_corta
+[Línea  55] REGLA VALIDADA: conjuncion
+[Línea  55] REGLA VALIDADA: declaracion_corta
+[Línea  58] REGLA VALIDADA: expresion_booleana
+[Línea  58] REGLA VALIDADA: declaracion_corta
+[Línea  61] REGLA VALIDADA: comparacion
+[Línea  61] REGLA VALIDADA: declaracion_corta
+[Línea  64] REGLA VALIDADA: comparacion
+[Línea  64] REGLA VALIDADA: declaracion_corta
+[Línea  67] REGLA VALIDADA: comparacion
+[Línea  67] REGLA VALIDADA: declaracion_corta
+[Línea  70] REGLA VALIDADA: incremento
+[Línea  73] REGLA VALIDADA: incremento
+[Línea  79] REGLA VALIDADA: sentencia_if
+[Línea  80] REGLA VALIDADA: sentencia_impresion
+[Línea  84] REGLA VALIDADA: sentencia_for
+[Línea  85] REGLA VALIDADA: sentencia_impresion
+[Línea  89] REGLA VALIDADA: sentencia_switch
+[Línea  91] REGLA VALIDADA: sentencia_interrupcion
+[Línea  93] REGLA VALIDADA: sentencia_impresion
+[Línea  95] REGLA VALIDADA: sentencia_impresion
+[Línea  99] REGLA VALIDADA: sentencia_if
+[Línea 100] REGLA VALIDADA: sentencia_interrupcion
+[Línea 104] REGLA VALIDADA: sentencia_interrupcion
+[Línea 107] REGLA VALIDADA: sentencia_interrupcion
+[Línea 109] REGLA VALIDADA: sentencia_impresion
+
+--- ERRORES SINTÁCTICOS DETECTADOS ---
+[Línea  38, Columna  34] Error sintáctico en la línea 38, columna 34: Token inesperado ')', se esperaba completar la expresión o instrucción previa antes del delimitador de cierre.
+[Línea  39, Columna  13] Error sintáctico en la línea 39, columna 13: Token inesperado ';', se esperaba una expresión, delimitador o sentencia válida según la gramática de Go.
+[Línea  40, Columna  31] Error sintáctico en la línea 40, columna 31: Token inesperado ';', se esperaba una expresión, delimitador o sentencia válida según la gramática de Go.
+
+--- ALERTAS LÉXICAS PREVIAS ---
+[Línea  30, Columna  17] ERROR LÉXICO: Carácter ilegal '@' no reconocido por el lenguaje.
+[Línea  31, Columna  17] ERROR LÉXICO: Carácter ilegal '$' no reconocido por el lenguaje.
+[Línea  32, Columna  12] ERROR LÉXICO: Carácter ilegal '~' no reconocido por el lenguaje.
+[Línea  33, Columna  15] ERROR LÉXICO: Carácter ilegal '#' no reconocido por el lenguaje.
+================================================================================
+RESUMEN: Reglas Validadas: 46 | Errores Sintácticos: 3 | Estado: INVÁLIDO
+================================================================================

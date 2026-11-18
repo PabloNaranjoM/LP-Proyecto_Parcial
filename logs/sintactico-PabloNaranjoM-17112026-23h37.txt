@@ -1,0 +1,116 @@
+================================================================================
+REPORTE DE ANÁLISIS SINTÁCTICO - COMPILADOR GO (ESPOL)
+Archivo analizado: algoritmos/algoritmo1.go
+Fecha y hora     : 17-11-2026 23:37:38
+Desarrollador    : PabloNaranjoM
+================================================================================
+
+--- REGLAS GRAMATICALES VALIDADAS ---
+[Línea   1] REGLA VALIDADA: programa
+[Línea  21] REGLA VALIDADA: declaracion_import
+[Línea  24] REGLA VALIDADA: declaracion_const
+[Línea  26] REGLA VALIDADA: declaracion_var
+[Línea  29] REGLA VALIDADA: definicion_struct
+[Línea  36] REGLA VALIDADA: definicion_struct
+[Línea  43] REGLA VALIDADA: declaracion_funcion
+[Línea  44] REGLA VALIDADA: comparacion
+[Línea  44] REGLA VALIDADA: sentencia_if
+[Línea  45] REGLA VALIDADA: sentencia_retorno
+[Línea  47] REGLA VALIDADA: sentencia_impresion
+[Línea  51] REGLA VALIDADA: declaracion_funcion_variadica
+[Línea  52] REGLA VALIDADA: declaracion_corta
+[Línea  53] REGLA VALIDADA: sentencia_for
+[Línea  54] REGLA VALIDADA: comparacion
+[Línea  54] REGLA VALIDADA: sentencia_if
+[Línea  55] REGLA VALIDADA: asignacion_compuesta
+[Línea  58] REGLA VALIDADA: sentencia_retorno
+[Línea  62] REGLA VALIDADA: declaracion_funcion
+[Línea  63] REGLA VALIDADA: comparacion
+[Línea  63] REGLA VALIDADA: sentencia_if
+[Línea  64] REGLA VALIDADA: sentencia_retorno
+[Línea  66] REGLA VALIDADA: sentencia_retorno
+[Línea  69] REGLA VALIDADA: declaracion_funcion
+[Línea  71] REGLA VALIDADA: declaracion_corta
+[Línea  72] REGLA VALIDADA: declaracion_corta
+[Línea  73] REGLA VALIDADA: declaracion_corta
+[Línea  74] REGLA VALIDADA: declaracion_corta
+[Línea  77] REGLA VALIDADA: instanciacion_struct
+[Línea  77] REGLA VALIDADA: declaracion_corta
+[Línea  83] REGLA VALIDADA: declaracion_corta
+[Línea  85] REGLA VALIDADA: instanciacion_struct
+[Línea  85] REGLA VALIDADA: declaracion_corta
+[Línea  92] REGLA VALIDADA: sentencia_lectura
+[Línea  93] REGLA VALIDADA: sentencia_lectura
+[Línea  96] REGLA VALIDADA: asignacion_compuesta
+[Línea  97] REGLA VALIDADA: asignacion_compuesta
+[Línea  98] REGLA VALIDADA: asignacion_compuesta
+[Línea  99] REGLA VALIDADA: asignacion_compuesta
+[Línea 100] REGLA VALIDADA: asignacion_compuesta
+[Línea 102] REGLA VALIDADA: incremento
+[Línea 103] REGLA VALIDADA: incremento
+[Línea 106] REGLA VALIDADA: declaracion_mapa
+[Línea 111] REGLA VALIDADA: declaracion_corta
+[Línea 112] REGLA VALIDADA: sentencia_for
+[Línea 113] REGLA VALIDADA: asignacion_compuesta
+[Línea 114] REGLA VALIDADA: sentencia_impresion
+[Línea 118] REGLA VALIDADA: expresion_aritmetica
+[Línea 118] REGLA VALIDADA: termino
+[Línea 118] REGLA VALIDADA: termino
+[Línea 118] REGLA VALIDADA: declaracion_corta
+[Línea 119] REGLA VALIDADA: declaracion_corta
+[Línea 120] REGLA VALIDADA: comparacion
+[Línea 120] REGLA VALIDADA: comparacion
+[Línea 120] REGLA VALIDADA: conjuncion
+[Línea 120] REGLA VALIDADA: declaracion_corta
+[Línea 123] REGLA VALIDADA: declaracion_corta
+[Línea 124] REGLA VALIDADA: comparacion
+[Línea 124] REGLA VALIDADA: sentencia_for
+[Línea 125] REGLA VALIDADA: incremento
+[Línea 128] REGLA VALIDADA: declaracion_corta
+[Línea 129] REGLA VALIDADA: declaracion_corta
+[Línea 129] REGLA VALIDADA: comparacion
+[Línea 129] REGLA VALIDADA: incremento
+[Línea 129] REGLA VALIDADA: sentencia_for
+[Línea 130] REGLA VALIDADA: asignacion_compuesta
+[Línea 133] REGLA VALIDADA: sentencia_for
+[Línea 134] REGLA VALIDADA: comparacion
+[Línea 134] REGLA VALIDADA: sentencia_if
+[Línea 135] REGLA VALIDADA: sentencia_interrupcion
+[Línea 140] REGLA VALIDADA: literal_funcion
+[Línea 140] REGLA VALIDADA: declaracion_corta
+[Línea 141] REGLA VALIDADA: termino
+[Línea 141] REGLA VALIDADA: sentencia_retorno
+[Línea 144] REGLA VALIDADA: llamada_funcion
+[Línea 145] REGLA VALIDADA: llamada_funcion
+[Línea 147] REGLA VALIDADA: llamada_funcion
+[Línea 147] REGLA VALIDADA: declaracion_corta
+[Línea 148] REGLA VALIDADA: llamada_funcion
+[Línea 148] REGLA VALIDADA: declaracion_corta
+[Línea 149] REGLA VALIDADA: llamada_funcion
+[Línea 149] REGLA VALIDADA: declaracion_corta
+[Línea 150] REGLA VALIDADA: llamada_funcion
+[Línea 150] REGLA VALIDADA: declaracion_corta
+[Línea 153] REGLA VALIDADA: declaracion_corta
+[Línea 154] REGLA VALIDADA: sentencia_if
+[Línea 155] REGLA VALIDADA: declaracion_corta
+[Línea 156] REGLA VALIDADA: sentencia_impresion
+[Línea 158] REGLA VALIDADA: declaracion_corta
+[Línea 158] REGLA VALIDADA: comparacion
+[Línea 158] REGLA VALIDADA: incremento
+[Línea 158] REGLA VALIDADA: sentencia_for
+[Línea 159] REGLA VALIDADA: declaracion_corta
+[Línea 160] REGLA VALIDADA: sentencia_impresion
+[Línea 164] REGLA VALIDADA: declaracion_corta
+[Línea 165] REGLA VALIDADA: sentencia_impresion
+[Línea 169] REGLA VALIDADA: declaracion_funcion
+[Línea 170] REGLA VALIDADA: sentencia_if
+[Línea 171] REGLA VALIDADA: expresion_aritmetica
+[Línea 171] REGLA VALIDADA: sentencia_retorno
+[Línea 173] REGLA VALIDADA: expresion_aritmetica
+[Línea 173] REGLA VALIDADA: sentencia_retorno
+
+--- ERRORES SINTÁCTICOS DETECTADOS ---
+No se detectaron errores sintácticos.
+================================================================================
+RESUMEN: Reglas Validadas: 102 | Errores Sintácticos: 0 | Estado: VÁLIDO
+================================================================================

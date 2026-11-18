@@ -35,6 +35,7 @@ from src.lexer import (
 
 start = "programa"
 
+# Resuelve el conflicto shift/reduce entre 'return' vacío y 'return <expresion>' (sin ';' obligatorio).
 precedence = (
     ("nonassoc", "RETORNAR"),
     ("nonassoc", "ID", "FUNCION"),

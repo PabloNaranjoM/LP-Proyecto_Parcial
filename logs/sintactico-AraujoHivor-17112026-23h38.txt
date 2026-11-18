@@ -1,0 +1,52 @@
+================================================================================
+REPORTE DE ANÁLISIS SINTÁCTICO - COMPILADOR GO (ESPOL)
+Archivo analizado: algoritmos/algoritmo2_error.go
+Fecha y hora     : 17-11-2026 23:38:38
+Desarrollador    : AraujoHivor
+================================================================================
+
+--- REGLAS GRAMATICALES VALIDADAS ---
+[Línea   1] REGLA VALIDADA: programa
+[Línea  16] REGLA VALIDADA: declaracion_import
+[Línea  18] REGLA VALIDADA: definicion_struct
+[Línea  23] REGLA VALIDADA: declaracion_funcion
+[Línea  24] REGLA VALIDADA: declaracion_var
+[Línea  25] REGLA VALIDADA: declaracion_const
+[Línea  26] REGLA VALIDADA: declaracion_arreglo
+[Línea  27] REGLA VALIDADA: declaracion_slice
+[Línea  28] REGLA VALIDADA: declaracion_mapa
+[Línea  29] REGLA VALIDADA: instanciacion_struct
+[Línea  29] REGLA VALIDADA: declaracion_corta
+[Línea  34] REGLA VALIDADA: declaracion_var
+[Línea  35] REGLA VALIDADA: declaracion_var
+[Línea  36] REGLA VALIDADA: declaracion_var
+[Línea  37] REGLA VALIDADA: declaracion_var
+[Línea  42] REGLA VALIDADA: declaracion_var
+[Línea  44] REGLA VALIDADA: declaracion_var
+[Línea  52] REGLA VALIDADA: asignacion
+[Línea  55] REGLA VALIDADA: asignacion
+[Línea  58] REGLA VALIDADA: asignacion
+[Línea  61] REGLA VALIDADA: asignacion
+[Línea  64] REGLA VALIDADA: asignacion
+[Línea  67] REGLA VALIDADA: asignacion
+[Línea  70] REGLA VALIDADA: declaracion_slice
+[Línea  73] REGLA VALIDADA: instanciacion_struct
+[Línea  73] REGLA VALIDADA: declaracion_corta
+[Línea  76] REGLA VALIDADA: sentencia_lectura
+[Línea  78] REGLA VALIDADA: sentencia_impresion
+
+--- ERRORES SINTÁCTICOS DETECTADOS ---
+[Línea  42, Columna  22] Error sintáctico en la línea 42, columna 22: Token inesperado ';', se esperaba una expresión, delimitador o sentencia válida según la gramática de Go.
+[Línea  43, Columna  19] Error sintáctico en la línea 43, columna 19: Token inesperado 'int', se esperaba una expresión, delimitador o sentencia válida según la gramática de Go.
+[Línea  44, Columna  27] Error sintáctico en la línea 44, columna 27: Token inesperado '*', se esperaba una expresión, delimitador o sentencia válida según la gramática de Go.
+[Línea  45, Columna  21] Error sintáctico en la línea 45, columna 21: Token inesperado ')', se esperaba completar la expresión o instrucción previa antes del delimitador de cierre.
+[Línea  46, Columna   9] Error sintáctico en la línea 46, columna 9: Token inesperado ';', se esperaba una expresión, delimitador o sentencia válida según la gramática de Go.
+
+--- ALERTAS LÉXICAS PREVIAS ---
+[Línea  34, Columna  12] ERROR LÉXICO: Carácter ilegal '@' no reconocido por el lenguaje.
+[Línea  35, Columna  15] ERROR LÉXICO: Carácter ilegal '$' no reconocido por el lenguaje.
+[Línea  36, Columna  12] ERROR LÉXICO: Carácter ilegal '?' no reconocido por el lenguaje.
+[Línea  37, Columna  11] ERROR LÉXICO: Carácter ilegal '#' no reconocido por el lenguaje.
+================================================================================
+RESUMEN: Reglas Validadas: 28 | Errores Sintácticos: 5 | Estado: INVÁLIDO
+================================================================================

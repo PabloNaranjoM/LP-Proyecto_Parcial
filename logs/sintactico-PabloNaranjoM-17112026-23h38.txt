@@ -1,0 +1,84 @@
+================================================================================
+REPORTE DE ANÁLISIS SINTÁCTICO - COMPILADOR GO (ESPOL)
+Archivo analizado: algoritmos/algoritmo1_error.go
+Fecha y hora     : 17-11-2026 23:38:38
+Desarrollador    : PabloNaranjoM
+================================================================================
+
+--- REGLAS GRAMATICALES VALIDADAS ---
+[Línea   1] REGLA VALIDADA: programa
+[Línea  16] REGLA VALIDADA: declaracion_import
+[Línea  19] REGLA VALIDADA: definicion_struct
+[Línea  24] REGLA VALIDADA: definicion_struct
+[Línea  29] REGLA VALIDADA: definicion_struct
+[Línea  34] REGLA VALIDADA: declaracion_funcion
+[Línea  35] REGLA VALIDADA: sentencia_retorno
+[Línea  39] REGLA VALIDADA: declaracion_funcion
+[Línea  40] REGLA VALIDADA: sentencia_retorno
+[Línea  44] REGLA VALIDADA: declaracion_funcion
+[Línea  45] REGLA VALIDADA: sentencia_if
+[Línea  46] REGLA VALIDADA: sentencia_retorno
+[Línea  48] REGLA VALIDADA: sentencia_retorno
+[Línea  52] REGLA VALIDADA: declaracion_funcion
+[Línea  53] REGLA VALIDADA: termino
+[Línea  53] REGLA VALIDADA: declaracion_corta
+[Línea  54] REGLA VALIDADA: sentencia_impresion
+[Línea  58] REGLA VALIDADA: declaracion_funcion
+[Línea  59] REGLA VALIDADA: comparacion
+[Línea  59] REGLA VALIDADA: sentencia_if
+[Línea  60] REGLA VALIDADA: sentencia_retorno
+[Línea  65] REGLA VALIDADA: declaracion_funcion
+[Línea  66] REGLA VALIDADA: sentencia_retorno
+[Línea  70] REGLA VALIDADA: declaracion_funcion_variadica
+[Línea  71] REGLA VALIDADA: declaracion_corta
+[Línea  72] REGLA VALIDADA: sentencia_for
+[Línea  73] REGLA VALIDADA: comparacion
+[Línea  73] REGLA VALIDADA: sentencia_if
+[Línea  74] REGLA VALIDADA: asignacion_compuesta
+[Línea  77] REGLA VALIDADA: sentencia_retorno
+[Línea  80] REGLA VALIDADA: declaracion_funcion
+[Línea  81] REGLA VALIDADA: sentencia_impresion
+[Línea  85] REGLA VALIDADA: declaracion_funcion
+[Línea  86] REGLA VALIDADA: sentencia_impresion
+[Línea  89] REGLA VALIDADA: declaracion_funcion
+[Línea  90] REGLA VALIDADA: declaracion_const
+[Línea  91] REGLA VALIDADA: declaracion_corta
+[Línea  92] REGLA VALIDADA: sentencia_lectura
+[Línea  97] REGLA VALIDADA: declaracion_corta
+[Línea  98] REGLA VALIDADA: declaracion_corta
+[Línea  99] REGLA VALIDADA: declaracion_corta
+[Línea 100] REGLA VALIDADA: declaracion_corta
+[Línea 106] REGLA VALIDADA: termino
+[Línea 106] REGLA VALIDADA: termino
+[Línea 107] REGLA VALIDADA: declaracion_corta
+[Línea 113] REGLA VALIDADA: declaracion_var
+[Línea 116] REGLA VALIDADA: declaracion_var
+[Línea 117] REGLA VALIDADA: declaracion_const
+[Línea 120] REGLA VALIDADA: llamada_funcion
+[Línea 120] REGLA VALIDADA: declaracion_corta
+[Línea 123] REGLA VALIDADA: llamada_funcion
+[Línea 123] REGLA VALIDADA: declaracion_corta
+[Línea 126] REGLA VALIDADA: llamada_funcion
+[Línea 126] REGLA VALIDADA: declaracion_corta
+[Línea 129] REGLA VALIDADA: llamada_funcion
+[Línea 129] REGLA VALIDADA: declaracion_corta
+[Línea 132] REGLA VALIDADA: llamada_funcion
+[Línea 132] REGLA VALIDADA: declaracion_corta
+[Línea 135] REGLA VALIDADA: llamada_funcion
+[Línea 135] REGLA VALIDADA: sentencia_impresion
+[Línea 138] REGLA VALIDADA: declaracion_corta
+[Línea 140] REGLA VALIDADA: sentencia_impresion
+
+--- ERRORES SINTÁCTICOS DETECTADOS ---
+[Línea 105, Columna  10] Error sintáctico en la línea 105, columna 10: Token inesperado ';', se esperaba una expresión, delimitador o sentencia válida según la gramática de Go.
+[Línea 106, Columna  26] Error sintáctico en la línea 106, columna 26: Token inesperado ';', se esperaba una expresión, delimitador o sentencia válida según la gramática de Go.
+[Línea 107, Columna  21] Error sintáctico en la línea 107, columna 21: Token inesperado ';', se esperaba una expresión, delimitador o sentencia válida según la gramática de Go.
+
+--- ALERTAS LÉXICAS PREVIAS ---
+[Línea  97, Columna  15] ERROR LÉXICO: Carácter ilegal '@' no reconocido por el lenguaje.
+[Línea  98, Columna  14] ERROR LÉXICO: Carácter ilegal '$' no reconocido por el lenguaje.
+[Línea  99, Columna  12] ERROR LÉXICO: Carácter ilegal '~' no reconocido por el lenguaje.
+[Línea 100, Columna  15] ERROR LÉXICO: Carácter ilegal '#' no reconocido por el lenguaje.
+================================================================================
+RESUMEN: Reglas Validadas: 62 | Errores Sintácticos: 3 | Estado: INVÁLIDO
+================================================================================

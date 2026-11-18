@@ -203,6 +203,16 @@ def registrar_validacion_semantica(
     )
     destino.append(entrada)
     return entrada
+
+
+def _nombre_base_referencia(referencia: Any) -> str | None:
+    """Extrae el identificador raíz desde referencias simples, de campo o de índice."""
+    base = referencia
+    while isinstance(base, tuple) and base[0] in ("campo", "indice"):
+        base = base[1]
+    if isinstance(base, tuple) and base[0] == "id":
+        return str(base[1])
+    return base if isinstance(base, str) else None
 # =====================================================================
 # FIN APORTE: Pablo Naranjo (@PabloNaranjoM)
 # =====================================================================
@@ -625,16 +635,8 @@ def visitar_asignacion(nodo, tabla_simbolos, contexto):
         return
 
     # Obtener el identificador base de la referencia
-    base = referencia
-
-    while isinstance(base, tuple) and base[0] in ("campo", "indice"):
-        base = base[1]
-
-    if isinstance(base, tuple) and base[0] == "id":
-        nombre = base[1]
-    elif isinstance(base, str):
-        nombre = base
-    else:
+    nombre = _nombre_base_referencia(referencia)
+    if nombre is None:
         return
 
     simbolo = tabla_simbolos.buscar_visible(nombre)
@@ -692,16 +694,8 @@ def visitar_asignacion_compuesta(nodo, tabla_simbolos, contexto):
         return
 
     # Obtener el nombre de la variable base
-    base = referencia
-
-    while isinstance(base, tuple) and base[0] in ("campo", "indice"):
-        base = base[1]
-
-    if isinstance(base, tuple) and base[0] == "id":
-        nombre = base[1]
-    elif isinstance(base, str):
-        nombre = base
-    else:
+    nombre = _nombre_base_referencia(referencia)
+    if nombre is None:
         return
 
     simbolo = tabla_simbolos.buscar_visible(nombre)
@@ -789,16 +783,8 @@ def visitar_sentencia_lectura(nodo, tabla_simbolos, contexto):
             continue
 
         # Obtener el identificador principal
-        base = referencia
-
-        while isinstance(base, tuple) and base[0] in ("campo", "indice"):
-            base = base[1]
-
-        if isinstance(base, tuple) and base[0] == "id":
-            nombre = base[1]
-        elif isinstance(base, str):
-            nombre = base
-        else:
+        nombre = _nombre_base_referencia(referencia)
+        if nombre is None:
             continue
 
         simbolo = tabla_simbolos.buscar_visible(nombre)
@@ -1402,7 +1388,27 @@ def validar_operacion_unaria(
     """Valida RS-4 para operadores unarios (!, -, &) e incremento/decremento (++, --)."""
     if operador == "&":
         tipo_ref = resolver_tipo_referencia(operando, tabla_simbolos, contexto)
-        return tipo_ref
+        if tipo_ref == "error_tipo":
+            return "error_tipo"
+
+        nombre_base = _nombre_base_referencia(operando)
+        simbolo = tabla_simbolos.buscar_visible(nombre_base) if nombre_base else None
+        if simbolo is not None and not simbolo.mutable:
+            detalle = (
+                f"No se puede obtener la dirección de la constante '{simbolo.nombre}'."
+                if simbolo.categoria == "constante"
+                else f"No se puede obtener la dirección del identificador no direccionable '{simbolo.nombre}'."
+            )
+            registrar_error_semantico("asignación de tipo", linea, detalle, contexto)
+            return "error_tipo"
+
+        registrar_validacion_semantica(
+            linea,
+            "RS-4 (Operaciones permitidas)",
+            f"Referencia '&' válida sobre '{tipo_ref}'.",
+            contexto,
+        )
+        return f"*{tipo_ref}"
 
     if operador in ("++", "--"):
         tipo_ref = resolver_tipo_referencia(operando, tabla_simbolos, contexto)
@@ -2481,6 +2487,7 @@ def analizar_semantica(
 
     errores_lexicos = list(res_sintactico.get("errores_lexicos", []))
     errores_sintacticos = list(res_sintactico.get("errores", []))
+    contexto["errores"].sort(key=lambda e: e["linea"])
     errores_sem = list(contexto["errores"])
 
     valido = (

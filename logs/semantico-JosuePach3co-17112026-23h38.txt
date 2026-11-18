@@ -1,0 +1,95 @@
+================================================================================
+REPORTE DE ANÁLISIS SEMÁNTICO - COMPILADOR GO (ESPOL)
+Archivo analizado: algoritmos/algoritmo3_error.go
+Fecha y hora     : 17-11-2026 23:38:38
+Desarrollador    : JosuePach3co
+================================================================================
+
+--- TABLA DE SÍMBOLOS ---
+#    Identificador        Categoría       Tipo de Dato           Ámbito             Línea
+1    main                 funcion         func()->void           global             21
+2    LIMITE_MAXIMO        constante       int                    global             18
+3    ETIQUETA_FIJA        constante       string                 global             19
+4    entero               variable        int                    func:main          22
+5    decimal              variable        float64                func:main          23
+6    texto                variable        string                 func:main          24
+7    bandera              variable        bool                   func:main          25
+8    errorAcceso          variable        bool                   func:main          30
+9    sensorFallo          variable        bool                   func:main          31
+10   umbral               variable        int                    func:main          32
+11   tokenRoto            variable        bool                   func:main          33
+
+--- REGLAS SEMÁNTICAS VALIDADAS ---
+[Semántico - Línea 21] RS-2 (Unicidad en el alcance): Función 'main' declarada con firma 'func()->void'.
+[Semántico - Línea 18] RS-3: Constante 'LIMITE_MAXIMO' declarada correctamente como 'int'
+[Semántico - Línea 19] RS-3: Constante 'ETIQUETA_FIJA' declarada correctamente como 'string'
+[Semántico - Línea 22] RS-3: Variable 'entero' declarada correctamente como 'int'
+[Semántico - Línea 23] RS-3: Variable 'decimal' declarada correctamente como 'float64'
+[Semántico - Línea 24] RS-3: Variable 'texto' declarada correctamente como 'string'
+[Semántico - Línea 25] RS-3: Variable 'bandera' declarada correctamente como 'bool'
+[Semántico - Línea 30] RS-3: Variable 'errorAcceso' declarada correctamente como 'bool'
+[Semántico - Línea 31] RS-3: Variable 'sensorFallo' declarada correctamente como 'bool'
+[Semántico - Línea 32] RS-3: Variable 'umbral' declarada correctamente como 'int'
+[Semántico - Línea 33] RS-3: Variable 'tokenRoto' declarada correctamente como 'bool'
+[Semántico - Línea 40] RS-1: El identificador 'bandera' fue declarado previamente
+[Semántico - Línea 40] RS-1: El identificador 'decimal' fue declarado previamente
+[Semántico - Línea 40] RS-4 (Operaciones permitidas): Comparación '>' válida entre 'float64'.
+[Semántico - Línea 40] RS-3: Asignacion valida a 'bandera' de tipo 'bool'
+[Semántico - Línea 46] RS-1: El identificador 'entero' fue declarado previamente
+[Semántico - Línea 46] RS-1: El identificador 'decimal' fue declarado previamente
+[Semántico - Línea 49] RS-1: El identificador 'entero' fue declarado previamente
+[Semántico - Línea 49] RS-1: El identificador 'decimal' fue declarado previamente
+[Semántico - Línea 52] RS-1: El identificador 'decimal' fue declarado previamente
+[Semántico - Línea 55] RS-1: El identificador 'entero' fue declarado previamente
+[Semántico - Línea 55] RS-1: El identificador 'bandera' fue declarado previamente
+[Semántico - Línea 58] RS-1: El identificador 'bandera' fue declarado previamente
+[Semántico - Línea 58] RS-1: El identificador 'texto' fue declarado previamente
+[Semántico - Línea 61] RS-1: El identificador 'entero' fue declarado previamente
+[Semántico - Línea 64] RS-1: El identificador 'entero' fue declarado previamente
+[Semántico - Línea 64] RS-1: El identificador 'decimal' fue declarado previamente
+[Semántico - Línea 67] RS-1: El identificador 'entero' fue declarado previamente
+[Semántico - Línea 67] RS-1: El identificador 'texto' fue declarado previamente
+[Semántico - Línea 70] RS-1: El identificador 'texto' fue declarado previamente
+[Semántico - Línea 73] RS-1: El identificador 'LIMITE_MAXIMO' fue declarado previamente
+[Semántico - Línea 79] RS-1: El identificador 'entero' fue declarado previamente
+[Semántico - Línea 80] RS-1 (Identificadores): Invocación a 'fmt.Println' validada con 1 argumento(s).
+[Semántico - Línea 84] RS-1: El identificador 'decimal' fue declarado previamente
+[Semántico - Línea 85] RS-1 (Identificadores): Invocación a 'fmt.Println' validada con 1 argumento(s).
+[Semántico - Línea 89] RS-1: El identificador 'entero' fue declarado previamente
+[Semántico - Línea 93] RS-1 (Identificadores): Invocación a 'fmt.Println' validada con 1 argumento(s).
+[Semántico - Línea 95] RS-1 (Identificadores): Invocación a 'fmt.Println' validada con 1 argumento(s).
+[Semántico - Línea 99] RS-1: El identificador 'bandera' fue declarado previamente
+[Semántico - Línea 99] RS-6 (Estructuras de control): Condición booleana válida en sentencia 'if'.
+[Semántico - Línea 109] RS-1: El identificador 'errorAcceso' fue declarado previamente
+[Semántico - Línea 109] RS-1: El identificador 'sensorFallo' fue declarado previamente
+[Semántico - Línea 109] RS-1: El identificador 'umbral' fue declarado previamente
+[Semántico - Línea 109] RS-1: El identificador 'tokenRoto' fue declarado previamente
+[Semántico - Línea 109] RS-1 (Identificadores): Invocación a 'fmt.Println' validada con 4 argumento(s).
+[Semántico - Línea 21] RS-5 (Retorno de funciones): Función 'main' sin retorno ('void') validada.
+
+--- ERRORES SEMÁNTICOS DETECTADOS ---
+Error Semántico operaciones permitidas en la línea 46: Operación '+' no válida entre tipos incompatibles 'int' y 'float64'.
+Error Semántico operaciones permitidas en la línea 49: Operación '*' requiere operandos numéricos del mismo tipo, se recibió 'int' y 'float64'.
+Error Semántico operaciones permitidas en la línea 52: El operador '%' solo admite operandos de tipo 'int', se recibió 'float64' y 'float64'.
+Error Semántico operaciones permitidas en la línea 55: El operador lógico '&&' requiere operandos 'bool', se recibió 'int' y 'bool'.
+Error Semántico operaciones permitidas en la línea 58: El operador lógico '||' requiere operandos 'bool', se recibió 'bool' y 'string'.
+Error Semántico operaciones permitidas en la línea 61: El operador '!' requiere un operando de tipo 'bool', se recibió 'int'.
+Error Semántico operaciones permitidas en la línea 64: No se pueden comparar los tipos 'int' y 'float64' con '>'.
+Error Semántico operaciones permitidas en la línea 67: No se puede comparar igualdad '==' entre tipos distintos 'int' y 'string'.
+Error Semántico operaciones permitidas en la línea 70: El operador '++' requiere un operando numérico ('int' o 'float64'), se recibió 'string'.
+Error Semántico asignación de tipo en la línea 73: No se puede aplicar '--' sobre la constante 'LIMITE_MAXIMO'.
+Error Semántico estructuras de control en la línea 79: La condición de la sentencia 'if' debe ser de tipo 'bool', se recibió 'int'.
+Error Semántico estructuras de control en la línea 84: La condición del ciclo 'for' debe ser de tipo 'bool', se recibió 'float64'.
+Error Semántico estructuras de control en la línea 90: La expresión del 'case' es de tipo 'string' y no coincide con el tipo 'int' del 'switch'.
+Error Semántico estructuras de control en la línea 91: La instrucción 'continue' solo puede usarse dentro de un bucle 'for'.
+Error Semántico estructuras de control en la línea 92: La expresión del 'case' es de tipo 'bool' y no coincide con el tipo 'int' del 'switch'.
+Error Semántico estructuras de control en la línea 100: La instrucción 'fallthrough' solo puede usarse dentro de un bloque 'switch'.
+Error Semántico estructuras de control en la línea 104: La instrucción 'continue' solo puede usarse dentro de un bucle 'for'.
+Error Semántico estructuras de control en la línea 107: La instrucción 'break' solo puede usarse dentro de un bucle 'for' o un 'switch'.
+
+================================================================================
+Símbolos registrados: 11
+Reglas validadas: 46
+Errores semánticos: 18
+Estado del análisis: INVÁLIDO
+================================================================================

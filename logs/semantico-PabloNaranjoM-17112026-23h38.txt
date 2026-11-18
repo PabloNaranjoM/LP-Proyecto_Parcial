@@ -1,0 +1,127 @@
+================================================================================
+REPORTE DE ANÁLISIS SEMÁNTICO - COMPILADOR GO (ESPOL)
+Archivo analizado: algoritmos/algoritmo1_error.go
+Fecha y hora     : 17-11-2026 23:38:38
+Desarrollador    : PabloNaranjoM
+================================================================================
+
+--- TABLA DE SÍMBOLOS ---
+#    Identificador        Categoría       Tipo de Dato           Ámbito             Línea
+1    Curso                tipo_struct     Curso                  global             24
+2    conParametroRepetido funcion         func(int, string)->int global             34
+3    retornoIncompatible  funcion         func()->int            global             39
+4    retornoVacioEnTipada funcion         func(bool)->string     global             44
+5    faltaRetorno         funcion         func(float64)->float64 global             52
+6    retornoIncompleto    funcion         func(int)->int         global             58
+7    voidConRetorno       funcion         func()->void           global             65
+8    sumarVariadico       funcion         func(int, ...int)->int global             70
+9    duplicada            funcion         func()->void           global             80
+10   main                 funcion         func()->void           global             89
+11   valor                parametro       int                    func:conParametroRepetido 34
+12   activo               parametro       bool                   func:retornoVacioEnTipada 44
+13   x                    parametro       float64                func:faltaRetorno  52
+14   calculo              variable        float64                func:faltaRetorno  53
+15   x                    parametro       int                    func:retornoIncompleto 58
+16   base                 parametro       int                    func:sumarVariadico 70
+17   extras               parametro       []int                  func:sumarVariadico 70
+18   total                variable        int                    func:sumarVariadico 71
+19   idx                  variable        int                    for_72             72
+20   v                    variable        int                    for_72             72
+21   bonoFijo             constante       int                    func:main          90
+22   edad                 variable        int                    func:main          91
+23   valorInvalido        variable        float64                func:main          97
+24   fondoReserva         variable        float64                func:main          98
+25   tasaAjuste           variable        float64                func:main          99
+26   tokenInvalido        variable        int                    func:main          100
+27   esMayor              variable        int                    func:main          107
+28   total                variable        int                    func:main          116
+
+--- REGLAS SEMÁNTICAS VALIDADAS ---
+[Semántico - Línea 24] RS-2 (Unicidad en el alcance): Estructura 'Curso' declarada con 1 campo(s).
+[Semántico - Línea 34] RS-2 (Unicidad en el alcance): Función 'conParametroRepetido' declarada con firma 'func(int, string)->int'.
+[Semántico - Línea 39] RS-2 (Unicidad en el alcance): Función 'retornoIncompatible' declarada con firma 'func()->int'.
+[Semántico - Línea 44] RS-2 (Unicidad en el alcance): Función 'retornoVacioEnTipada' declarada con firma 'func(bool)->string'.
+[Semántico - Línea 52] RS-2 (Unicidad en el alcance): Función 'faltaRetorno' declarada con firma 'func(float64)->float64'.
+[Semántico - Línea 58] RS-2 (Unicidad en el alcance): Función 'retornoIncompleto' declarada con firma 'func(int)->int'.
+[Semántico - Línea 65] RS-2 (Unicidad en el alcance): Función 'voidConRetorno' declarada con firma 'func()->void'.
+[Semántico - Línea 70] RS-2 (Unicidad en el alcance): Función 'sumarVariadico' declarada con firma 'func(int, ...int)->int'.
+[Semántico - Línea 80] RS-2 (Unicidad en el alcance): Función 'duplicada' declarada con firma 'func()->void'.
+[Semántico - Línea 89] RS-2 (Unicidad en el alcance): Función 'main' declarada con firma 'func()->void'.
+[Semántico - Línea 35] RS-1: El identificador 'valor' fue declarado previamente
+[Semántico - Línea 35] RS-5 (Retorno de funciones): Retorno de tipo 'int' válido en 'conParametroRepetido'.
+[Semántico - Línea 45] RS-1: El identificador 'activo' fue declarado previamente
+[Semántico - Línea 45] RS-6 (Estructuras de control): Condición booleana válida en sentencia 'if'.
+[Semántico - Línea 48] RS-5 (Retorno de funciones): Retorno de tipo 'string' válido en 'retornoVacioEnTipada'.
+[Semántico - Línea 53] RS-1: El identificador 'x' fue declarado previamente
+[Semántico - Línea 53] RS-4 (Operaciones permitidas): Operación '*' válida entre operandos 'float64'.
+[Semántico - Línea 53] RS-3: Declaracion corta de 'calculo' con tipo 'float64'
+[Semántico - Línea 54] RS-1: El identificador 'calculo' fue declarado previamente
+[Semántico - Línea 54] RS-1 (Identificadores): Invocación a 'fmt.Println' validada con 1 argumento(s).
+[Semántico - Línea 59] RS-1: El identificador 'x' fue declarado previamente
+[Semántico - Línea 59] RS-4 (Operaciones permitidas): Comparación '>' válida entre 'int'.
+[Semántico - Línea 59] RS-6 (Estructuras de control): Condición booleana válida en sentencia 'if'.
+[Semántico - Línea 60] RS-5 (Retorno de funciones): Retorno de tipo 'int' válido en 'retornoIncompleto'.
+[Semántico - Línea 65] RS-5 (Retorno de funciones): Función 'voidConRetorno' sin retorno ('void') validada.
+[Semántico - Línea 71] RS-1: El identificador 'base' fue declarado previamente
+[Semántico - Línea 71] RS-3: Declaracion corta de 'total' con tipo 'int'
+[Semántico - Línea 72] RS-1: El identificador 'extras' fue declarado previamente
+[Semántico - Línea 72] RS-6 (Estructuras de control): Iteración 'for range' válida sobre '[]int'.
+[Semántico - Línea 73] RS-1: El identificador 'idx' fue declarado previamente
+[Semántico - Línea 73] RS-4 (Operaciones permitidas): Comparación '>=' válida entre 'int'.
+[Semántico - Línea 73] RS-6 (Estructuras de control): Condición booleana válida en sentencia 'if'.
+[Semántico - Línea 74] RS-1: El identificador 'total' fue declarado previamente
+[Semántico - Línea 74] RS-1: El identificador 'v' fue declarado previamente
+[Semántico - Línea 74] RS-4 (Operaciones permitidas): Operación '+' válida entre operandos 'int'.
+[Semántico - Línea 74] RS-3: Asignacion '+=' valida sobre 'total'
+[Semántico - Línea 77] RS-1: El identificador 'total' fue declarado previamente
+[Semántico - Línea 77] RS-5 (Retorno de funciones): Retorno de tipo 'int' válido en 'sumarVariadico'.
+[Semántico - Línea 81] RS-1 (Identificadores): Invocación a 'fmt.Println' validada con 1 argumento(s).
+[Semántico - Línea 80] RS-5 (Retorno de funciones): Función 'duplicada' sin retorno ('void') validada.
+[Semántico - Línea 90] RS-3: Constante 'bonoFijo' declarada correctamente como 'int'
+[Semántico - Línea 91] RS-3: Declaracion corta de 'edad' con tipo 'int'
+[Semántico - Línea 92] RS-1: El identificador 'edad' fue declarado previamente
+[Semántico - Línea 92] RS-3: Lectura valida sobre 'edad' de tipo 'int'
+[Semántico - Línea 97] RS-3: Declaracion corta de 'valorInvalido' con tipo 'float64'
+[Semántico - Línea 98] RS-3: Declaracion corta de 'fondoReserva' con tipo 'float64'
+[Semántico - Línea 99] RS-3: Declaracion corta de 'tasaAjuste' con tipo 'float64'
+[Semántico - Línea 100] RS-3: Declaracion corta de 'tokenInvalido' con tipo 'int'
+[Semántico - Línea 107] RS-1: El identificador 'edad' fue declarado previamente
+[Semántico - Línea 107] RS-3: Declaracion corta de 'esMayor' con tipo 'int'
+[Semántico - Línea 116] RS-3: Variable 'total' declarada con tipo inferido 'int'
+[Semántico - Línea 135] RS-5 (Retorno de funciones): Llamada a 'voidConRetorno' válida (retorna 'void').
+[Semántico - Línea 135] RS-1 (Identificadores): Invocación a 'fmt.Println' validada con 1 argumento(s).
+[Semántico - Línea 138] RS-1: El identificador 'bonoFijo' fue declarado previamente
+[Semántico - Línea 140] RS-1: El identificador 'valorInvalido' fue declarado previamente
+[Semántico - Línea 140] RS-1: El identificador 'fondoReserva' fue declarado previamente
+[Semántico - Línea 140] RS-1: El identificador 'tasaAjuste' fue declarado previamente
+[Semántico - Línea 140] RS-1: El identificador 'tokenInvalido' fue declarado previamente
+[Semántico - Línea 140] RS-1: El identificador 'total' fue declarado previamente
+[Semántico - Línea 140] RS-1 (Identificadores): Invocación a 'fmt.Println' validada con 5 argumento(s).
+[Semántico - Línea 89] RS-5 (Retorno de funciones): Función 'main' sin retorno ('void') validada.
+
+--- ERRORES SEMÁNTICOS DETECTADOS ---
+Error Semántico identificadores en la línea 19: El campo 'codigo' está duplicado en la estructura 'Registro'.
+Error Semántico identificadores en la línea 29: El identificador 'Curso' ya fue declarado previamente en este bloque (línea 24).
+Error Semántico identificadores en la línea 34: El identificador 'valor' ya fue declarado previamente en este bloque (línea 34).
+Error Semántico retorno de funciones en la línea 40: El valor retornado 'string' no coincide con el tipo esperado 'int' en la función 'retornoIncompatible'.
+Error Semántico retorno de funciones en la línea 46: La función 'retornoVacioEnTipada' debe retornar un valor de tipo 'string'.
+Error Semántico retorno de funciones en la línea 52: La función 'faltaRetorno' no contiene una sentencia 'return' que devuelva el tipo esperado 'float64'.
+Error Semántico retorno de funciones en la línea 58: La función 'retornoIncompleto' no contiene una sentencia 'return' que devuelva el tipo esperado 'int'.
+Error Semántico retorno de funciones en la línea 66: La función 'voidConRetorno' no declara tipo de retorno pero intenta retornar un valor de tipo 'int'.
+Error Semántico identificadores en la línea 85: El identificador 'duplicada' ya fue declarado previamente en este bloque (línea 80).
+Error Semántico identificadores en la línea 113: El identificador 'edad' ya fue declarado previamente en este bloque (línea 91).
+Error Semántico identificadores en la línea 117: El identificador 'total' ya fue declarado previamente en este bloque (línea 116).
+Error Semántico retorno de funciones en la línea 120: La función variádica 'sumarVariadico' requiere al menos 1 argumento(s), pero recibió 0.
+Error Semántico asignación de tipo en la línea 123: El argumento 2 de 'sumarVariadico' espera 'int', pero recibió 'string'.
+Error Semántico retorno de funciones en la línea 126: La función 'conParametroRepetido' espera 2 argumento(s), pero recibió 1.
+Error Semántico asignación de tipo en la línea 129: El argumento 1 de 'faltaRetorno' espera 'float64', pero recibió 'string'.
+Error Semántico identificadores en la línea 132: La función 'funcionInexistente' no ha sido declarada en este alcance.
+Error Semántico asignación de tipo en la línea 135: La expresión pasada a 'fmt.Println' no produce ningún valor (tipo 'void').
+Error Semántico asignación de tipo en la línea 138: No se puede obtener la dirección de la constante 'bonoFijo'.
+
+================================================================================
+Símbolos registrados: 28
+Reglas validadas: 61
+Errores semánticos: 18
+Estado del análisis: INVÁLIDO
+================================================================================

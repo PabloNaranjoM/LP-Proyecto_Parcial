@@ -1,0 +1,70 @@
+================================================================================
+REPORTE DE ANÁLISIS SINTÁCTICO - COMPILADOR GO (ESPOL)
+Archivo analizado: algoritmos/algoritmo2.go
+Fecha y hora     : 17-11-2026 23:37:38
+Desarrollador    : AraujoHivor
+================================================================================
+
+--- REGLAS GRAMATICALES VALIDADAS ---
+[Línea   1] REGLA VALIDADA: programa
+[Línea  21] REGLA VALIDADA: declaracion_import
+[Línea  23] REGLA VALIDADA: definicion_struct
+[Línea  29] REGLA VALIDADA: declaracion_funcion
+[Línea  30] REGLA VALIDADA: termino
+[Línea  30] REGLA VALIDADA: sentencia_retorno
+[Línea  34] REGLA VALIDADA: declaracion_funcion
+[Línea  35] REGLA VALIDADA: sentencia_impresion
+[Línea  36] REGLA VALIDADA: sentencia_retorno
+[Línea  39] REGLA VALIDADA: declaracion_funcion
+[Línea  41] REGLA VALIDADA: declaracion_var
+[Línea  42] REGLA VALIDADA: declaracion_var
+[Línea  43] REGLA VALIDADA: declaracion_var
+[Línea  44] REGLA VALIDADA: declaracion_var
+[Línea  45] REGLA VALIDADA: declaracion_const
+[Línea  46] REGLA VALIDADA: declaracion_var
+[Línea  47] REGLA VALIDADA: declaracion_corta
+[Línea  50] REGLA VALIDADA: declaracion_arreglo
+[Línea  51] REGLA VALIDADA: declaracion_arreglo
+[Línea  52] REGLA VALIDADA: declaracion_slice
+[Línea  53] REGLA VALIDADA: declaracion_mapa
+[Línea  54] REGLA VALIDADA: instanciacion_struct
+[Línea  54] REGLA VALIDADA: declaracion_corta
+[Línea  57] REGLA VALIDADA: termino
+[Línea  57] REGLA VALIDADA: expresion_aritmetica
+[Línea  57] REGLA VALIDADA: declaracion_var
+[Línea  58] REGLA VALIDADA: llamada_funcion
+[Línea  58] REGLA VALIDADA: declaracion_corta
+[Línea  59] REGLA VALIDADA: asignacion
+[Línea  60] REGLA VALIDADA: asignacion_compuesta
+[Línea  61] REGLA VALIDADA: asignacion
+[Línea  62] REGLA VALIDADA: asignacion
+[Línea  63] REGLA VALIDADA: asignacion
+[Línea  64] REGLA VALIDADA: asignacion
+[Línea  67] REGLA VALIDADA: comparacion
+[Línea  67] REGLA VALIDADA: comparacion
+[Línea  67] REGLA VALIDADA: conjuncion
+[Línea  67] REGLA VALIDADA: sentencia_if
+[Línea  68] REGLA VALIDADA: declaracion_var
+[Línea  69] REGLA VALIDADA: sentencia_impresion
+[Línea  70] REGLA VALIDADA: comparacion
+[Línea  70] REGLA VALIDADA: comparacion
+[Línea  70] REGLA VALIDADA: conjuncion
+[Línea  70] REGLA VALIDADA: sentencia_if
+[Línea  71] REGLA VALIDADA: declaracion_var
+[Línea  72] REGLA VALIDADA: sentencia_impresion
+[Línea  74] REGLA VALIDADA: declaracion_var
+[Línea  75] REGLA VALIDADA: sentencia_impresion
+[Línea  78] REGLA VALIDADA: comparacion
+[Línea  78] REGLA VALIDADA: conjuncion
+[Línea  78] REGLA VALIDADA: sentencia_if
+[Línea  79] REGLA VALIDADA: llamada_funcion
+[Línea  83] REGLA VALIDADA: sentencia_impresion
+[Línea  84] REGLA VALIDADA: sentencia_impresion
+[Línea  85] REGLA VALIDADA: sentencia_impresion
+[Línea  88] REGLA VALIDADA: sentencia_lectura
+
+--- ERRORES SINTÁCTICOS DETECTADOS ---
+No se detectaron errores sintácticos.
+================================================================================
+RESUMEN: Reglas Validadas: 56 | Errores Sintácticos: 0 | Estado: VÁLIDO
+================================================================================

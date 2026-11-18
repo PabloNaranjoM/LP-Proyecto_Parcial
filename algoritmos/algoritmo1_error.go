@@ -1,100 +1,141 @@
 package main
 
 /*
- * Algoritmo de Validación 1 con Errores Léxicos - Analizador Léxico (Avance 1)
- * =========================================================================
+ * Algoritmo Completo 1 con Errores - Avance Final
+ * ===============================================
  * Materia    : Lenguajes de Programación (ESPOL)
  * Docente    : Ing. Rodrigo Saraguro
  * Responsable: Pablo Naranjo (@PabloNaranjoM)
  *
- * Descripción del algoritmo:
- * Simulación de un sistema financiero y contable que administra transacciones,
- * cotizaciones de divisas y balances de cuentas bancarias, incluyendo errores
- * léxicos deliberados (@, $, ~, #).
- *
- * Componentes evaluados asignados a Pablo Naranjo:
- * 1. Palabras reservadas oficiales: 'struct' y 'map'
- * 2. Tipos de datos numéricos: 'int' y 'float64'
- * 3. Operador de declaración y asignación corta: ':='
- * 4. Operadores de asignación compuesta: '+=', '-=', '*=', '/=', '%='
- * 5. Operadores unarios de incremento y decremento: '++', '--'
- * 6. Operador de dirección de memoria / puntero: '&'
- * 7. Delimitadores específicos: ':' y ';'
- * 8. Literales de punto flotante: e.g., 0.125, 1500.75, 1.085
- * 9. Literales de cadena con secuencias de escape: \", \n, \t, \\
- * 10. Comentarios de línea única (//) y bloques multilínea
- * 11. Errores léxicos deliberados: '@', '$', '~', '#' para verificar t_error
+ * Descripción:
+ * Reúne en un solo archivo errores léxicos, sintácticos y semánticos (RS-2 y RS-5)
+ * diseñados de modo que las tres fases se reporten en una misma ejecución sin
+ * que los errores sintácticos impidan construir el AST.
  */
 
 import "fmt"
 
-// Definición de estructura contable con tipos int y float64 (Pablo Naranjo)
-type Transaccion struct {
-	idTransaccion int
-	tasaInteres   float64
-	montoBase     float64
-	totalFinal    float64
+// [Error Semántico RS-2]: Campo duplicado dentro de la misma estructura.
+type Registro struct {
+	codigo int
+	codigo string
 }
 
-// Estructura auxiliar para saldos
-type CuentaBancaria struct {
-	numeroCuenta int
-	saldoActual  float64
+type Curso struct {
+	nombre string
+}
+
+// [Error Semántico RS-2]: Redeclaración de struct en el ámbito global.
+type Curso struct {
+	creditos int
+}
+
+// [Error Semántico RS-2]: Parámetro duplicado en la misma firma de función.
+func conParametroRepetido(valor int, valor string) int {
+	return valor
+}
+
+// [Error Semántico RS-5]: Función tipada que retorna un tipo incompatible ('string' vs 'int').
+func retornoIncompatible() int {
+	return "no_soy_entero"
+}
+
+// [Error Semántico RS-5]: Función tipada con sentencia 'return' vacía.
+func retornoVacioEnTipada(activo bool) string {
+	if activo {
+		return
+	}
+	return "ok"
+}
+
+// [Error Semántico RS-5]: Función tipada que omite la sentencia 'return'.
+func faltaRetorno(x float64) float64 {
+	calculo := x * 2.0
+	fmt.Println(calculo)
+}
+
+// [Error Semántico RS-5]: Función tipada donde falta retorno en la rama 'else'.
+func retornoIncompleto(x int) int {
+	if x > 0 {
+		return 1
+	}
+}
+
+// [Error Semántico RS-5]: Función void que intenta retornar un valor.
+func voidConRetorno() {
+	return 42
+}
+
+// Función variádica válida para probar errores en llamadas
+func sumarVariadico(base int, extras ...int) int {
+	total := base
+	for idx, v := range extras {
+		if idx >= 0 {
+			total += v
+		}
+	}
+	return total
+}
+
+func duplicada() {
+	fmt.Println("Primera definición")
+}
+
+// [Error Semántico RS-2]: Redeclaración de función en el ámbito global.
+func duplicada() {
+	fmt.Println("Segunda definición")
 }
 
 func main() {
-	// 1. Declaración y asignación corta (:=) con tipos int y float64
-	intentosMaximos := 3;
-	tasaAnual := 0.125
-	saldoInicial := 1500.75
-
-	// 2. Instanciación de estructura (struct) con delimitador ':'
-	operacion := Transaccion{
-		idTransaccion: 1001,
-		tasaInteres:   tasaAnual,
-		montoBase:     saldoInicial,
-		totalFinal:    0.0,
-	}
-
-	// 3. Operador ampersand (&) para referencia de memoria / punteros
-	ptrOperacion := &operacion;
-
-	// 4. Asignaciones compuestas (+=, -=, *=, /=, %=)
-	operacion.montoBase += 350.50
-	operacion.montoBase -= 75.25
-	operacion.tasaInteres *= 1.05
-	operacion.totalFinal /= 2.0
-	operacion.idTransaccion %= 100
-
-	// 5. Operadores de incremento (++) y decremento (--)
-	intentosMaximos++
-	intentosMaximos--
-
-	// 6. Colección de tipo mapa (map) asociando cadenas con float64
-	cotizaciones := map[string]float64{
-		"USD": 1.00,
-		"EUR": 1.085,
-		"GBP": 1.295,
-	}
-
-	// 7. Literales de cadena con secuencias de escape (\", \n, \t, \\)
-	mensajeEstado := "Reporte: \"Cierre Diario\"\n\tEstado: Exitoso \\ Verificado\n"
-
-	/*
-	 * Bloque de liquidación final de balances
-	 * Cálculo del cargo por servicio administrativo
-	 */
-	cargoServicio := 4.75;
-	operacion.totalFinal = operacion.montoBase + (operacion.montoBase * operacion.tasaInteres) - cargoServicio;
+	const bonoFijo int = 5
+	edad := 20
+	fmt.Scanln(&edad)
 
 	// =========================================================================
-	// SECCIÓN DE ERRORES LÉXICOS INTENCIONALES
-	// Caracteres ilegales deliberados para evidenciar la captura en t_error
+	// 1. ERRORES LÉXICOS DELIBERADOS (@, $, ~, #)
 	// =========================================================================
-	valorInvalido@ := 250.00         // Error: carácter ilegal '@'
-	fondoReserva$ := 890.50          // Error: carácter ilegal '$'
-	tasaAjuste~ := 0.03              // Error: carácter ilegal '~'
-	tokenInvalido# := 99             // Error: carácter ilegal '#'
+	valorInvalido@ := 250.00
+	fondoReserva$ := 890.50
+	tasaAjuste~ := 0.03
+	tokenInvalido# := 99
 
-	fmt.Println(ptrOperacion, cotizaciones["USD"], mensajeEstado)
+	// =========================================================================
+	// 2. ERRORES SINTÁCTICOS RECUPERABLES (sin desbalancear llaves)
+	// =========================================================================
+	tasa := ;
+	residuo := (edad / 2 % 3;
+	esMayor := edad >= ;
+
+	// =========================================================================
+	// 3. ERRORES SEMÁNTICOS (RS-2 y RS-5)
+	// =========================================================================
+	// [Error RS-2]: Redeclaración de variable en el mismo bloque.
+	var edad int = 25
+
+	// [Error RS-2]: Redeclaración con inferencia sobre identificador ya existente.
+	var total = 10
+	const total = 30
+
+	// [Error RS-5]: Llamada variádica con cantidad de argumentos menor a la requerida.
+	a := sumarVariadico()
+
+	// [Error RS-5]: Llamada variádica con argumento de tipo incompatible.
+	b := sumarVariadico(10, "veinte")
+
+	// [Error RS-5]: Llamada a función normal con aridad incorrecta.
+	c := conParametroRepetido(1)
+
+	// [Error RS-5]: Llamada a función normal con tipo de argumento inválido.
+	d := faltaRetorno("texto")
+
+	// [Error RS-5 / RS-1]: Invocar una función no declarada.
+	e := funcionInexistente(5)
+
+	// [Error RS-5]: Usar el retorno 'void' de una función como argumento.
+	fmt.Println(voidConRetorno())
+
+	// [Error asignación de tipo]: Obtener dirección '&' de una constante.
+	ptrBono := &bonoFijo
+
+	fmt.Println(valorInvalido, fondoReserva, tasaAjuste, tokenInvalido, total)
 }

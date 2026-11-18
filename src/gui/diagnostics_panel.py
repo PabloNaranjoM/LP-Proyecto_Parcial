@@ -620,6 +620,8 @@ class DiagnosticsPanel(ctk.CTkFrame):
             segmentos = [(f"{e['mensaje'].rstrip('.')}.\n", "error") for e in errores]
         self._escribir_consola(segmentos)
         if not modo_ejecucion_todo:
+            self._limpiar_tab_sintactico()
+            self._limpiar_tab_simbolos()
             self.tabview.set(self.TAB_TOKENS)
 
     def mostrar_resultados_sintacticos(
@@ -676,27 +678,51 @@ class DiagnosticsPanel(ctk.CTkFrame):
                 segmentos.append((f"{es['mensaje']}\n", "error"))
 
         self._escribir_consola(segmentos)
+        if not modo_ejecucion_todo:
+            self._limpiar_tab_simbolos()
         if not modo_ejecucion_todo or tiene_err_sin:
             self.tabview.set(self.TAB_SINTACTICO)
 
+    def _resetear_pestana(
+        self,
+        tree: ttk.Treeview,
+        lbl_resumen: ctk.CTkLabel,
+        texto_resumen: str,
+        actualizar_contador: Callable[[int], None],
+    ) -> None:
+        tree.delete(*tree.get_children())
+        lbl_resumen.configure(text=texto_resumen, text_color=TEXT_SECONDARY)
+        actualizar_contador(0)
+
+    def _limpiar_tab_tokens(self) -> None:
+        self._resetear_pestana(
+            self.tree_tokens,
+            self.lbl_resumen_tokens,
+            "0 válidos • 0 errores léxicos",
+            self._actualizar_contador_tokens,
+        )
+
+    def _limpiar_tab_sintactico(self) -> None:
+        self._resetear_pestana(
+            self.tree_sintactico,
+            self.lbl_resumen_sintactico,
+            "0 reglas validadas • 0 errores sintácticos",
+            self._actualizar_contador_sintactico,
+        )
+
+    def _limpiar_tab_simbolos(self) -> None:
+        self._resetear_pestana(
+            self.tree_simbolos,
+            self.lbl_resumen_simbolos,
+            "0 símbolos • 0 reglas validadas • 0 errores semánticos",
+            self._actualizar_contador_simbolos,
+        )
+
     def limpiar_panel(self) -> None:
         self.actualizar_estado_banner("IDLE")
-        self.tree_tokens.delete(*self.tree_tokens.get_children())
-        self.tree_sintactico.delete(*self.tree_sintactico.get_children())
-        self.tree_simbolos.delete(*self.tree_simbolos.get_children())
-        self.lbl_resumen_tokens.configure(
-            text="0 válidos • 0 errores léxicos", text_color=TEXT_SECONDARY
-        )
-        self.lbl_resumen_sintactico.configure(
-            text="0 reglas validadas • 0 errores sintácticos", text_color=TEXT_SECONDARY
-        )
-        self.lbl_resumen_simbolos.configure(
-            text="0 símbolos • 0 reglas validadas • 0 errores semánticos",
-            text_color=TEXT_SECONDARY,
-        )
-        self._actualizar_contador_tokens(0)
-        self._actualizar_contador_sintactico(0)
-        self._actualizar_contador_simbolos(0)
+        self._limpiar_tab_tokens()
+        self._limpiar_tab_sintactico()
+        self._limpiar_tab_simbolos()
         self._escribir_consola([(
             "Consola lista. Cargue un archivo .go o escriba código en el editor y presione 'Léxico', 'Sintáctico', 'Semántico' o '▶ Ejecutar Todo'.\n",
             "info",

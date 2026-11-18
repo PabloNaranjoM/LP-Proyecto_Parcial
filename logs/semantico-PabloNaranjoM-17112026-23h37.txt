@@ -1,0 +1,254 @@
+================================================================================
+REPORTE DE ANÁLISIS SEMÁNTICO - COMPILADOR GO (ESPOL)
+Archivo analizado: algoritmos/algoritmo1.go
+Fecha y hora     : 17-11-2026 23:37:38
+Desarrollador    : PabloNaranjoM
+================================================================================
+
+--- TABLA DE SÍMBOLOS ---
+#    Identificador        Categoría       Tipo de Dato           Ámbito             Línea
+1    Transaccion          tipo_struct     Transaccion            global             29
+2    Estudiante           tipo_struct     Estudiante             global             36
+3    registrarAviso       funcion         func(bool)->void       global             43
+4    acumularPuntos       funcion         func(int, ...int)->int global             51
+5    esAprobado           funcion         func(float64, float64)->bool global             62
+6    main                 funcion         func()->void           global             69
+7    construirResumen     funcion         func(string, int, bool)->string global             169
+8    bonoBase             constante       int                    global             24
+9    etiquetaGlobal       variable        string                 global             26
+10   activo               parametro       bool                   func:registrarAviso 43
+11   base                 parametro       int                    func:acumularPuntos 51
+12   extras               parametro       []int                  func:acumularPuntos 51
+13   total                variable        int                    func:acumularPuntos 52
+14   idx                  variable        int                    for_53             53
+15   valor                variable        int                    for_53             53
+16   nota                 parametro       float64                func:esAprobado    62
+17   limite               parametro       float64                func:esAprobado    62
+18   etiquetaGlobal       variable        int                    func:main          71
+19   intentosMaximos      variable        int                    func:main          72
+20   tasaAnual            variable        float64                func:main          73
+21   saldoInicial         variable        float64                func:main          74
+22   operacion            variable        Transaccion            func:main          77
+23   ptrOperacion         variable        *Transaccion           func:main          83
+24   alumno               variable        Estudiante             func:main          85
+25   cotizaciones         mapa            map[string]float64     func:main          106
+26   sumaDivisas          variable        float64                func:main          111
+27   divisa               variable        string                 for_112            112
+28   tasa                 variable        float64                for_112            112
+29   residuo              variable        int                    func:main          118
+30   bloqueado            variable        bool                   func:main          119
+31   accesoValido         variable        bool                   func:main          120
+32   contador             variable        int                    func:main          123
+33   acumulado            variable        int                    func:main          128
+34   i                    variable        int                    for_129            129
+35   n                    parametro       int                    func:anonima_140   140
+36   duplicar             variable        func(int)->int         func:main          140
+37   puntosBase           variable        int                    func:main          147
+38   puntajeTotal         variable        int                    func:main          148
+39   aprobado             variable        bool                   func:main          149
+40   resumen              variable        string                 func:main          150
+41   estado               variable        string                 func:main          153
+42   estado               variable        int                    if_154             155
+43   paso                 variable        int                    for_158            158
+44   estado               variable        bool                   for_158            159
+45   mensajeEstado        variable        string                 func:main          164
+46   nombre               parametro       string                 func:construirResumen 169
+47   puntos               parametro       int                    func:construirResumen 169
+48   aprobado             parametro       bool                   func:construirResumen 169
+
+--- REGLAS SEMÁNTICAS VALIDADAS ---
+[Semántico - Línea 29] RS-2 (Unicidad en el alcance): Estructura 'Transaccion' declarada con 4 campo(s).
+[Semántico - Línea 36] RS-2 (Unicidad en el alcance): Estructura 'Estudiante' declarada con 3 campo(s).
+[Semántico - Línea 43] RS-2 (Unicidad en el alcance): Función 'registrarAviso' declarada con firma 'func(bool)->void'.
+[Semántico - Línea 51] RS-2 (Unicidad en el alcance): Función 'acumularPuntos' declarada con firma 'func(int, ...int)->int'.
+[Semántico - Línea 62] RS-2 (Unicidad en el alcance): Función 'esAprobado' declarada con firma 'func(float64, float64)->bool'.
+[Semántico - Línea 69] RS-2 (Unicidad en el alcance): Función 'main' declarada con firma 'func()->void'.
+[Semántico - Línea 169] RS-2 (Unicidad en el alcance): Función 'construirResumen' declarada con firma 'func(string, int, bool)->string'.
+[Semántico - Línea 24] RS-3: Constante 'bonoBase' declarada correctamente como 'int'
+[Semántico - Línea 26] RS-3: Variable 'etiquetaGlobal' declarada correctamente como 'string'
+[Semántico - Línea 44] RS-1: El identificador 'activo' fue declarado previamente
+[Semántico - Línea 44] RS-4 (Operaciones permitidas): Negación lógica '!' válida sobre 'bool'.
+[Semántico - Línea 44] RS-6 (Estructuras de control): Condición booleana válida en sentencia 'if'.
+[Semántico - Línea 45] RS-5 (Retorno de funciones): Retorno vacío válido en función 'registrarAviso'.
+[Semántico - Línea 47] RS-1: El identificador 'etiquetaGlobal' fue declarado previamente
+[Semántico - Línea 47] RS-1 (Identificadores): Invocación a 'fmt.Println' validada con 2 argumento(s).
+[Semántico - Línea 43] RS-5 (Retorno de funciones): Función 'registrarAviso' sin retorno ('void') validada.
+[Semántico - Línea 52] RS-1: El identificador 'base' fue declarado previamente
+[Semántico - Línea 52] RS-3: Declaracion corta de 'total' con tipo 'int'
+[Semántico - Línea 53] RS-1: El identificador 'extras' fue declarado previamente
+[Semántico - Línea 53] RS-6 (Estructuras de control): Iteración 'for range' válida sobre '[]int'.
+[Semántico - Línea 54] RS-1: El identificador 'idx' fue declarado previamente
+[Semántico - Línea 54] RS-4 (Operaciones permitidas): Comparación '>=' válida entre 'int'.
+[Semántico - Línea 54] RS-6 (Estructuras de control): Condición booleana válida en sentencia 'if'.
+[Semántico - Línea 55] RS-1: El identificador 'total' fue declarado previamente
+[Semántico - Línea 55] RS-1: El identificador 'valor' fue declarado previamente
+[Semántico - Línea 55] RS-4 (Operaciones permitidas): Operación '+' válida entre operandos 'int'.
+[Semántico - Línea 55] RS-3: Asignacion '+=' valida sobre 'total'
+[Semántico - Línea 58] RS-1: El identificador 'total' fue declarado previamente
+[Semántico - Línea 58] RS-5 (Retorno de funciones): Retorno de tipo 'int' válido en 'acumularPuntos'.
+[Semántico - Línea 63] RS-1: El identificador 'nota' fue declarado previamente
+[Semántico - Línea 63] RS-1: El identificador 'limite' fue declarado previamente
+[Semántico - Línea 63] RS-4 (Operaciones permitidas): Comparación '>=' válida entre 'float64'.
+[Semántico - Línea 63] RS-6 (Estructuras de control): Condición booleana válida en sentencia 'if'.
+[Semántico - Línea 64] RS-5 (Retorno de funciones): Retorno de tipo 'bool' válido en 'esAprobado'.
+[Semántico - Línea 66] RS-5 (Retorno de funciones): Retorno de tipo 'bool' válido en 'esAprobado'.
+[Semántico - Línea 71] RS-3: Declaracion corta de 'etiquetaGlobal' con tipo 'int'
+[Semántico - Línea 72] RS-3: Declaracion corta de 'intentosMaximos' con tipo 'int'
+[Semántico - Línea 73] RS-3: Declaracion corta de 'tasaAnual' con tipo 'float64'
+[Semántico - Línea 74] RS-3: Declaracion corta de 'saldoInicial' con tipo 'float64'
+[Semántico - Línea 79] RS-1: El identificador 'tasaAnual' fue declarado previamente
+[Semántico - Línea 80] RS-1: El identificador 'saldoInicial' fue declarado previamente
+[Semántico - Línea 77] RS-3: Estructura 'Transaccion' inicializada correctamente
+[Semántico - Línea 77] RS-3: Declaracion corta de 'operacion' con tipo 'Transaccion'
+[Semántico - Línea 83] RS-1: El identificador 'operacion' fue declarado previamente
+[Semántico - Línea 83] RS-4 (Operaciones permitidas): Referencia '&' válida sobre 'Transaccion'.
+[Semántico - Línea 83] RS-3: Declaracion corta de 'ptrOperacion' con tipo '*Transaccion'
+[Semántico - Línea 85] RS-3: Estructura 'Estudiante' inicializada correctamente
+[Semántico - Línea 85] RS-3: Declaracion corta de 'alumno' con tipo 'Estudiante'
+[Semántico - Línea 92] RS-1: El identificador 'alumno' fue declarado previamente
+[Semántico - Línea 92] RS-1: El campo 'nombre' existe en la estructura 'Estudiante'
+[Semántico - Línea 92] RS-3: Lectura valida sobre 'alumno' de tipo 'string'
+[Semántico - Línea 92] RS-1: El identificador 'intentosMaximos' fue declarado previamente
+[Semántico - Línea 92] RS-3: Lectura valida sobre 'intentosMaximos' de tipo 'int'
+[Semántico - Línea 93] RS-1: El identificador 'operacion' fue declarado previamente
+[Semántico - Línea 93] RS-1: El campo 'idTransaccion' existe en la estructura 'Transaccion'
+[Semántico - Línea 93] RS-3: Lectura valida sobre 'operacion' de tipo 'int'
+[Semántico - Línea 96] RS-1: El identificador 'operacion' fue declarado previamente
+[Semántico - Línea 96] RS-1: El campo 'montoBase' existe en la estructura 'Transaccion'
+[Semántico - Línea 96] RS-4 (Operaciones permitidas): Operación '+' válida entre operandos 'float64'.
+[Semántico - Línea 96] RS-3: Asignacion '+=' valida sobre 'operacion'
+[Semántico - Línea 97] RS-1: El identificador 'operacion' fue declarado previamente
+[Semántico - Línea 97] RS-1: El campo 'montoBase' existe en la estructura 'Transaccion'
+[Semántico - Línea 97] RS-4 (Operaciones permitidas): Operación '-' válida entre operandos 'float64'.
+[Semántico - Línea 97] RS-3: Asignacion '-=' valida sobre 'operacion'
+[Semántico - Línea 98] RS-1: El identificador 'operacion' fue declarado previamente
+[Semántico - Línea 98] RS-1: El campo 'tasaInteres' existe en la estructura 'Transaccion'
+[Semántico - Línea 98] RS-4 (Operaciones permitidas): Operación '*' válida entre operandos 'float64'.
+[Semántico - Línea 98] RS-3: Asignacion '*=' valida sobre 'operacion'
+[Semántico - Línea 99] RS-1: El identificador 'operacion' fue declarado previamente
+[Semántico - Línea 99] RS-1: El campo 'totalFinal' existe en la estructura 'Transaccion'
+[Semántico - Línea 99] RS-4 (Operaciones permitidas): Operación '/' válida entre operandos 'float64'.
+[Semántico - Línea 99] RS-3: Asignacion '/=' valida sobre 'operacion'
+[Semántico - Línea 100] RS-1: El identificador 'operacion' fue declarado previamente
+[Semántico - Línea 100] RS-1: El campo 'idTransaccion' existe en la estructura 'Transaccion'
+[Semántico - Línea 100] RS-4 (Operaciones permitidas): Operación '%' válida entre operandos 'int'.
+[Semántico - Línea 100] RS-3: Asignacion '%=' valida sobre 'operacion'
+[Semántico - Línea 102] RS-1: El identificador 'intentosMaximos' fue declarado previamente
+[Semántico - Línea 102] RS-4 (Operaciones permitidas): Operador '++' válido sobre tipo 'int'.
+[Semántico - Línea 103] RS-1: El identificador 'intentosMaximos' fue declarado previamente
+[Semántico - Línea 103] RS-4 (Operaciones permitidas): Operador '--' válido sobre tipo 'int'.
+[Semántico - Línea 106] RS-3: Mapa 'cotizaciones' declarado como 'map[string]float64'
+[Semántico - Línea 111] RS-3: Declaracion corta de 'sumaDivisas' con tipo 'float64'
+[Semántico - Línea 112] RS-1: El identificador 'cotizaciones' fue declarado previamente
+[Semántico - Línea 112] RS-6 (Estructuras de control): Iteración 'for range' válida sobre 'map[string]float64'.
+[Semántico - Línea 113] RS-1: El identificador 'sumaDivisas' fue declarado previamente
+[Semántico - Línea 113] RS-1: El identificador 'tasa' fue declarado previamente
+[Semántico - Línea 113] RS-4 (Operaciones permitidas): Operación '+' válida entre operandos 'float64'.
+[Semántico - Línea 113] RS-3: Asignacion '+=' valida sobre 'sumaDivisas'
+[Semántico - Línea 114] RS-1: El identificador 'divisa' fue declarado previamente
+[Semántico - Línea 114] RS-1: El identificador 'tasa' fue declarado previamente
+[Semántico - Línea 114] RS-1 (Identificadores): Invocación a 'fmt.Println' validada con 4 argumento(s).
+[Semántico - Línea 118] RS-1: El identificador 'intentosMaximos' fue declarado previamente
+[Semántico - Línea 118] RS-4 (Operaciones permitidas): Operación '+' válida entre operandos 'int'.
+[Semántico - Línea 118] RS-4 (Operaciones permitidas): Operación '/' válida entre operandos 'int'.
+[Semántico - Línea 118] RS-4 (Operaciones permitidas): Operación '%' válida entre operandos 'int'.
+[Semántico - Línea 118] RS-3: Declaracion corta de 'residuo' con tipo 'int'
+[Semántico - Línea 119] RS-3: Declaracion corta de 'bloqueado' con tipo 'bool'
+[Semántico - Línea 120] RS-1: El identificador 'bloqueado' fue declarado previamente
+[Semántico - Línea 120] RS-4 (Operaciones permitidas): Negación lógica '!' válida sobre 'bool'.
+[Semántico - Línea 120] RS-1: El identificador 'operacion' fue declarado previamente
+[Semántico - Línea 120] RS-1: El campo 'idTransaccion' existe en la estructura 'Transaccion'
+[Semántico - Línea 120] RS-4 (Operaciones permitidas): Comparación '>=' válida entre 'int'.
+[Semántico - Línea 120] RS-4 (Operaciones permitidas): Operador lógico '&&' válido entre booleanos.
+[Semántico - Línea 120] RS-3: Declaracion corta de 'accesoValido' con tipo 'bool'
+[Semántico - Línea 123] RS-3: Declaracion corta de 'contador' con tipo 'int'
+[Semántico - Línea 124] RS-1: El identificador 'contador' fue declarado previamente
+[Semántico - Línea 124] RS-4 (Operaciones permitidas): Comparación '<' válida entre 'int'.
+[Semántico - Línea 124] RS-6 (Estructuras de control): Condición booleana válida en ciclo 'for'.
+[Semántico - Línea 125] RS-1: El identificador 'contador' fue declarado previamente
+[Semántico - Línea 125] RS-4 (Operaciones permitidas): Operador '++' válido sobre tipo 'int'.
+[Semántico - Línea 128] RS-3: Declaracion corta de 'acumulado' con tipo 'int'
+[Semántico - Línea 129] RS-3: Declaracion corta de 'i' con tipo 'int'
+[Semántico - Línea 129] RS-1: El identificador 'i' fue declarado previamente
+[Semántico - Línea 129] RS-4 (Operaciones permitidas): Comparación '<' válida entre 'int'.
+[Semántico - Línea 129] RS-6 (Estructuras de control): Ciclo 'for' clásico con condición 'bool' validado.
+[Semántico - Línea 129] RS-1: El identificador 'i' fue declarado previamente
+[Semántico - Línea 129] RS-4 (Operaciones permitidas): Operador '++' válido sobre tipo 'int'.
+[Semántico - Línea 130] RS-1: El identificador 'acumulado' fue declarado previamente
+[Semántico - Línea 130] RS-1: El identificador 'i' fue declarado previamente
+[Semántico - Línea 130] RS-4 (Operaciones permitidas): Operación '+' válida entre operandos 'int'.
+[Semántico - Línea 130] RS-3: Asignacion '+=' valida sobre 'acumulado'
+[Semántico - Línea 133] RS-6 (Estructuras de control): Bucle 'for' infinito validado.
+[Semántico - Línea 134] RS-1: El identificador 'acumulado' fue declarado previamente
+[Semántico - Línea 134] RS-4 (Operaciones permitidas): Comparación '>=' válida entre 'int'.
+[Semántico - Línea 134] RS-6 (Estructuras de control): Condición booleana válida en sentencia 'if'.
+[Semántico - Línea 135] RS-6 (Estructuras de control): Instrucción 'break' utilizada en un contexto válido.
+[Semántico - Línea 141] RS-1: El identificador 'n' fue declarado previamente
+[Semántico - Línea 141] RS-4 (Operaciones permitidas): Operación '*' válida entre operandos 'int'.
+[Semántico - Línea 141] RS-5 (Retorno de funciones): Retorno de tipo 'int' válido en 'anonima_140'.
+[Semántico - Línea 140] RS-5 (Retorno de funciones): Literal de función con firma 'func(int)->int' validado.
+[Semántico - Línea 140] RS-3: Declaracion corta de 'duplicar' con tipo 'func(int)->int'
+[Semántico - Línea 144] RS-5 (Retorno de funciones): Llamada a 'registrarAviso' válida (retorna 'void').
+[Semántico - Línea 145] RS-1: El identificador 'accesoValido' fue declarado previamente
+[Semántico - Línea 145] RS-5 (Retorno de funciones): Llamada a 'registrarAviso' válida (retorna 'void').
+[Semántico - Línea 147] RS-1: El identificador 'bonoBase' fue declarado previamente
+[Semántico - Línea 147] RS-5 (Retorno de funciones): Llamada a 'duplicar' válida (retorna 'int').
+[Semántico - Línea 147] RS-3: Declaracion corta de 'puntosBase' con tipo 'int'
+[Semántico - Línea 148] RS-1: El identificador 'puntosBase' fue declarado previamente
+[Semántico - Línea 148] RS-5 (Retorno de funciones): Llamada a 'acumularPuntos' válida (retorna 'int').
+[Semántico - Línea 148] RS-3: Declaracion corta de 'puntajeTotal' con tipo 'int'
+[Semántico - Línea 149] RS-1: El identificador 'alumno' fue declarado previamente
+[Semántico - Línea 149] RS-1: El campo 'promedio' existe en la estructura 'Estudiante'
+[Semántico - Línea 149] RS-5 (Retorno de funciones): Llamada a 'esAprobado' válida (retorna 'bool').
+[Semántico - Línea 149] RS-3: Declaracion corta de 'aprobado' con tipo 'bool'
+[Semántico - Línea 150] RS-1: El identificador 'alumno' fue declarado previamente
+[Semántico - Línea 150] RS-1: El campo 'nombre' existe en la estructura 'Estudiante'
+[Semántico - Línea 150] RS-1: El identificador 'puntajeTotal' fue declarado previamente
+[Semántico - Línea 150] RS-1: El identificador 'aprobado' fue declarado previamente
+[Semántico - Línea 150] RS-5 (Retorno de funciones): Llamada a 'construirResumen' válida (retorna 'string').
+[Semántico - Línea 150] RS-3: Declaracion corta de 'resumen' con tipo 'string'
+[Semántico - Línea 153] RS-3: Declaracion corta de 'estado' con tipo 'string'
+[Semántico - Línea 154] RS-1: El identificador 'aprobado' fue declarado previamente
+[Semántico - Línea 154] RS-6 (Estructuras de control): Condición booleana válida en sentencia 'if'.
+[Semántico - Línea 155] RS-3: Declaracion corta de 'estado' con tipo 'int'
+[Semántico - Línea 156] RS-1: El identificador 'estado' fue declarado previamente
+[Semántico - Línea 156] RS-1 (Identificadores): Invocación a 'fmt.Println' validada con 2 argumento(s).
+[Semántico - Línea 158] RS-3: Declaracion corta de 'paso' con tipo 'int'
+[Semántico - Línea 158] RS-1: El identificador 'paso' fue declarado previamente
+[Semántico - Línea 158] RS-4 (Operaciones permitidas): Comparación '<' válida entre 'int'.
+[Semántico - Línea 158] RS-6 (Estructuras de control): Ciclo 'for' clásico con condición 'bool' validado.
+[Semántico - Línea 158] RS-1: El identificador 'paso' fue declarado previamente
+[Semántico - Línea 158] RS-4 (Operaciones permitidas): Operador '++' válido sobre tipo 'int'.
+[Semántico - Línea 159] RS-3: Declaracion corta de 'estado' con tipo 'bool'
+[Semántico - Línea 160] RS-1: El identificador 'paso' fue declarado previamente
+[Semántico - Línea 160] RS-1: El identificador 'estado' fue declarado previamente
+[Semántico - Línea 160] RS-1 (Identificadores): Invocación a 'fmt.Println' validada con 4 argumento(s).
+[Semántico - Línea 164] RS-3: Declaracion corta de 'mensajeEstado' con tipo 'string'
+[Semántico - Línea 165] RS-1: El identificador 'ptrOperacion' fue declarado previamente
+[Semántico - Línea 165] RS-1: El identificador 'cotizaciones' fue declarado previamente
+[Semántico - Línea 165] RS-1: Acceso por indice valido sobre 'map[string]float64'
+[Semántico - Línea 165] RS-1: El identificador 'sumaDivisas' fue declarado previamente
+[Semántico - Línea 165] RS-1: El identificador 'residuo' fue declarado previamente
+[Semántico - Línea 165] RS-1: El identificador 'resumen' fue declarado previamente
+[Semántico - Línea 165] RS-1: El identificador 'estado' fue declarado previamente
+[Semántico - Línea 165] RS-1: El identificador 'mensajeEstado' fue declarado previamente
+[Semántico - Línea 165] RS-1 (Identificadores): Invocación a 'fmt.Println' validada con 7 argumento(s).
+[Semántico - Línea 69] RS-5 (Retorno de funciones): Función 'main' sin retorno ('void') validada.
+[Semántico - Línea 170] RS-1: El identificador 'aprobado' fue declarado previamente
+[Semántico - Línea 170] RS-6 (Estructuras de control): Condición booleana válida en sentencia 'if'.
+[Semántico - Línea 171] RS-1: El identificador 'nombre' fue declarado previamente
+[Semántico - Línea 171] RS-4 (Operaciones permitidas): Operación '+' válida entre operandos 'string'.
+[Semántico - Línea 171] RS-5 (Retorno de funciones): Retorno de tipo 'string' válido en 'construirResumen'.
+[Semántico - Línea 173] RS-1: El identificador 'nombre' fue declarado previamente
+[Semántico - Línea 173] RS-4 (Operaciones permitidas): Operación '+' válida entre operandos 'string'.
+[Semántico - Línea 173] RS-5 (Retorno de funciones): Retorno de tipo 'string' válido en 'construirResumen'.
+
+--- ERRORES SEMÁNTICOS DETECTADOS ---
+No se detectaron errores semánticos.
+
+================================================================================
+Símbolos registrados: 48
+Reglas validadas: 185
+Errores semánticos: 0
+Estado del análisis: VÁLIDO
+================================================================================

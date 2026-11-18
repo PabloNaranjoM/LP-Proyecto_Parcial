@@ -1,32 +1,31 @@
 package main
 
 /*
- * Algoritmo de Validación 1 - Analizador Léxico (Avance 1)
- * =======================================================
+ * Algoritmo Completo 1 (Válido) - Avance Final
+ * ============================================
  * Materia    : Lenguajes de Programación (ESPOL)
  * Docente    : Ing. Rodrigo Saraguro
  * Responsable: Pablo Naranjo (@PabloNaranjoM)
  *
- * Descripción del algoritmo:
- * Simulación de un sistema financiero y contable que administra transacciones,
- * cotizaciones de divisas y balances de cuentas bancarias.
- *
- * Componentes evaluados asignados a Pablo Naranjo:
- * 1. Palabras reservadas oficiales: 'struct' y 'map'
- * 2. Tipos de datos numéricos: 'int' y 'float64'
- * 3. Operador de declaración y asignación corta: ':='
- * 4. Operadores de asignación compuesta: '+=', '-=', '*=', '/=', '%='
- * 5. Operadores unarios de incremento y decremento: '++', '--'
- * 6. Operador de dirección de memoria / puntero: '&'
- * 7. Delimitadores específicos: ':' y ';'
- * 8. Literales de punto flotante: e.g., 0.125, 1500.75, 1.085
- * 9. Literales de cadena con secuencias de escape: \", \n, \t, \\
- * 10. Comentarios de línea única (//) y bloques multilínea
+ * Descripción:
+ * Programa completo y válido dentro del subconjunto aprobado de Go que integra
+ * los aportes léxicos, sintácticos y semánticos (RS-2 y RS-5) de Pablo Naranjo:
+ * - Léxico: struct, map, int, float64, :=, +=/-=/*=//=/%=, ++/--, &, :, ;, ...,
+ *   fmt.Scanln/Scan, literales float64 y string con escapes, comentarios // y /* * /.
+ * - Sintáctico: declaración corta, expresiones con / y %, relacionales, for
+ *   (condicional, clásico, range e infinito), map, struct, variádicas y llamadas.
+ * - Semántico: unicidad en el alcance y shadowing válido (RS-2); firmas,
+ *   pre-registro, retorno en todas las rutas, void, variádicas y literal de función (RS-5).
  */
 
 import "fmt"
 
-// Definición de estructura contable con tipos int y float64 (Pablo Naranjo)
+// Ámbito global único (RS-2)
+const bonoBase int = 5
+
+var etiquetaGlobal string = "ESPOL"
+
+// Definición de estructuras con campos únicos (RS-2 / RS-5)
 type Transaccion struct {
 	idTransaccion int
 	tasaInteres   float64
@@ -34,56 +33,142 @@ type Transaccion struct {
 	totalFinal    float64
 }
 
-// Estructura auxiliar para saldos
-type CuentaBancaria struct {
-	numeroCuenta int
-	saldoActual  float64
+type Estudiante struct {
+	nombre    string
+	matricula int
+	promedio  float64
+}
+
+// Función void con return vacío temprano (RS-5)
+func registrarAviso(activo bool) {
+	if !activo {
+		return
+	}
+	fmt.Println("Aviso:", etiquetaGlobal)
+}
+
+// Función variádica con parámetros enteros y bucle for range (RS-5)
+func acumularPuntos(base int, extras ...int) int {
+	total := base
+	for idx, valor := range extras {
+		if idx >= 0 {
+			total += valor
+		}
+	}
+	return total
+}
+
+// Función tipada con retorno en todas las rutas de ejecución (RS-5)
+func esAprobado(nota float64, limite float64) bool {
+	if nota >= limite {
+		return true
+	}
+	return false
 }
 
 func main() {
-	// 1. Declaración y asignación corta (:=) con tipos int y float64
+	// 1. Shadowing válido: variable local oculta a la global sin conflicto (RS-2)
+	etiquetaGlobal := 2026
 	intentosMaximos := 3;
 	tasaAnual := 0.125
 	saldoInicial := 1500.75
 
-	// 2. Instanciación de estructura (struct) con delimitador ':'
+	// 2. Instanciación de struct y operador '&' sobre variable mutable
 	operacion := Transaccion{
 		idTransaccion: 1001,
 		tasaInteres:   tasaAnual,
 		montoBase:     saldoInicial,
 		totalFinal:    0.0,
 	}
-
-	// 3. Operador ampersand (&) para referencia de memoria / punteros
 	ptrOperacion := &operacion;
 
-	// 4. Asignaciones compuestas (+=, -=, *=, /=, %=)
+	alumno := Estudiante{
+		nombre:    "Pablo",
+		matricula: 202601,
+		promedio:  9.15,
+	}
+
+	// 3. Entrada estándar por teclado (fmt.Scanln / fmt.Scan)
+	fmt.Scanln(&alumno.nombre, &intentosMaximos)
+	fmt.Scan(&operacion.idTransaccion)
+
+	// 4. Asignaciones compuestas (+=, -=, *=, /=, %=) e incremento/decremento (++, --)
 	operacion.montoBase += 350.50
 	operacion.montoBase -= 75.25
 	operacion.tasaInteres *= 1.05
 	operacion.totalFinal /= 2.0
 	operacion.idTransaccion %= 100
 
-	// 5. Operadores de incremento (++) y decremento (--)
 	intentosMaximos++
 	intentosMaximos--
 
-	// 6. Colección de tipo mapa (map) asociando cadenas con float64
+	// 5. Mapa asociativo (map) e iteración con for range
 	cotizaciones := map[string]float64{
 		"USD": 1.00,
 		"EUR": 1.085,
 		"GBP": 1.295,
 	}
+	sumaDivisas := 0.0
+	for divisa, tasa := range cotizaciones {
+		sumaDivisas += tasa
+		fmt.Println("Divisa:", divisa, "-> Tasa:", tasa)
+	}
 
-	// 7. Literales de cadena con secuencias de escape (\", \n, \t, \\)
+	// 6. Expresiones con '/', '%', paréntesis, negación '!' y relacionales
+	residuo := (intentosMaximos + 10) / 3 % 2
+	bloqueado := false
+	accesoValido := !bloqueado && operacion.idTransaccion >= 0
+
+	// 7. Variantes de bucle for (condicional, clásico e infinito con break)
+	contador := 0
+	for contador < 3 {
+		contador++
+	}
+
+	acumulado := 0
+	for i := 0; i < 4; i++ {
+		acumulado += i
+	}
+
+	for {
+		if acumulado >= 0 {
+			break
+		}
+	}
+
+	// 8. Literal de función e invocaciones con aridad y tipos exactos (RS-5)
+	duplicar := func(n int) int {
+		return n * 2
+	}
+
+	registrarAviso(false)
+	registrarAviso(accesoValido)
+
+	puntosBase := duplicar(bonoBase)
+	puntajeTotal := acumularPuntos(puntosBase, 10, 15, 20)
+	aprobado := esAprobado(alumno.promedio, 7.0)
+	resumen := construirResumen(alumno.nombre, puntajeTotal, aprobado)
+
+	// 9. Shadowing válido dentro de bloques hijos if y for (RS-2)
+	estado := "pendiente"
+	if aprobado {
+		estado := 100
+		fmt.Println("Estado interno if:", estado)
+	}
+	for paso := 0; paso < 2; paso++ {
+		estado := true
+		fmt.Println("Iteración", paso, "-> activo:", estado)
+	}
+
+	// 10. Cadenas con secuencias de escape (\", \n, \t, \\)
 	mensajeEstado := "Reporte: \"Cierre Diario\"\n\tEstado: Exitoso \\ Verificado\n"
+	fmt.Println(ptrOperacion, cotizaciones["USD"], sumaDivisas, residuo, resumen, estado, mensajeEstado)
+}
 
-	/*
-	 * Bloque de liquidación final de balances
-	 * Cálculo del cargo por servicio administrativo
-	 */
-	cargoServicio := 4.75;
-	operacion.totalFinal = operacion.montoBase + (operacion.montoBase * operacion.tasaInteres) - cargoServicio;
-
-	fmt.Println(ptrOperacion, cotizaciones["USD"], mensajeEstado)
+// Función declarada después de main() para comprobar el pre-registro de firmas (RS-5)
+func construirResumen(nombre string, puntos int, aprobado bool) string {
+	if aprobado {
+		return nombre + " aprobado"
+	}
+	return nombre + " reprobado"
 }

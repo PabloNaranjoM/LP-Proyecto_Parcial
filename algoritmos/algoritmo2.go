@@ -1,45 +1,89 @@
+package main
+
 /*
- * Algoritmo de Validación 2 - Analizador Léxico (Avance 1)
- * =======================================================
+ * Algoritmo Completo 2 (Válido) - Avance Final
+ * ============================================
  * Materia    : Lenguajes de Programación (ESPOL)
  * Docente    : Ing. Rodrigo Saraguro
  * Responsable: Hivor Araujo (@AraujoHivor)
  *
+ * Descripción:
+ * Programa completo y válido en Go que integra los aportes léxicos,
+ * sintácticos y semánticos (RS-1 y RS-3) de Hivor Araujo:
+ * - Léxico: palabras reservadas base, string, Println, identificadores,
+ *   enteros, operadores aritméticos (+, -, *, /, %), '=' y delimitadores (), {}, [].
+ * - Sintáctico: var tipada/sin valor, const, arreglos [n]T, referencias/índices,
+ *   funciones con y sin retorno, return, if/else if/else y fmt.Println.
+ * - Semántico: declaración previa, índices y campos (RS-1); compatibilidad estricta
+ *   de tipos, inmutabilidad de const, colecciones, struct_init y lectura (RS-3).
  */
-package main
+
 import "fmt"
 
-// Prueba 2: uso de variables, operaciones, arreglos y estructuras de control.
-func calcularTotal(precio int, cantidad int) int {
-    total := precio * cantidad
-    if total > 30 {
-        total = total - 5
-    } else {
-        total = total + 2
-    }
-    return total
+type Persona struct {
+	nombre string
+	edad   int
+}
+
+// Función con retorno explícito
+func calcularArea(base int, altura int) int {
+	return base * altura
+}
+
+// Función sin retorno explícito (void)
+func mostrarResumen(nombre string, area int) {
+	fmt.Println("Usuario:", nombre, "| Área:", area)
+	return
 }
 
 func main() {
-    var nombre string = "Ana"
-    var variable int = 2
-    numeros := [3]int{10, 20, 30}
-    resultado := calcularTotal(numeros[0], 4)
+	// Declaraciones explícitas, sin valor inicial, con inferencia y constante
+	var edad int = 20
+	var nombre string = "Ana"
+	var activo bool = true
+	var auxiliar int
+	const limite int = 100
+	var mensaje = nombre
+	apodo := "Estudiante"
 
-    for i := 0; i < 3; i++ {
-        if i == 1 {
-            continue
-        }
-        resultado = resultado + numeros[i] % 7
-    }
+	// Arreglos, slice, mapa y struct
+	var edades [3]int
+	numeros := [3]int{10, 20, 30}
+	lista := []int{1, 2, 3}
+	edadesPorNombre := map[string]int{"Ana": 20, "Luis": 25}
+	persona := Persona{nombre: "Ana", edad: 20}
 
-    mitad := resultado / 2
-    resultado = mitad + variable * 3 - 1
+	// Expresiones aritméticas, llamadas a funciones y asignaciones válidas
+	var total int = 2 + 3*4
+	area := calcularArea(numeros[0], 5)
+	edad = 21
+	edad += 2
+	numeros[0] = 25
+	lista[1] = 10
+	edadesPorNombre["Ana"] = 22
+	persona.edad = 23
 
-    switch resultado {
-    case 10:
-        fmt.Println("El resultado es diez")
-    default:
-        fmt.Println(nombre, resultado)
-    }
+	// Condicional if / else if / else con llaves obligatorias
+	if edad >= 18 && edad <= 60 {
+		var estado string = "Adulto"
+		fmt.Println("Categoría:", estado)
+	} else if edad >= 13 && edad <= 17 {
+		var estado string = "Adolescente"
+		fmt.Println("Categoría:", estado)
+	} else {
+		var estado string = "Menor"
+		fmt.Println("Categoría:", estado)
+	}
+
+	if activo && area > 10 {
+		mostrarResumen(nombre, area)
+	}
+
+	// Usos válidos de identificadores, índices y campos (RS-1)
+	fmt.Println(edad, auxiliar, limite, mensaje, apodo)
+	fmt.Println(edades[0], numeros[1], lista[1], edadesPorNombre["Ana"])
+	fmt.Println(persona.nombre, persona.edad, total)
+
+	// Lectura sobre variable modificable (RS-3)
+	fmt.Scanln(&edad)
 }
